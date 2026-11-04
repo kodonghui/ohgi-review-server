@@ -1,8 +1,9 @@
 """
-리뷰 요청, 응답 DTO (Spring의 review/dto 패키지 역할)
+리뷰 요청, 응답 DTO와 답글 응답 DTO (Spring의 review/dto 패키지 역할)
 
 - ReviewCreateRequest : POST /api/reviews의 요청 본문. Field 조건에 맞지 않으면 FastAPI가 핸들러를 실행하지 않고 422로 응답한다.
 - ReviewResponse      : 리뷰 등록, 조회 API의 응답
+- ReplyResponse       : 답글 API의 응답
 
 엔티티(Review)를 그대로 응답하지 않고 응답 DTO로 바꿔서 응답한다.
 요청 DTO에는 review_id가 없다. 번호는 저장소가 붙이기 때문이다.
@@ -57,3 +58,13 @@ class ReviewResponse(CamelModel):
             content=review.content,
         )
 
+
+class ReplyResponse(CamelModel):
+    """사장님 답글 초안 응답 DTO. POST /api/reviews/{review_id}/reply가 이 형태로 응답한다."""
+
+    # 답글을 단 리뷰의 번호
+    review_id: int
+    # LLM이 만든 답글 초안
+    reply: str
+    # 답글을 만든 모델 이름. 가짜 LLM 클라이언트면 "fake-llm"이다. (가짜 서버인지 확인할 때 쓴다)
+    model: str

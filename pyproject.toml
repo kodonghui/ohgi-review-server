@@ -6,6 +6,10 @@ requires-python = ">=3.14"
 dependencies = [
     # FastAPI와 서버 실행에 필요한 부가 기능(uvicorn, fastapi 명령 등)
     "fastapi[standard]",
+    # .env와 환경 변수에서 설정값을 읽는다 (app/core/config.py)
+    "pydantic-settings",
+    # OpenAI 공식 라이브러리 (app/clients/llm_client.py)
+    "openai",
 ]
 
 # uv run fastapi dev 명령이 실행할 앱의 위치. "app/main.py 파일의 app 객체"라는 뜻이다.
