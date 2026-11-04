@@ -6,7 +6,7 @@
 - ReplyResponse       : 답글 API의 응답
 
 엔티티(Review)를 그대로 응답하지 않고 응답 DTO로 바꿔서 응답한다.
-요청 DTO에는 review_id가 없다. 번호는 저장소가 붙이기 때문이다.
+요청 DTO에는 review_id와 reply가 없다. 번호는 저장소가 붙이고, 답글은 답글 API가 만들기 때문이다.
 """
 
 from pydantic import ConfigDict, Field
@@ -37,6 +37,8 @@ class ReviewResponse(CamelModel):
     customer_name: str
     rating: int
     content: str
+    # 사장님 답글. 답글 API로 만들기 전에는 null이다.
+    reply: str | None
 
     # 엔티티를 응답 DTO로 바꾸는 정적 팩토리 메서드 (Spring의 ReviewResponse.from(review))
     @classmethod
@@ -56,11 +58,12 @@ class ReviewResponse(CamelModel):
             customer_name=review.customer_name,
             rating=review.rating,
             content=review.content,
+            reply=review.reply,
         )
 
 
 class ReplyResponse(CamelModel):
-    """사장님 답글 초안 응답 DTO. POST /api/reviews/{review_id}/reply가 이 형태로 응답한다."""
+    """사장님 답글 초안 응답 DTO. 답글 API 두 개(async, sync)가 이 형태로 응답한다."""
 
     # 답글을 단 리뷰의 번호
     review_id: int

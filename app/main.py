@@ -6,6 +6,7 @@
 - GET  /api/reviews                         : 리뷰 전체 조회 (def)
 - GET  /api/reviews/{review_id}             : 리뷰 하나 조회 (def, 없으면 404)
 - POST /api/reviews/{review_id}/reply       : 사장님 답글 초안 생성 (async def + await, OpenAI 실패 502)
+- POST /api/reviews/{review_id}/reply/sync  : 답글 초안 생성 동기 버전 (def, 비교용)
 
 [실행 방법] 이 프로젝트 폴더에서
   uv run fastapi dev   ->  http://127.0.0.1:8000/docs

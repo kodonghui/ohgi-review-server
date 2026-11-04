@@ -7,6 +7,7 @@
                      await로 LLM을 기다리는 동안 이벤트 루프는 다른 요청을 처리한다.
 
 답글 API는 LLM의 응답을 몇 초씩 기다리는 일이라 async def + await로 만들었다(POST /{review_id}/reply).
+비교를 위해 def + 동기 메서드 버전도 하나 더 두었다(POST /{review_id}/reply/sync).
 """
 
 import threading
@@ -41,7 +42,7 @@ def register_review(request: ReviewCreateRequest, service: ReviewServiceDep) -> 
 # 요청 : POST /api/reviews
 # {"customerName": "최유진", "rating": 4, "content": "생갈치쉐이크가 의외로 달콤해서 놀랐어요."}
 # 응답 : 201
-# {"reviewId": 4, "customerName": "최유진", "rating": 4, "content": "생갈치쉐이크가 의외로 달콤해서 놀랐어요."}
+# {"reviewId": 4, "customerName": "최유진", "rating": 4, "content": "생갈치쉐이크가 의외로 달콤해서 놀랐어요.", "reply": null}
 #
 # 요청 : POST /api/reviews {"customerName": "최유진", "rating": 6, "content": "맛있어요"}
 # 응답 : 422 {"detail": [{"type": "less_than_equal", "loc": ["body", "rating"], "msg": "Input should be less than or equal to 5", ...}]}
@@ -85,3 +86,29 @@ async def create_reply(review_id: int, service: ReplyServiceDep) -> ReplyRespons
 #   10:15:02 [reply] 요청 받음 reviewId=2 (스레드: MainThread)
 #   10:15:05 [reply] 응답 보냄 (스레드: MainThread)
 
+
+# 5. 사장님 답글 초안 생성 - 동기 버전 (def + 동기 메서드)
+# 4번과 같은 일을 하지만, 스레드 풀의 스레드 하나가 LLM의 응답이 올 때까지 멈춰서 기다린다.
+@router.post("/{review_id}/reply/sync", summary="사장님 답글 초안 생성 - 동기 버전 (def)")
+def create_reply_sync(review_id: int, service: ReplyServiceDep) -> ReplyResponse:
+
+    log("reply/sync", f"요청 받음 reviewId={review_id}")
+    response = service.create_reply(review_id)
+    log("reply/sync", "응답 보냄")
+
+    return response
+
+# 터미널
+#   10:16:10 [reply/sync] 요청 받음 reviewId=2 (스레드: AnyIO worker thread)
+#   10:16:13 [reply/sync] 응답 보냄 (스레드: AnyIO worker thread)
+
+
+# [Postman으로 두 버전 비교하기]
+# .env에 FAKE_LLM=true, FAKE_LLM_DELAY_SECONDS=5, THREAD_POOL_SIZE=1을 적고 서버를 다시 실행한다.
+# (스레드 풀에 스레드가 하나뿐인 서버. 기다리는 시간이 길어야 차이가 잘 보인다)
+# Postman에서 탭 두 개를 열고, 첫 번째 탭의 Send를 누른 직후 두 번째 탭의 Send를 누른다.
+#   탭 A, 탭 B : 둘 다 POST /api/reviews/1/reply/sync
+#   -> 탭 B는 10초 가까이 걸린다. 하나뿐인 스레드를 탭 A가 쓰고 있어서, 탭 A가 끝날 때까지 시작하지도 못했다.
+#   탭 A, 탭 B : 둘 다 POST /api/reviews/1/reply
+#   -> 둘 다 5초 만에 응답을 받는다. await로 기다리는 동안 이벤트 루프가 두 번째 요청도 받았다.
+# 확인했으면 THREAD_POOL_SIZE 줄을 다시 지워 두자.

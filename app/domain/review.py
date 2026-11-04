@@ -18,3 +18,5 @@ class Review:
     rating: int
     # 리뷰 내용
     content: str
+    # 사장님 답글. 답글 API로 만들기 전에는 None이다.
+    reply: str | None = None
