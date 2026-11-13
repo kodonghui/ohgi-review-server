@@ -147,7 +147,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--markdown", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--source-commit", default="c24a37b")
+    parser.add_argument("--source-commit", default="b3c7dba")
     parser.add_argument("--expect-new-topics", action="store_true")
     parser.add_argument("--expect-policy-scope", action="store_true")
     args = parser.parse_args()

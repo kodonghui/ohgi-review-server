@@ -9,7 +9,7 @@
 | 155조 대리 수령 등 적용 범위 진단 · 번호와 핵심 구절까지 저장 | 5/11 → 11/11 |
 | 같은 진단의 실제 상태·대상 불명 문의 · 올바르게 보류 | 2/5 → 5/5 |
 
-[35조 버전별 측정](benchmark/RESULTS.md) · [155조 버전별 측정과 응답 원본](benchmark/scale/VERSIONS.md)
+[35조 버전별 측정](benchmark/RESULTS.md) · [155조 버전별 측정과 응답 원본](benchmark/scale/VERSIONS.md) · [벤치마크 커밋 대조표](benchmark/SOURCES.md)
 
 ## 로컬 실행
 
@@ -106,7 +106,15 @@ Invoke-RestMethod -Method Post -Uri "$reviewUrl/reply/revise" `
 
 ### 기본 규정 35조
 
-강의 골든셋 20개를 검색기에 직접 넣었을 때, Chroma 벡터는 Hit@1 **13/20**, Hit@3 **15/20**, BM25는 **14/20**, **20/20**, RRF는 **17/20**, **19/20**이었습니다. 이 세트에서는 RRF가 첫 후보를 더 자주 맞혔고 BM25가 상위 세 후보에서 더 많이 찾았습니다. [평가 명령과 전체 기록](benchmark/RESULTS.md)
+강의 골든셋 20개를 검색기에 직접 넣은 결과입니다. Hit@1은 첫 후보, Hit@3은 상위 세 후보에 정답 조문이 들어온 문항 수입니다.
+
+| 검색기 | Hit@1 | Hit@3 |
+| --- | ---: | ---: |
+| Chroma 벡터 | 13/20 | 15/20 |
+| BM25 | 14/20 | 20/20 |
+| 하이브리드 RRF | 17/20 | 19/20 |
+
+검색기 단독 평가 명령은 `uv run --locked python -m app.services.policy_index --evaluate`입니다.
 
 답글 API 벤치에서는 44건 중 필요한 조문을 모두 포함해 저장한 수가 6건에서 43건으로 늘었습니다. 남은 G15는 중증 땅콩 알레르기가 있는 손님의 특정 주문 안전 문의입니다. 검색 후보의 제20조는 같은 주방에서 미량이 섞일 수 있다는 일반 근거를 담고 있어, 실제 안전 판단은 매장 확인으로 넘겼습니다. [35조 버전별 수치](benchmark/RESULTS.md) · [제20조 근거 보존 시제품](benchmark/experiments/ANSWERABILITY.md)
 
@@ -118,7 +126,7 @@ Invoke-RestMethod -Method Post -Uri "$reviewUrl/reply/revise" `
 
 ```powershell
 $book = '.local/benchmark/regulations-50p.md'
-$version = '5993846'
+$version = 'c6f0fb0'
 uv run --no-project --with reportlab python benchmark/scale/render_book.py --markdown $book --pdf .local/benchmark/regulations-50p.pdf
 uv run --locked python benchmark/scale/run.py --expanded-only --source-commit $version --markdown $book --output .local/benchmark/router-155.json
 uv run --locked python benchmark/scale/run.py --diagnostic-file benchmark/scale/policy-scope.json --source-commit $version --markdown $book --output .local/benchmark/router-155-scope.json
@@ -133,6 +141,6 @@ $env:LANGSMITH_TRACING = 'false'
 uv run --locked pytest -q
 ```
 
-`5993846`에서 테스트 89개가 통과했습니다. 155조는 실제 Chroma·BM25를 사용한 FastAPI `TestClient`와 로컬 Uvicorn으로 JSON·SSE·수정·재조회·보류를 검증했습니다. 측정의 OpenAI 요청은 0회입니다. 가짜 모델과 개발에 사용한 회귀 문항으로는 실제 모델의 문장 품질, 새로운 사용자 질문의 성능, 운영 지연을 판단할 수 없습니다. [HTTP 점검 원본](benchmark/scale/results/155-5993846-localhost.json)
+`c6f0fb0`에서 테스트 89개가 통과했습니다. 155조는 실제 Chroma·BM25를 사용한 FastAPI `TestClient`와 로컬 Uvicorn으로 JSON·SSE·수정·재조회·보류를 검증했습니다. 측정의 OpenAI 요청은 0회입니다. 가짜 모델과 개발에 사용한 회귀 문항으로는 실제 모델의 문장 품질, 새로운 사용자 질문의 성능, 운영 지연을 판단할 수 없습니다. [HTTP 점검 원본](benchmark/scale/results/155-5993846-localhost.json)
 
 가짜 모델 로컬 서버를 8000번 포트에 띄운 뒤 `uv run --locked python benchmark/benchmark.py`로 동기·비동기 경로의 지연과 처리량을 비교할 수 있습니다. 두 경로의 작업량은 다릅니다. [리팩토링 전 README와 실제 OpenAI 예시](https://github.com/kodonghui/ohgi-review-server/blob/d13fba9510a31f517b983f933e9348187b87741a/README.md)

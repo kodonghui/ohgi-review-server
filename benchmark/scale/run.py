@@ -224,7 +224,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--markdown", type=Path)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--source-commit", default="c24a37b")
+    parser.add_argument("--source-commit", default="b3c7dba")
     parser.add_argument("--expanded-only", action="store_true", help="155조 확장판만 측정합니다.")
     parser.add_argument("--diagnostics-only", action="store_true", help="155조의 추가 진단 문항만 측정합니다.")
     parser.add_argument("--diagnostic-file", type=Path, help="별도 문항 JSON으로 155조를 측정합니다.")

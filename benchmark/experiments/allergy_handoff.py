@@ -25,7 +25,7 @@ from fastapi.testclient import TestClient
 ALLERGY = re.compile(r"알레르기|알러지|교차\s*(?:오염|접촉)")
 ARTICLE_ID = "제20조"
 SOURCE_PATTERN = re.compile(r"같은\s*주방[^.]{0,45}미량이\s*섞일\s*가능성[^.]{0,20}없앨\s*수는\s*없다\.")
-BASE_COMMIT = "c24a37b"
+BASE_COMMIT = "b3c7dba"
 
 HOLDOUT = (
     ("H01", "우유 알러지가 있는데 이 메뉴 먹어도 돼요?", [ARTICLE_ID]),
