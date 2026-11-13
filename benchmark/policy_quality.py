@@ -138,6 +138,28 @@ def check_gate(http):
     }
 
 
+def check_routing(http):
+    probes = (
+        ("personal_card_refund", "제 카드 결제 건 환불 들어왔나요?"),
+        ("personal_refund_with_damage", "포장 용기가 깨졌는데 제 환불금은 계좌에 들어왔나요?"),
+        ("damage_with_no_wrong_delivery", "오배송은 없었고 배달 용기만 깨졌어요."),
+        ("card_refund_policy", "카드 결제를 취소하면 환불은 언제 들어오나요?"),
+        ("group_menu", "이미 예약한 단체는 메뉴를 미리 골라야 하나요?"),
+    )
+    outcomes = {}
+    for name, question in probes:
+        path = review(http, question)
+        response = http.post(path + "/reply")
+        response.raise_for_status()
+        result = response.json()
+        assert http.get(path).json()["reply"] == result["reply"]
+        outcomes[name] = {
+            "question": question, "status": result["status"], "article_ids": result["articleIds"],
+            "attempts": result["attempts"], "saved": result["reply"] is not None,
+        }
+    return outcomes
+
+
 def summarize(rows):
     cases = [row for row in rows if row["required"]]
     counts = Counter()
@@ -176,9 +198,12 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--runs", type=int, default=3)
     parser.add_argument("--runtime-dir", type=Path, default=Path(".local"))
+    parser.add_argument("--source-commit", help="git archive에서 가져온 소스의 40자리 커밋 해시")
     args = parser.parse_args()
     if args.runs < 1:
         parser.error("--runs는 1 이상이어야 합니다.")
+    if args.source_commit and not re.fullmatch(r"[0-9a-f]{40}", args.source_commit):
+        parser.error("--source-commit에는 전체 커밋 해시를 입력하세요.")
     runtime = args.runtime_dir.resolve()
     manifest_path = runtime / "policy-index.json"
     if not manifest_path.is_file():
@@ -200,6 +225,7 @@ def main():
                 http.post(review(http, case["question"]) + "/reply").raise_for_status()
             rows = measure(http, cases, args.runs, active)
             gate = check_gate(http)
+            probes = check_routing(http)
     inputs = {
         "regulations": sha256(DATA / "ohgi_regulations.md"),
         "course_questions": sha256(DATA / "golden_set.json"),
@@ -210,7 +236,9 @@ def main():
         "indexed_articles": manifest["article_count"],
     }
     result = {
-        "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+        "git_commit": args.source_commit or subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], text=True,
+        ).strip(),
         "recorded_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "inputs": inputs,
         "environment": {"python": platform.python_version(), "os": platform.system(),
@@ -219,6 +247,7 @@ def main():
                 "fake_model_delay_seconds": 0, "warmups": 3},
         "summary": summarize(rows),
         "validation": gate,
+        "routing_probes": probes,
         "cases": rows,
     }
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

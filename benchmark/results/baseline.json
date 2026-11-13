@@ -1,0 +1,1667 @@
+{
+  "git_commit": "1fa612118938d47f4ce58634cd0549968997533a",
+  "recorded_at_utc": "2026-11-13T05:11:03+00:00",
+  "inputs": {
+    "regulations": "db8b21b34388c5e0f6fc4eea7c1a64c6cc1c0f88ec413f37cee0a5b35d9ee0fd",
+    "course_questions": "5a5aa961a57c136a1e668392ca38708f9e02a1fde1a7daa647e877872098c793",
+    "extra_questions": "903534471c2eb9698eec48d3ad4ca0da3cd059b54685a12ae534edb127b86252",
+    "runner": "be2a3a9ac8632f227e50e3084d9303ffff9e4a14f3bfc2cd26f3f9f3a1362fab",
+    "lockfile": "02e2093aa04056d1c4f783872bc751fb3b45cacd0ff1f6f352ee298665ef9580",
+    "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "indexed_articles": 35
+  },
+  "environment": {
+    "python": "3.14.5",
+    "os": "Windows",
+    "fastapi": "0.162.0",
+    "chromadb": "1.5.9",
+    "langgraph": "1.2.19",
+    "fastembed": "0.9.1",
+    "onnxruntime": "1.31.1"
+  },
+  "run": {
+    "repetitions": 3,
+    "openai_requests": 0,
+    "transport": "FastAPI TestClient",
+    "fake_model_delay_seconds": 0,
+    "warmups": 3
+  },
+  "summary": {
+    "cases": 52,
+    "policy_cases": 44,
+    "search_coverage": 7,
+    "reply_coverage": 6,
+    "groups": {
+      "gold": {
+        "cases": 20,
+        "search_coverage": 5,
+        "reply_coverage": 5
+      },
+      "paraphrase": {
+        "cases": 16,
+        "search_coverage": 0,
+        "reply_coverage": 0
+      },
+      "multi": {
+        "cases": 8,
+        "search_coverage": 2,
+        "reply_coverage": 1
+      }
+    },
+    "retried_requests": 0,
+    "ready_without_all_citations": 36,
+    "policy_hold": 2,
+    "policy_without_articles": 34,
+    "no_policy_correct": 3,
+    "unsupported_saved": 5,
+    "search_median_ms": 0.011,
+    "search_p95_ms": 11.773,
+    "api_median_ms": 4.548,
+    "api_p95_ms": 16.855
+  },
+  "validation": {
+    "swapped_status": "ready",
+    "draft_attempts": 1,
+    "model_review_calls": 1,
+    "previous_reply_preserved": false
+  },
+  "routing_probes": {
+    "personal_card_refund": {
+      "question": "제 카드 결제 건 환불 들어왔나요?",
+      "status": "needs_review",
+      "article_ids": [],
+      "attempts": 0,
+      "saved": false
+    },
+    "personal_refund_with_damage": {
+      "question": "포장 용기가 깨졌는데 제 환불금은 계좌에 들어왔나요?",
+      "status": "ready",
+      "article_ids": [
+        "제17조"
+      ],
+      "attempts": 1,
+      "saved": true
+    },
+    "damage_with_no_wrong_delivery": {
+      "question": "오배송은 없었고 배달 용기만 깨졌어요.",
+      "status": "ready",
+      "article_ids": [
+        "제12조",
+        "제17조"
+      ],
+      "attempts": 2,
+      "saved": true
+    },
+    "card_refund_policy": {
+      "question": "카드 결제를 취소하면 환불은 언제 들어오나요?",
+      "status": "needs_review",
+      "article_ids": [],
+      "attempts": 0,
+      "saved": false
+    },
+    "group_menu": {
+      "question": "이미 예약한 단체는 메뉴를 미리 골라야 하나요?",
+      "status": "ready",
+      "article_ids": [],
+      "attempts": 1,
+      "saved": true
+    }
+  },
+  "cases": [
+    {
+      "id": "G01",
+      "group": "gold",
+      "question": "평일 오후 4시에 매장에서 식사할 수 있어?",
+      "required": [
+        "제1조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.016,
+      "api_ms": 7.414,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        7.414,
+        7.061,
+        4.18
+      ],
+      "search_samples_ms": [
+        0.016,
+        0.015,
+        0.01
+      ]
+    },
+    {
+      "id": "G02",
+      "group": "gold",
+      "question": "마지막 주문은 몇 시까지 받아?",
+      "required": [
+        "제1조"
+      ],
+      "articles": [
+        "제1조",
+        "제15조",
+        "제11조"
+      ],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 10.693,
+      "api_ms": 15.609,
+      "status": "ready",
+      "answer_articles": [
+        "제1조"
+      ],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장은 매일 오전 11시부터 오후 10시까지 영업한다. 마지막 주문은 오후 9시 30분까지 받는다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "api_samples_ms": [
+        15.609,
+        13.004,
+        13.944
+      ],
+      "search_samples_ms": [
+        10.693,
+        7.827,
+        7.388
+      ]
+    },
+    {
+      "id": "G03",
+      "group": "gold",
+      "question": "월요일이 공휴일이면 문을 열어?",
+      "required": [
+        "제2조"
+      ],
+      "articles": [
+        "제2조",
+        "제1조",
+        "제25조"
+      ],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 10.61,
+      "api_ms": 17.003,
+      "status": "ready",
+      "answer_articles": [
+        "제2조"
+      ],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 정기 휴무일은 매주 월요일이다. 월요일이 공휴일이면 영업하고, 그다음 날인 화요일에 쉰다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "api_samples_ms": [
+        17.003,
+        18.142,
+        15.103
+      ],
+      "search_samples_ms": [
+        10.61,
+        12.324,
+        9.384
+      ]
+    },
+    {
+      "id": "G04",
+      "group": "gold",
+      "question": "강아지를 데리고 들어가도 돼?",
+      "required": [
+        "제3조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.009,
+      "api_ms": 4.436,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.436,
+        4.018,
+        4.069
+      ],
+      "search_samples_ms": [
+        0.009,
+        0.009,
+        0.009
+      ]
+    },
+    {
+      "id": "G05",
+      "group": "gold",
+      "question": "25,000원어치 먹으면 주차가 몇 시간 무료야?",
+      "required": [
+        "제4조"
+      ],
+      "articles": [
+        "제4조",
+        "제3조",
+        "제15조"
+      ],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 9.816,
+      "api_ms": 15.865,
+      "status": "ready",
+      "answer_articles": [
+        "제4조"
+      ],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 건물 지하 주차장을 이용할 수 있다. 매장에서 30,000원 이상 결제하면 2시간 무료 주차를 지원하고, 그 미만이면 1시간 무료 주차를 지원한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "api_samples_ms": [
+        15.865,
+        16.841,
+        26.648
+      ],
+      "search_samples_ms": [
+        9.816,
+        10.563,
+        17.328
+      ]
+    },
+    {
+      "id": "G06",
+      "group": "gold",
+      "question": "전화로 배달 주문할 수 있어?",
+      "required": [
+        "제6조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.017,
+      "api_ms": 7.169,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        7.169,
+        7.101,
+        7.264
+      ],
+      "search_samples_ms": [
+        0.017,
+        0.015,
+        0.016
+      ]
+    },
+    {
+      "id": "G07",
+      "group": "gold",
+      "question": "다른 회사 상품권으로 결제할 수 있어?",
+      "required": [
+        "제8조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.011,
+      "api_ms": 6.482,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        6.482,
+        6.044,
+        4.56
+      ],
+      "search_samples_ms": [
+        0.011,
+        0.011,
+        0.009
+      ]
+    },
+    {
+      "id": "G08",
+      "group": "gold",
+      "question": "다회용기를 고르면 뭐가 좋아?",
+      "required": [
+        "제10조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.01,
+      "api_ms": 4.66,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.66,
+        3.815,
+        6.123
+      ],
+      "search_samples_ms": [
+        0.01,
+        0.01,
+        0.01
+      ]
+    },
+    {
+      "id": "G09",
+      "group": "gold",
+      "question": "조리 중인 주문도 취소할 수 있어?",
+      "required": [
+        "제11조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.015,
+      "api_ms": 7.05,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        7.05,
+        4.364,
+        4.219
+      ],
+      "search_samples_ms": [
+        0.015,
+        0.01,
+        0.01
+      ]
+    },
+    {
+      "id": "G10",
+      "group": "gold",
+      "question": "맛이 없으면 환불해 줘?",
+      "required": [
+        "제12조"
+      ],
+      "articles": [
+        "제12조",
+        "제22조",
+        "제24조"
+      ],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 9.447,
+      "api_ms": 14.384,
+      "status": "ready",
+      "answer_articles": [
+        "제12조"
+      ],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 불편을 드려 죄송합니다. 맛에 대한 불만만으로는 교환이나 환불이 어려운 점을 안내드립니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "api_samples_ms": [
+        14.384,
+        14.769,
+        13.714
+      ],
+      "search_samples_ms": [
+        9.447,
+        9.001,
+        8.635
+      ]
+    },
+    {
+      "id": "G11",
+      "group": "gold",
+      "question": "카드로 결제한 걸 취소하면 언제 돌아와?",
+      "required": [
+        "제13조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.015,
+      "api_ms": 5.059,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        5.059,
+        4.896,
+        5.02
+      ],
+      "search_samples_ms": [
+        0.015,
+        0.009,
+        0.012
+      ]
+    },
+    {
+      "id": "G12",
+      "group": "gold",
+      "question": "12,000원어치 배달시킬 수 있어?",
+      "required": [
+        "제16조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.009,
+      "api_ms": 4.102,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.102,
+        5.886,
+        5.303
+      ],
+      "search_samples_ms": [
+        0.009,
+        0.011,
+        0.011
+      ]
+    },
+    {
+      "id": "G13",
+      "group": "gold",
+      "question": "배달비는 얼마야?",
+      "required": [
+        "제16조"
+      ],
+      "articles": [
+        "제16조",
+        "제15조",
+        "제25조"
+      ],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 7.393,
+      "api_ms": 13.042,
+      "status": "ready",
+      "answer_articles": [
+        "제16조"
+      ],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 배달은 15,000원 이상 주문할 때만 가능하다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "api_samples_ms": [
+        13.042,
+        12.632,
+        12.186
+      ],
+      "search_samples_ms": [
+        7.393,
+        7.265,
+        7.457
+      ]
+    },
+    {
+      "id": "G14",
+      "group": "gold",
+      "question": "맥주도 배달돼?",
+      "required": [
+        "제18조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.01,
+      "api_ms": 4.19,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.19,
+        4.707,
+        4.276
+      ],
+      "search_samples_ms": [
+        0.01,
+        0.011,
+        0.01
+      ]
+    },
+    {
+      "id": "G15",
+      "group": "gold",
+      "question": "땅콩 알레르기가 심한데 주문해도 안전해?",
+      "required": [
+        "제20조"
+      ],
+      "articles": [],
+      "hold": true,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.005,
+      "api_ms": 3.555,
+      "status": "needs_review",
+      "answer_articles": [],
+      "attempts": 0,
+      "saved": false,
+      "reply": null,
+      "api_samples_ms": [
+        3.555,
+        3.112,
+        2.839
+      ],
+      "search_samples_ms": [
+        0.005,
+        0.005,
+        0.004
+      ]
+    },
+    {
+      "id": "G16",
+      "group": "gold",
+      "question": "쇠고기는 어디 거야?",
+      "required": [
+        "제21조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.009,
+      "api_ms": 4.608,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.608,
+        4.834,
+        4.246
+      ],
+      "search_samples_ms": [
+        0.009,
+        0.012,
+        0.01
+      ]
+    },
+    {
+      "id": "G17",
+      "group": "gold",
+      "question": "열매 등급이 되려면 얼마나 써야 해?",
+      "required": [
+        "제24조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.009,
+      "api_ms": 3.812,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        3.812,
+        4.024,
+        4.259
+      ],
+      "search_samples_ms": [
+        0.009,
+        0.013,
+        0.01
+      ]
+    },
+    {
+      "id": "G18",
+      "group": "gold",
+      "question": "포인트 800점 있는데 쓸 수 있어?",
+      "required": [
+        "제26조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.008,
+      "api_ms": 3.801,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        3.801,
+        4.015,
+        3.76
+      ],
+      "search_samples_ms": [
+        0.008,
+        0.009,
+        0.009
+      ]
+    },
+    {
+      "id": "G19",
+      "group": "gold",
+      "question": "쿠폰 두 장을 같이 쓸 수 있어?",
+      "required": [
+        "제27조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.014,
+      "api_ms": 4.078,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.078,
+        4.157,
+        4.221
+      ],
+      "search_samples_ms": [
+        0.014,
+        0.009,
+        0.01
+      ]
+    },
+    {
+      "id": "G20",
+      "group": "gold",
+      "question": "12명 단체 예약을 하루 전에 취소하면 예약금은?",
+      "required": [
+        "제31조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.01,
+      "api_ms": 4.261,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.261,
+        4.177,
+        4.27
+      ],
+      "search_samples_ms": [
+        0.01,
+        0.01,
+        0.009
+      ]
+    },
+    {
+      "id": "P01",
+      "group": "paraphrase",
+      "question": "라거 캔도 집으로 가져다줘요?",
+      "required": [
+        "제18조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.008,
+      "api_ms": 3.831,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        3.831,
+        4.142,
+        3.8
+      ],
+      "search_samples_ms": [
+        0.008,
+        0.008,
+        0.008
+      ]
+    },
+    {
+      "id": "P02",
+      "group": "paraphrase",
+      "question": "개점 시간하고 음식 주문 마감이 각각 언제예요?",
+      "required": [
+        "제1조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.01,
+      "api_ms": 4.311,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.311,
+        4.104,
+        3.789
+      ],
+      "search_samples_ms": [
+        0.01,
+        0.01,
+        0.01
+      ]
+    },
+    {
+      "id": "P03",
+      "group": "paraphrase",
+      "question": "월욜에 빨간 날이 끼면 다음날 가도 될까요?",
+      "required": [
+        "제2조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.008,
+      "api_ms": 4.026,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.026,
+        4.42,
+        3.975
+      ],
+      "search_samples_ms": [
+        0.008,
+        0.01,
+        0.009
+      ]
+    },
+    {
+      "id": "P04",
+      "group": "paraphrase",
+      "question": "와이파이 암호 어디서 봐요?",
+      "required": [
+        "제5조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.009,
+      "api_ms": 4.588,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.588,
+        4.307,
+        5.243
+      ],
+      "search_samples_ms": [
+        0.009,
+        0.01,
+        0.01
+      ]
+    },
+    {
+      "id": "P05",
+      "group": "paraphrase",
+      "question": "QR이나 태블릿을 못 쓰는데 점원한테 주문해도 되나요?",
+      "required": [
+        "제6조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.01,
+      "api_ms": 4.193,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.193,
+        4.267,
+        3.699
+      ],
+      "search_samples_ms": [
+        0.01,
+        0.01,
+        0.009
+      ]
+    },
+    {
+      "id": "P06",
+      "group": "paraphrase",
+      "question": "계절 메뉴 재입고 날짜 알려주실래요?",
+      "required": [
+        "제7조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.01,
+      "api_ms": 4.224,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.224,
+        6.156,
+        5.513
+      ],
+      "search_samples_ms": [
+        0.01,
+        0.015,
+        0.013
+      ]
+    },
+    {
+      "id": "P07",
+      "group": "paraphrase",
+      "question": "결제한 지 사흘 됐는데 현금영수증을 지금 받을 수 있나요?",
+      "required": [
+        "제9조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.011,
+      "api_ms": 5.193,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        5.193,
+        6.025,
+        7.931
+      ],
+      "search_samples_ms": [
+        0.011,
+        0.019,
+        0.029
+      ]
+    },
+    {
+      "id": "P08",
+      "group": "paraphrase",
+      "question": "돌려주는 포장 그릇을 일주일 넘게 들고 있으면 어떻게 돼요?",
+      "required": [
+        "제10조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.013,
+      "api_ms": 5.648,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        5.648,
+        8.498,
+        6.895
+      ],
+      "search_samples_ms": [
+        0.013,
+        0.02,
+        0.02
+      ]
+    },
+    {
+      "id": "P09",
+      "group": "paraphrase",
+      "question": "세 가지 음식 중 하나만 문제인데 그 메뉴 값만 돌려받을 수 있을까요?",
+      "required": [
+        "제14조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.036,
+      "api_ms": 7.769,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        7.769,
+        5.44,
+        6.998
+      ],
+      "search_samples_ms": [
+        0.036,
+        0.016,
+        0.013
+      ]
+    },
+    {
+      "id": "P10",
+      "group": "paraphrase",
+      "question": "눈 오는 날은 배달이 평소보다 오래 걸려요?",
+      "required": [
+        "제15조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.019,
+      "api_ms": 7.038,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        7.038,
+        6.255,
+        7.227
+      ],
+      "search_samples_ms": [
+        0.019,
+        0.017,
+        0.013
+      ]
+    },
+    {
+      "id": "P11",
+      "group": "paraphrase",
+      "question": "새우는 어느 나라에서 들어와요?",
+      "required": [
+        "제21조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.009,
+      "api_ms": 4.721,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.721,
+        4.808,
+        5.752
+      ],
+      "search_samples_ms": [
+        0.009,
+        0.013,
+        0.014
+      ]
+    },
+    {
+      "id": "P12",
+      "group": "paraphrase",
+      "question": "초등학생이 먹을 수 있게 맵기를 낮출 수 있어요?",
+      "required": [
+        "제22조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.008,
+      "api_ms": 4.789,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.789,
+        4.303,
+        4.74
+      ],
+      "search_samples_ms": [
+        0.008,
+        0.009,
+        0.009
+      ]
+    },
+    {
+      "id": "P13",
+      "group": "paraphrase",
+      "question": "적립금 모은 지 1년 넘었는데 그대로 쓸 수 있나요?",
+      "required": [
+        "제26조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.012,
+      "api_ms": 5.736,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        5.736,
+        5.059,
+        5.1
+      ],
+      "search_samples_ms": [
+        0.012,
+        0.01,
+        0.014
+      ]
+    },
+    {
+      "id": "P14",
+      "group": "paraphrase",
+      "question": "앱 주문하고 사진 찍어 후기 쓰면 몇 점 쌓여요?",
+      "required": [
+        "제33조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.011,
+      "api_ms": 5.26,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        5.26,
+        4.049,
+        4.479
+      ],
+      "search_samples_ms": [
+        0.011,
+        0.01,
+        0.012
+      ]
+    },
+    {
+      "id": "P15",
+      "group": "paraphrase",
+      "question": "회원 탈퇴하면 생일 정보는 언제 없어지나요?",
+      "required": [
+        "제34조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.011,
+      "api_ms": 4.397,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.397,
+        4.673,
+        4.324
+      ],
+      "search_samples_ms": [
+        0.011,
+        0.011,
+        0.011
+      ]
+    },
+    {
+      "id": "P16",
+      "group": "paraphrase",
+      "question": "앱 일대일 문의는 보통 언제 답변받아요?",
+      "required": [
+        "제35조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.011,
+      "api_ms": 4.568,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.568,
+        4.269,
+        4.161
+      ],
+      "search_samples_ms": [
+        0.011,
+        0.011,
+        0.01
+      ]
+    },
+    {
+      "id": "M01",
+      "group": "multi",
+      "question": "다른 메뉴가 왔고 용기도 깨져서 쏟아졌어요. 각각 사진을 언제까지 보내나요?",
+      "required": [
+        "제12조",
+        "제17조"
+      ],
+      "articles": [
+        "제12조",
+        "제17조",
+        "제33조"
+      ],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 12.967,
+      "api_ms": 19.527,
+      "status": "ready",
+      "answer_articles": [
+        "제12조",
+        "제17조"
+      ],
+      "attempts": 2,
+      "saved": true,
+      "reply": "실습 손님, 불편을 드려 죄송합니다. 다른 메뉴나 이물질은 수령 후 24시간 이내에 사진과 함께 알려 주세요. 용기 파손이나 내용물 유출은 수령 후 1시간 이내에 사진과 함께 알려 주세요. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "api_samples_ms": [
+        19.527,
+        17.95,
+        19.222
+      ],
+      "search_samples_ms": [
+        12.967,
+        12.572,
+        12.881
+      ]
+    },
+    {
+      "id": "M02",
+      "group": "multi",
+      "question": "열두 명 예약은 인당 얼마를 먼저 내고, 방문 전날 취소하면 몇 퍼센트를 돌려받아요?",
+      "required": [
+        "제30조",
+        "제31조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.012,
+      "api_ms": 4.38,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.38,
+        3.847,
+        3.986
+      ],
+      "search_samples_ms": [
+        0.012,
+        0.011,
+        0.012
+      ]
+    },
+    {
+      "id": "M03",
+      "group": "multi",
+      "question": "배달비랑 마지막 매장 주문 시간이 둘 다 궁금해요.",
+      "required": [
+        "제1조",
+        "제16조"
+      ],
+      "articles": [
+        "제1조",
+        "제15조",
+        "제12조"
+      ],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 11.595,
+      "api_ms": 16.323,
+      "status": "ready",
+      "answer_articles": [
+        "제1조"
+      ],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장은 매일 오전 11시부터 오후 10시까지 영업한다. 마지막 주문은 오후 9시 30분까지 받는다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "api_samples_ms": [
+        16.323,
+        12.419,
+        13.859
+      ],
+      "search_samples_ms": [
+        11.595,
+        7.971,
+        8.903
+      ]
+    },
+    {
+      "id": "M04",
+      "group": "multi",
+      "question": "포장 용기 안 돌려주면 얼마예요? 차도 가져갈 건데 2만 원만 쓰면 몇 시간 무료죠?",
+      "required": [
+        "제4조",
+        "제10조"
+      ],
+      "articles": [
+        "제10조",
+        "제4조",
+        "제15조"
+      ],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 12.358,
+      "api_ms": 16.84,
+      "status": "ready",
+      "answer_articles": [
+        "제10조"
+      ],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 포장 주문은 다회용기와 일회용기 중에서 고를 수 있다. 다회용기를 고르면 500원을 할인하고, 용기는 7일 안에 매장에 돌려준다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "api_samples_ms": [
+        16.84,
+        16.816,
+        17.278
+      ],
+      "search_samples_ms": [
+        12.358,
+        12.307,
+        12.591
+      ]
+    },
+    {
+      "id": "M05",
+      "group": "multi",
+      "question": "앱에서 카드로 주문했는데 조리 시작 전엔 취소할 수 있나요? 카드 환불까지 얼마나 걸려요?",
+      "required": [
+        "제11조",
+        "제13조"
+      ],
+      "articles": [],
+      "hold": true,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.012,
+      "api_ms": 3.737,
+      "status": "needs_review",
+      "answer_articles": [],
+      "attempts": 0,
+      "saved": false,
+      "reply": null,
+      "api_samples_ms": [
+        3.737,
+        2.979,
+        3.213
+      ],
+      "search_samples_ms": [
+        0.012,
+        0.01,
+        0.01
+      ]
+    },
+    {
+      "id": "M06",
+      "group": "multi",
+      "question": "배달 사고 문의랑 별개로, 맥주도 음식이랑 같이 배달되나요? 용기가 터지면 사진은 언제까지 보내요?",
+      "required": [
+        "제17조",
+        "제18조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.013,
+      "api_ms": 4.193,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.193,
+        3.772,
+        3.955
+      ],
+      "search_samples_ms": [
+        0.013,
+        0.012,
+        0.013
+      ]
+    },
+    {
+      "id": "M07",
+      "group": "multi",
+      "question": "주문할 때 쿠폰 두 개를 동시에 쓰고 싶고, 사진 리뷰 포인트도 궁금해요.",
+      "required": [
+        "제27조",
+        "제33조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.01,
+      "api_ms": 3.685,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        3.685,
+        4.368,
+        4.185
+      ],
+      "search_samples_ms": [
+        0.01,
+        0.01,
+        0.01
+      ]
+    },
+    {
+      "id": "M08",
+      "group": "multi",
+      "question": "맥주도 배달돼요? 그리고 배달 주문이 밤 몇 시에 마감되나요?",
+      "required": [
+        "제15조",
+        "제18조"
+      ],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.011,
+      "api_ms": 3.812,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        3.812,
+        3.953,
+        3.658
+      ],
+      "search_samples_ms": [
+        0.011,
+        0.011,
+        0.01
+      ]
+    },
+    {
+      "id": "N01",
+      "group": "no_policy",
+      "question": "식사하는 동안 친절하게 안내해 주셔서 감사해요.",
+      "required": [],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.009,
+      "api_ms": 4.036,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.036,
+        4.149,
+        3.822
+      ],
+      "search_samples_ms": [
+        0.009,
+        0.009,
+        0.009
+      ]
+    },
+    {
+      "id": "N02",
+      "group": "no_policy",
+      "question": "어제 테이블 맡으신 분 성함하고 개인 전화번호를 알려 주세요.",
+      "required": [],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.009,
+      "api_ms": 3.897,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        3.897,
+        4.007,
+        4.138
+      ],
+      "search_samples_ms": [
+        0.009,
+        0.01,
+        0.009
+      ]
+    },
+    {
+      "id": "N03",
+      "group": "no_policy",
+      "question": "다음 주 수요일 두 시에 창가 2인석이 실제로 비어 있나요?",
+      "required": [],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.009,
+      "api_ms": 4.537,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.537,
+        4.686,
+        4.37
+      ],
+      "search_samples_ms": [
+        0.009,
+        0.012,
+        0.011
+      ]
+    },
+    {
+      "id": "N04",
+      "group": "no_policy",
+      "question": "토요일 생일 파티에 케이크를 가져가도 되나요?",
+      "required": [],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.01,
+      "api_ms": 4.082,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        4.082,
+        4.214,
+        4.093
+      ],
+      "search_samples_ms": [
+        0.01,
+        0.009,
+        0.009
+      ]
+    },
+    {
+      "id": "N05",
+      "group": "no_policy",
+      "question": "파손된 배달 주문인데 제 주문 환불이 이미 승인됐는지 알려줘요.",
+      "required": [],
+      "articles": [],
+      "hold": true,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.01,
+      "api_ms": 2.937,
+      "status": "needs_review",
+      "answer_articles": [],
+      "attempts": 0,
+      "saved": false,
+      "reply": null,
+      "api_samples_ms": [
+        2.937,
+        4.638,
+        3.931
+      ],
+      "search_samples_ms": [
+        0.01,
+        0.016,
+        0.01
+      ]
+    },
+    {
+      "id": "N06",
+      "group": "no_policy",
+      "question": "갈릭미역파르페의 1인분 칼로리를 알려 주세요.",
+      "required": [],
+      "articles": [],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.016,
+      "api_ms": 5.839,
+      "status": "ready",
+      "answer_articles": [],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+      "api_samples_ms": [
+        5.839,
+        5.363,
+        5.713
+      ],
+      "search_samples_ms": [
+        0.016,
+        0.013,
+        0.014
+      ]
+    },
+    {
+      "id": "N07",
+      "group": "no_policy",
+      "question": "예약 손님용 와인잔 대여료는 정확히 얼마예요?",
+      "required": [],
+      "articles": [
+        "제30조",
+        "제12조",
+        "제32조"
+      ],
+      "hold": false,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 11.504,
+      "api_ms": 16.899,
+      "status": "ready",
+      "answer_articles": [
+        "제30조"
+      ],
+      "attempts": 1,
+      "saved": true,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 10명 이상이 함께 오는 단체는 방문일 3일 전까지 전화나 앱으로 예약한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "api_samples_ms": [
+        16.899,
+        14.055,
+        13.357
+      ],
+      "search_samples_ms": [
+        11.504,
+        8.442,
+        8.542
+      ]
+    },
+    {
+      "id": "N08",
+      "group": "no_policy",
+      "question": "제 카드 결제 건에 환불금이 지금 입금됐는지 봐 주세요.",
+      "required": [],
+      "articles": [],
+      "hold": true,
+      "reason": "",
+      "retried_questions": [],
+      "ms": 0.01,
+      "api_ms": 3.333,
+      "status": "needs_review",
+      "answer_articles": [],
+      "attempts": 0,
+      "saved": false,
+      "reply": null,
+      "api_samples_ms": [
+        3.333,
+        3.302,
+        3.426
+      ],
+      "search_samples_ms": [
+        0.01,
+        0.009,
+        0.01
+      ]
+    }
+  ]
+}
