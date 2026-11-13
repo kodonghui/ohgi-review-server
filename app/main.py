@@ -21,6 +21,7 @@ from app.schemas.review import ReplyPreferences
 from app.services.hybrid_retriever import HybridRetriever
 from app.services.policy_index import load_articles, open_policy_index
 from app.services.policy_search import PolicySearch, PolicySearchResult
+from app.services.policy_topics import PolicyEvidence
 from app.services.reply_workflow import build_reply_workflow
 
 
@@ -69,7 +70,7 @@ async def lifespan(app: FastAPI):
         search = PolicySearch(index, hybrid)
         serializer = JsonPlusSerializer(allowed_msgpack_modules=[
             (cls.__module__, cls.__name__)
-            for cls in (ReplyPreferences, GroundedReplyDraft, PolicySearchResult)
+            for cls in (ReplyPreferences, GroundedReplyDraft, PolicySearchResult, PolicyEvidence)
         ])
         app.state.reply_workflow = build_reply_workflow(
             search.retrieve, checkpointer=InMemorySaver(serde=serializer),

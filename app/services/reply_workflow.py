@@ -79,6 +79,8 @@ def build_reply_workflow(
         }
         if evidence.needs_manual_review:
             initial.update(status="needs_review", feedback="적용할 규정을 매장에서 확인해 주세요.")
+        if evidence.reason:
+            get_stream_writer()({"event": "progress", "stage": "evidence", "reason": evidence.reason})
         return initial
 
     def after_retrieval(state: ReplyWorkflowState) -> Literal["draft", "__end__"]:
@@ -100,7 +102,7 @@ def build_reply_workflow(
             or not set(draft.article_ids).issubset(article.id for article in evidence.articles)
         ):
             feedback = "필요한 조문을 모두 반영하고 확인한 조문만 표시해 주세요."
-        elif (evidence.required_ids or FOLLOWUP_ISSUE.search(state["review_text"])) and not draft.needs_followup:
+        elif (evidence.requires_followup or FOLLOWUP_ISSUE.search(state["review_text"])) and not draft.needs_followup:
             feedback = "매장이 직접 확인해야 하는 내용을 표시해 주세요."
         elif evidence.articles and not draft.article_ids:
             feedback = "안내를 뒷받침하는 조문을 확인하고 표시해 주세요."

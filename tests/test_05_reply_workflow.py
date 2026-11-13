@@ -9,7 +9,8 @@ from chromadb.config import Settings
 from langchain_chroma import Chroma
 
 from app.schemas.reply_draft import GroundedReplyDraft, ReplyVerdict
-from app.services.policy_search import DELIVERY_ARTICLE, QUALITY_ARTICLE, PolicySearch
+from app.services.policy_search import PolicySearch
+from app.services.policy_topics import DELIVERY_ARTICLE, QUALITY_ARTICLE
 from app.services.reply_workflow import ReplyModelCalls, ReplyWorkflowState, build_reply_workflow
 
 
@@ -31,7 +32,8 @@ def policy_search(tmp_path: Path) -> PolicySearch:
     collection.add(
         ids=ARTICLE_IDS,
         documents=[
-            "다른 메뉴가 나온 경우에는 수령 후 24시간 안에 사진과 함께 알려야 한다.",
+            "다른 메뉴가 나온 경우에는 수령 후 24시간 안에 사진과 함께 알려야 한다. "
+            "맛이 입에 맞지 않는다는 이유만으로는 교환이나 환불을 하지 않는다.",
             "배달 용기가 파손된 경우에는 수령 후 1시간 안에 사진과 함께 알려야 한다.",
         ],
         metadatas=[{"article_no": article_id} for article_id in ARTICLE_IDS],
