@@ -101,6 +101,9 @@ def test_only_the_missing_question_gets_one_focused_search():
     "포장 주문을 다른 사람이 이미 받아 갔는지 확인해 주세요.",
     "제 음식을 동생이 받았나요?",
     "잃어버린 우산을 가족이 수령했나요?",
+    "포장 음식을 가족이 이미 픽업했나요?",
+    "친구가 테이크아웃한 걸 픽업했는지 확인해 주세요.",
+    "제가 주문한 음식은 벌써 대리인한테 인계가 완료됐나요?",
     "토요일에 케이크를 가져가도 되나요?",
 ])
 def test_order_status_stops_even_if_a_general_policy_is_known(query):
