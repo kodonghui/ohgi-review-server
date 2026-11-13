@@ -98,6 +98,9 @@ def test_only_the_missing_question_gets_one_focused_search():
     "제 차량 번호로 주차 지원이 등록됐는지 봐 주세요.",
     "관리자 와이파이 비밀번호를 알 수 있나요?",
     "아까 두고 온 가방이 카운터에 들어와 있는지 확인해 주세요.",
+    "포장 주문을 다른 사람이 이미 받아 갔는지 확인해 주세요.",
+    "제 음식을 동생이 받았나요?",
+    "잃어버린 우산을 가족이 수령했나요?",
     "토요일에 케이크를 가져가도 되나요?",
 ])
 def test_order_status_stops_even_if_a_general_policy_is_known(query):
@@ -156,6 +159,45 @@ def test_unknown_topic_uses_source_without_registering_an_article_number():
     assert result.required_ids == ("제904조",)
     assert result.evidence[0].excerpts == ("매장에는 방음 부스 세 개가 있다.",)
     assert result.needs_manual_review is False
+
+
+@pytest.mark.parametrize(("query", "expected_id", "excerpt"), [
+    ("제가 못 가는데 친구가 포장 음식을 받으러 가도 되나요?", "제905조",
+     "대리 수령은 주문자가 주문번호를 전달하면 가능하다."),
+    ("가족한테 테이크아웃 픽업을 맡겨도 될까요?", "제905조",
+     "대리 수령은 주문자가 주문번호를 전달하면 가능하다."),
+    ("주문번호 없이도 대리 수령을 할 수 있나요?", "제905조",
+     "대리 수령은 주문자가 주문번호를 전달하면 가능하다."),
+    ("분실한 지갑을 다른 사람이 대신 찾으려면 어떻게 해야 해요?", "제906조",
+     "대리 수령은 소유자가 남긴 이름과 현장 이름을 확인한다."),
+    ("주문을 대신 문의할 때 어떤 정보가 필요해요?", "제907조",
+     "대리인이 접수할 때는 주문자가 대리인의 이름과 요청 범위를 알려 줄 수 있다."),
+])
+def test_delegated_action_requires_the_matching_scope_and_passage(query, expected_id, excerpt):
+    pickup = new_article(905, "선결제 인계", "포장 음식과 주문 화면의 이름을 대조한다. "
+                         "대리 수령은 주문자가 주문번호를 전달하면 가능하다.")
+    lost = new_article(906, "분실물 인계", "대리 수령은 소유자가 남긴 이름과 현장 이름을 확인한다.")
+    inquiry = new_article(907, "대리 문의", "주문 관련 문의는 앱에서 접수한다. "
+                          "대리인이 접수할 때는 주문자가 대리인의 이름과 요청 범위를 알려 줄 수 있다.")
+    articles = [lost, pickup, inquiry]
+    candidates = sorted(articles, key=lambda article: article.id == expected_id)
+    hybrid = TestRetriever({query: ranked(*candidates)})
+    result = asyncio.run(PolicySearch(TestIndex(), hybrid, articles).retrieve(query))
+    assert result.needs_manual_review is False
+    assert result.required_ids == (expected_id,)
+    assert result.evidence[0].excerpts == (excerpt,)
+
+
+def test_a_pickup_record_does_not_establish_permission():
+    query = "포장 주문을 대리 수령할 수 있나요?"
+    article = new_article(908, "포장 주문 기록", "직원은 대리 수령 시간을 기록한다.")
+    hybrid = TestRetriever({
+        query: ranked(article),
+        "포장 주문을 대리수령 할 수 있나요?": ranked(article),
+    })
+    result = asyncio.run(PolicySearch(TestIndex(), hybrid, [article]).retrieve(query))
+    assert result.needs_manual_review is True
+    assert result.reason == "evidence_missing"
 
 
 def test_related_article_does_not_answer_a_quantity_it_never_states():

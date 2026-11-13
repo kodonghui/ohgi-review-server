@@ -12,6 +12,8 @@ from app.services.policy_topics import PolicyEvidence, article_sentences
 
 
 DOCUMENT_TOPIC = "document_question"
+PICKUP_VERB = r"(?:수령|받으러|받으려|받을|받아|받는|찾아|찾으러|찾으려|가져가|픽업)"
+DELEGATE = r"(?:다른\s*사람|가족|친구|지인|동생|부모님|배우자|남편|아내)(?:이|가|에게|한테)"
 # Terms used to distinguish nearby policy topics. These also apply to unseen articles.
 ALIASES = tuple((re.compile(pattern), term) for pattern, term in (
     (r"엘리베이터|리프트", "승강기"),
@@ -22,12 +24,15 @@ ALIASES = tuple((re.compile(pattern), term) for pattern, term in (
     (r"(?<!\d)[2-9]\s*(?:인|명)\s*예약|두\s*명\s*예약", "일반 좌석 예약"),
     (r"예약할|예약하는", "예약"),
     (r"다시\s*부르|더\s*불러|재호출", "호출"),
-    (r"잃어버린\s*(?:물건|지갑|가방|우산)?|놓고\s*온\s*(?:물건|지갑|가방|우산)|두고\s*간\s*(?:물건|지갑|가방|우산)|습득물|발견한\s*물건", "분실물"),
+    (r"(?:잃어버린|분실한)\s*(?:물건|지갑|가방|우산)?|놓고\s*온\s*(?:물건|지갑|가방|우산)|두고\s*간\s*(?:물건|지갑|가방|우산)|습득물|발견한\s*물건", "분실물"),
     (r"택배로\s*보내|우편(?:으로)?\s*보내|택배\s*발송", "택배 발송"),
     (r"일행이\s*늦|예약\s*시(?:각|간)보다\s*늦|늦을\s*(?:경우|때)|방문\s*시각\s*지연|예약\s*지각", "예약 지연"),
     (r"자리(?:를)?\s*(?:얼마나\s*)?잡아\s*줘", "자리 유지"),
     (r"카드\s*승인[^.?!]{0,12}두\s*(?:줄|건)|이중\s*결제|두\s*번\s*(?:카드\s*)?결제", "카드 중복 결제"),
-    (r"대신\s*(?:수령|받|찾아|가져가)|(?:다른\s*사람|제가|가족|친구)(?:이|가)?\s*대신[^.?!]{0,12}(?:받으러|찾으러)|대리\s*수령", "대리수령"),
+    (r"포장\s*해\s*둔|포장한|테이크\s*아웃", "포장"),
+    (rf"(?:대신|본인\s*말고|{DELEGATE})(?=[^.?!\n]{{0,26}}{PICKUP_VERB})|"
+     rf"대리(?:로)?\s*{PICKUP_VERB}|픽업(?=\s*[을를]?\s*맡겨)", "대리수령"),
+    (r"대신\s*(?:문의|접수)|대리(?:로|인이)?\s*(?:문의|접수)", "대리문의"),
     (r"주문\s*번호", "주문번호"),
     (r"두\s*(?:개\s*)?(?:집|곳|군데)|(?:여러|다른)\s*(?:배송지|배달지|주소)|주소[^.?!]{0,12}두\s*개", "복수주소"),
     (r"사진[^.?!]{0,21}(?:못\s*올려|안\s*올라|업로드[^.?!]{0,7}실패|첨부[^.?!]{0,8}(?:오류|실패|안\s*돼))", "사진 첨부 오류"),
@@ -50,6 +55,7 @@ STOP_WORDS = frozenset((
     "오늘", "어제", "지금", "제가", "제게", "받을", "되나요", "되어", "봐요", "있나요", "해요",
     "하나요", "되죠", "주세요", "있는", "알려", "며칠", "동안", "걸리는", "업무", "계속", "얼마예요",
     "우리", "뒤까지", "넣을", "받는", "싶은데", "가는데", "가면", "는데", "받아", "하나", "가족", "직접", "가지", "못하면",
+    "가능한가요", "될까요", "되겠어요", "필요한가요", "필요해요", "준비하나요",
 ))
 WORD = re.compile(r"[가-힣a-z0-9]+")
 ENDING = re.compile(r"(?:에서는|에서|에게|한테|까지|으로|이라면|과는|에도|부터|으로는|[은는이가을를과와도에의로랑])$")
@@ -67,6 +73,14 @@ ANSWER_FORMS = tuple((re.compile(question), re.compile(answer)) for question, an
     (r"됐는지\s*어디서\s*봐|확정\s*여부[^.?!]{0,12}(?:어디|확인)", r"확정\s*여부"),
     (r"어느\s*(?:구역|승강기|층|출입구)", r"승강기|출입구|\d+\s*층"),
 ))
+PERMISSION_QUESTION = re.compile(
+    r"가능|허용|조건|절차|수\s*있|(?:해도|가도|받아도|맡겨도)\s*(?:되|돼)|"
+    r"될까요|준비|어떻게\s*(?:해야|하면)|(?:무슨|어떤)\s*정보|필요"
+)
+POLICY_CONDITION = re.compile(r"가능하|허용|해야\s*한다|필요하|하면|경우|제공하지|수\s*[있없]|확인한다")
+ACTION_TERMS = frozenset(("대리수령", "대리문의"))
+# These distinguish the object of an action shared by several policies.
+ACTION_SCOPE_TERMS = frozenset(("포장", "음식", "분실물", "주문", "주문내역", "주문번호", "결제"))
 COMPOUND_QUESTIONS = re.compile(r"(?:시간|기간|기한|방법|조건|요금)(?:과|와|이랑|랑)\s+(?=[가-힣])")
 CONTEXT_QUESTION = re.compile(r"^(?:그럼\s*)?(?:어디[에서]*|언제|어떻게|얼마나|몇\s*[시분일개명])")
 MIN_PASSAGE_MATCH = 0.43
@@ -83,6 +97,9 @@ def normalized(text: str) -> str:
 def terms(text: str) -> frozenset[str]:
     result = set()
     for raw in WORD.findall(text):
+        if raw in ACTION_TERMS:
+            result.add(raw)
+            continue
         word = VERB_ENDING.sub("", raw)
         stem = ENDING.sub("", word)
         if len(stem) >= 2:
@@ -100,6 +117,10 @@ def relevant_words(query: frozenset[str], source: frozenset[str]) -> frozenset[s
             for other in source
         )
     ))
+
+
+def score_words(matched: frozenset[str], weights: dict[str, float]) -> float:
+    return sum(weights[word] for word in matched)
 
 
 def split_questions(question: str) -> tuple[str, ...]:
@@ -122,6 +143,7 @@ class PolicyPassages:
     def __init__(self, articles: Sequence[Document]):
         self._headings = {}
         self._passages = {}
+        self._article_terms = {}
         frequencies: Counter[str] = Counter()
         for article in articles:
             title = article.metadata.get("article", "")
@@ -129,7 +151,9 @@ class PolicyPassages:
             passages = tuple((sentence, terms(normalized(sentence))) for sentence in article_sentences(article))
             self._headings[article.id] = heading
             self._passages[article.id] = passages
-            frequencies.update(heading.union(*(words for _, words in passages)))
+            article_terms = heading.union(*(words for _, words in passages))
+            self._article_terms[article.id] = article_terms
+            frequencies.update(article_terms)
         self._weights = {word: 1 + log((len(articles) + 1) / (count + 1)) for word, count in frequencies.items()}
 
     def select(
@@ -138,39 +162,52 @@ class PolicyPassages:
         query = terms(normalized(question))
         if context and CONTEXT_QUESTION.search(question):
             query |= terms(normalized(context)) & FOCUS_TERMS
-        weights = {word: self._weights.get(word, 1.0) for word in query}
-        total = sum(weights.values())
-        if not total:
+        actions = query & ACTION_TERMS
+        action_scope = query & ACTION_SCOPE_TERMS
+        if not query or (actions and not action_scope):
             return None
+        primary_terms = actions | action_scope if actions else query
+        weights = {
+            word: self._weights.get(word, 1.0) * (1.0 if word in primary_terms else 0.25)
+            for word in query
+        }
+        total = sum(weights.values())
         focus = query & FOCUS_TERMS
         answer_forms = requested_forms(question)
+        if actions and PERMISSION_QUESTION.search(question):
+            answer_forms.append(POLICY_CONDITION)
         matches: list[tuple[float, tuple[str, ...], Document]] = []
         for position, article in enumerate(candidates):
             heading = self._headings.get(article.id, frozenset())
             passages = self._passages.get(article.id, ())
+            scope_match = relevant_words(action_scope, self._article_terms.get(article.id, frozenset()))
+            if actions and scope_match != action_scope:
+                continue
             best: tuple[float, tuple[str, ...]] | None = None
             for index, (sentence, words) in enumerate(passages):
                 if any(not form.search(sentence) for form in answer_forms):
                     continue
                 scope = heading | words
                 excerpt = (sentence,)
-                if index and answer_forms and not (focus & words):
+                if index and answer_forms and not actions and not (focus & words):
                     previous, previous_words = passages[index - 1]
                     if relevant_words(query, previous_words) - relevant_words(query, scope):
                         scope |= previous_words
                         excerpt = (previous, sentence)
-                if focus - scope:
+                if focus - (scope | scope_match):
                     continue
                 matched = relevant_words(query, words)
+                if actions - matched:
+                    continue
                 if not matched and not answer_forms:
                     continue
-                direct = sum(weights[word] for word in matched) / total
-                surrounding = sum(weights[word] for word in relevant_words(query, scope)) / total
+                direct = score_words(matched, weights) / total
+                surrounding = score_words(relevant_words(query, scope | scope_match), weights) / total
                 if not answer_forms and focus and not (focus & words):
                     continue
                 if not matched and (not index or surrounding < 0.75):
                     continue
-                score = direct + (0.55 if answer_forms else 0.23) * surrounding + 0.10 / (position + 1)
+                score = direct + (0.55 if answer_forms or actions else 0.23) * surrounding + 0.10 / (position + 1)
                 if score >= MIN_PASSAGE_MATCH and (best is None or score > best[0]):
                     best = (score, excerpt)
             if best:
@@ -183,7 +220,7 @@ class PolicyPassages:
 
     def matches_scope(self, question: str, evidence: PolicyEvidence, *, check_form: bool) -> bool:
         """A broad known rule does not cover a narrower subject mentioned in the question."""
-        focus = terms(normalized(question)) & FOCUS_TERMS
+        focus = terms(normalized(question)) & (FOCUS_TERMS | ACTION_TERMS)
         heading = self._headings.get(evidence.article_id, frozenset())
         source = terms(normalized(" ".join(evidence.excerpts)))
         if not focus.issubset(heading | source):
