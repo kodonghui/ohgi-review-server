@@ -1,0 +1,16 @@
+[
+  {"id":"D01","question":"엘리베이터로 지하에서 올라갈 때 어느 구역으로 가야 하나요?","required":["제36조"],"spans":["A구역 승강기"],"group":"diagnostic","expected":"ready"},
+  {"id":"D02","question":"삼각대 설치는 통로를 가려도 허용되나요?","required":["제44조"],"spans":["통로를 막는 삼각대 설치","허용하지 않는다"],"group":"diagnostic","expected":"ready"},
+  {"id":"D03","question":"대기표 첫 호출 후 안 나타나면 몇 분 뒤에 재호출해요?","required":["제39조"],"spans":["첫 호출 뒤 5분","한 번 더 호출"],"group":"diagnostic","expected":"ready"},
+  {"id":"D04","question":"매장에 두고 간 우산 보관 기간이 며칠이에요?","required":["제42조"],"spans":["14일 동안 보관"],"group":"diagnostic","expected":"ready"},
+  {"id":"D05","question":"제가 직접 가지 못하면 포장 음식 대리 수령 가능한가요?","required":["제69조"],"spans":["대리 수령은 주문자가 주문번호를 전달하면 가능하다"],"group":"diagnostic","expected":"ready"},
+  {"id":"D06","question":"친구에게 포인트 양도할 수 있나요?","required":["제114조"],"spans":["잔액을 보내거나","합쳐 결제할 수 없다"],"group":"diagnostic","expected":"ready"},
+  {"id":"D07","question":"문의에 사진 첨부가 실패하면 어디에 접수하나요?","required":["제87조"],"spans":["앱 1:1 문의에 남기거나 영업 중 매장에 전화"],"group":"diagnostic","expected":"ready"},
+  {"id":"D08","question":"음식과 같이 술도 배달돼요? 아기 의자는 몇 개예요?","required":["제18조","제37조"],"spans":["주류는 배달하지 않는다","유아 의자 네 개"],"group":"diagnostic","expected":"ready"},
+  {"id":"D09","question":"단체 예약 메뉴 제출은 언제까지예요? 일반 자리 2명 예약은 며칠 뒤까지 가능해요?","required":["제51조","제48조"],"spans":["방문일 전날 오후 6시","다음 14일"],"group":"diagnostic","expected":"ready"},
+  {"id":"D10","question":"매장 내부에 휴대전화 충전기 빌릴 수 있나요?","required":["제147조"],"spans":["충전기와 케이블을 대여하지 않는다"],"group":"diagnostic","expected":"ready"},
+  {"id":"D11","question":"제가 맡긴 우산 아직 매장에 보관 중인가요?","required":[],"spans":[],"group":"diagnostic","expected":"needs_review"},
+  {"id":"D12","question":"이번 제 카드 결제 건 취소가 승인됐나요?","required":[],"spans":[],"group":"diagnostic","expected":"needs_review"},
+  {"id":"D13","question":"축구 중계를 보려고 하는데 어떤 채널을 틀어 주시나요?","required":[],"spans":[],"group":"diagnostic","expected":"needs_review"},
+  {"id":"D14","question":"초콜릿 케이크를 매장에 가져가도 될까요?","required":[],"spans":[],"group":"diagnostic","expected":"needs_review"}
+]

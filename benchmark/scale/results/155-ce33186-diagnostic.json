@@ -1,0 +1,1000 @@
+{
+  "expanded": {
+    "timestamp_utc": "2026-11-13T06:20:03+00:00",
+    "index": {
+      "version": 1,
+      "source_sha256": "6c1375683ca14d09a529a201e2e9674285e94319cb9ce2d2c36d2ff163ff3ea5",
+      "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+      "article_count": 155
+    },
+    "index_bytes": 1503396,
+    "build_seconds": 21.696,
+    "startup_seconds": 2.408,
+    "environment": {
+      "fastapi": "0.162.0",
+      "chromadb": "1.5.9",
+      "langgraph": "1.2.19",
+      "fastembed": "0.9.1"
+    },
+    "run": {
+      "repetitions": 3,
+      "warmups": 3,
+      "transport": "FastAPI TestClient",
+      "fake_delay_seconds": 0,
+      "openai_requests": 0,
+      "diagnostics_only": true,
+      "new_queries_sha256": "fd1a7c2328037ee96b5fd2b16b2b033b1fb7e0a71c3aa3a1ee554283b248e357",
+      "course_queries_sha256": "5a5aa961a57c136a1e668392ca38708f9e02a1fde1a7daa647e877872098c793",
+      "fixed_additions_sha256": "903534471c2eb9698eec48d3ad4ca0da3cd059b54685a12ae534edb127b86252",
+      "lock_sha256": "02e2093aa04056d1c4f783872bc751fb3b45cacd0ff1f6f352ee298665ef9580",
+      "runner_sha256": "9c5f7661ed833b03249795b965bc6d2de641a227db762eab64f1096f4fe6d2cd"
+    },
+    "summary": {
+      "diagnostic": {
+        "requests": 14,
+        "with_reference": 10,
+        "full_top3_vector": 4,
+        "full_top3_bm25": 7,
+        "full_top3_rrf": 6,
+        "full_candidate_union": 9,
+        "reference_spans_in_union": 9,
+        "reference_spans_saved": 0,
+        "full_api_retrieval": 0,
+        "full_api_save": 0,
+        "full_save_with_spans": 0,
+        "requires_staff": 4,
+        "staff_correctly_held": 3,
+        "saved_missing_reference": 1,
+        "retries": 1,
+        "api_p50_ms": 14.333,
+        "api_p95_ms": 66.232,
+        "search_p50_ms": 0.212,
+        "search_p95_ms": 49.089
+      }
+    },
+    "cases": [
+      {
+        "id": "D01",
+        "question": "엘리베이터로 지하에서 올라갈 때 어느 구역으로 가야 하나요?",
+        "required": [
+          "제36조"
+        ],
+        "spans": [
+          "A구역 승강기"
+        ],
+        "group": "diagnostic",
+        "expected": "ready",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.22,
+        "api_ms": 14.136,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          14.136,
+          13.924,
+          15.08
+        ],
+        "search_samples_ms": [
+          0.22,
+          0.299,
+          0.309
+        ],
+        "vector_top3": [
+          "제146조",
+          "제46조",
+          "제45조"
+        ],
+        "bm25_top3": [
+          "제36조",
+          "제12조",
+          "제53조"
+        ],
+        "rrf_top3": [
+          "제36조",
+          "제146조",
+          "제46조"
+        ],
+        "candidate_union": [
+          "제36조",
+          "제146조",
+          "제46조",
+          "제12조",
+          "제45조",
+          "제53조",
+          "제75조",
+          "제109조",
+          "제74조",
+          "제148조",
+          "제4조",
+          "제152조",
+          "제40조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D02",
+        "question": "삼각대 설치는 통로를 가려도 허용되나요?",
+        "required": [
+          "제44조"
+        ],
+        "spans": [
+          "통로를 막는 삼각대 설치",
+          "허용하지 않는다"
+        ],
+        "group": "diagnostic",
+        "expected": "ready",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.23,
+        "api_ms": 13.406,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          13.406,
+          13.453,
+          16.346
+        ],
+        "search_samples_ms": [
+          0.23,
+          0.151,
+          0.13
+        ],
+        "vector_top3": [
+          "제146조",
+          "제155조",
+          "제45조"
+        ],
+        "bm25_top3": [
+          "제44조",
+          "제56조",
+          "제148조"
+        ],
+        "rrf_top3": [
+          "제44조",
+          "제148조",
+          "제146조"
+        ],
+        "candidate_union": [
+          "제44조",
+          "제148조",
+          "제146조",
+          "제155조",
+          "제56조",
+          "제45조",
+          "제36조",
+          "제46조",
+          "제37조",
+          "제74조",
+          "제55조",
+          "제21조",
+          "제49조",
+          "제61조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D03",
+        "question": "대기표 첫 호출 후 안 나타나면 몇 분 뒤에 재호출해요?",
+        "required": [
+          "제39조"
+        ],
+        "spans": [
+          "첫 호출 뒤 5분",
+          "한 번 더 호출"
+        ],
+        "group": "diagnostic",
+        "expected": "ready",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.289,
+        "api_ms": 14.262,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          14.262,
+          15.332,
+          16.984
+        ],
+        "search_samples_ms": [
+          0.289,
+          0.227,
+          0.404
+        ],
+        "vector_top3": [
+          "제13조",
+          "제28조",
+          "제39조"
+        ],
+        "bm25_top3": [
+          "제39조",
+          "제128조",
+          "제152조"
+        ],
+        "rrf_top3": [
+          "제39조",
+          "제28조",
+          "제13조"
+        ],
+        "candidate_union": [
+          "제39조",
+          "제28조",
+          "제13조",
+          "제128조",
+          "제152조",
+          "제15조",
+          "제17조",
+          "제110조",
+          "제29조",
+          "제111조",
+          "제123조",
+          "제11조",
+          "제26조",
+          "제49조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D04",
+        "question": "매장에 두고 간 우산 보관 기간이 며칠이에요?",
+        "required": [
+          "제42조"
+        ],
+        "spans": [
+          "14일 동안 보관"
+        ],
+        "group": "diagnostic",
+        "expected": "ready",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.254,
+        "api_ms": 16.2,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          16.2,
+          15.349,
+          15.27
+        ],
+        "search_samples_ms": [
+          0.254,
+          0.193,
+          0.174
+        ],
+        "vector_top3": [
+          "제24조",
+          "제46조",
+          "제25조"
+        ],
+        "bm25_top3": [
+          "제148조",
+          "제46조",
+          "제43조"
+        ],
+        "rrf_top3": [
+          "제46조",
+          "제148조",
+          "제24조"
+        ],
+        "candidate_union": [
+          "제46조",
+          "제148조",
+          "제24조",
+          "제25조",
+          "제43조",
+          "제49조",
+          "제55조",
+          "제111조",
+          "제129조",
+          "제15조",
+          "제42조",
+          "제1조",
+          "제29조",
+          "제103조",
+          "제132조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D05",
+        "question": "제가 직접 가지 못하면 포장 음식 대리 수령 가능한가요?",
+        "required": [
+          "제69조"
+        ],
+        "spans": [
+          "대리 수령은 주문자가 주문번호를 전달하면 가능하다"
+        ],
+        "group": "diagnostic",
+        "expected": "ready",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.194,
+        "api_ms": 14.404,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          14.404,
+          13.466,
+          15.896
+        ],
+        "search_samples_ms": [
+          0.194,
+          0.209,
+          0.213
+        ],
+        "vector_top3": [
+          "제20조",
+          "제81조",
+          "제105조"
+        ],
+        "bm25_top3": [
+          "제43조",
+          "제69조",
+          "제81조"
+        ],
+        "rrf_top3": [
+          "제81조",
+          "제105조",
+          "제20조"
+        ],
+        "candidate_union": [
+          "제81조",
+          "제105조",
+          "제20조",
+          "제43조",
+          "제69조",
+          "제103조",
+          "제71조",
+          "제149조",
+          "제154조",
+          "제10조",
+          "제141조",
+          "제12조",
+          "제100조",
+          "제77조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D06",
+        "question": "친구에게 포인트 양도할 수 있나요?",
+        "required": [
+          "제114조"
+        ],
+        "spans": [
+          "잔액을 보내거나",
+          "합쳐 결제할 수 없다"
+        ],
+        "group": "diagnostic",
+        "expected": "ready",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.136,
+        "api_ms": 15.908,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          15.908,
+          16.82,
+          14.142
+        ],
+        "search_samples_ms": [
+          0.136,
+          0.227,
+          0.264
+        ],
+        "vector_top3": [
+          "제26조",
+          "제114조",
+          "제25조"
+        ],
+        "bm25_top3": [
+          "제26조",
+          "제114조",
+          "제113조"
+        ],
+        "rrf_top3": [
+          "제26조",
+          "제114조",
+          "제119조"
+        ],
+        "candidate_union": [
+          "제26조",
+          "제114조",
+          "제119조",
+          "제111조",
+          "제110조",
+          "제113조",
+          "제25조",
+          "제139조",
+          "제118조",
+          "제33조",
+          "제112조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D07",
+        "question": "문의에 사진 첨부가 실패하면 어디에 접수하나요?",
+        "required": [
+          "제87조"
+        ],
+        "spans": [
+          "앱 1:1 문의에 남기거나 영업 중 매장에 전화"
+        ],
+        "group": "diagnostic",
+        "expected": "ready",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.317,
+        "api_ms": 16.138,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          16.138,
+          15.245,
+          13.448
+        ],
+        "search_samples_ms": [
+          0.317,
+          0.171,
+          0.169
+        ],
+        "vector_top3": [
+          "제87조",
+          "제136조",
+          "제75조"
+        ],
+        "bm25_top3": [
+          "제87조",
+          "제136조",
+          "제85조"
+        ],
+        "rrf_top3": [
+          "제87조",
+          "제136조",
+          "제84조"
+        ],
+        "candidate_union": [
+          "제87조",
+          "제136조",
+          "제84조",
+          "제86조",
+          "제75조",
+          "제85조",
+          "제93조",
+          "제132조",
+          "제133조",
+          "제76조",
+          "제118조",
+          "제54조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D08",
+        "question": "음식과 같이 술도 배달돼요? 아기 의자는 몇 개예요?",
+        "required": [
+          "제18조",
+          "제37조"
+        ],
+        "spans": [
+          "주류는 배달하지 않는다",
+          "유아 의자 네 개"
+        ],
+        "group": "diagnostic",
+        "expected": "ready",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.212,
+        "api_ms": 12.546,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          12.546,
+          12.163,
+          12.183
+        ],
+        "search_samples_ms": [
+          0.212,
+          0.196,
+          0.288
+        ],
+        "vector_top3": [
+          "제37조",
+          "제3조",
+          "제50조"
+        ],
+        "bm25_top3": [
+          "제37조",
+          "제44조",
+          "제55조"
+        ],
+        "rrf_top3": [
+          "제37조",
+          "제36조",
+          "제3조"
+        ],
+        "candidate_union": [
+          "제37조",
+          "제36조",
+          "제3조",
+          "제44조",
+          "제50조",
+          "제55조",
+          "제128조",
+          "제40조",
+          "제17조",
+          "제56조",
+          "제149조",
+          "제154조",
+          "제59조",
+          "제81조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D09",
+        "question": "단체 예약 메뉴 제출은 언제까지예요? 일반 자리 2명 예약은 며칠 뒤까지 가능해요?",
+        "required": [
+          "제51조",
+          "제48조"
+        ],
+        "spans": [
+          "방문일 전날 오후 6시",
+          "다음 14일"
+        ],
+        "group": "diagnostic",
+        "expected": "ready",
+        "articles": [
+          "제30조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "group_booking"
+        ],
+        "ms": 54.813,
+        "api_ms": 71.703,
+        "status": "ready",
+        "answer_articles": [
+          "제30조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 10명 이상이 함께 오는 단체는 방문일 3일 전까지 전화나 앱으로 예약한다. 단체 예약은 1명당 5,000원의 예약금을 미리 받는다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          71.703,
+          67.567,
+          68.171
+        ],
+        "search_samples_ms": [
+          54.813,
+          50.746,
+          50.386
+        ],
+        "vector_top3": [
+          "제51조",
+          "제32조",
+          "제50조"
+        ],
+        "bm25_top3": [
+          "제48조",
+          "제49조",
+          "제30조"
+        ],
+        "rrf_top3": [
+          "제51조",
+          "제49조",
+          "제32조"
+        ],
+        "candidate_union": [
+          "제51조",
+          "제49조",
+          "제32조",
+          "제48조",
+          "제30조",
+          "제59조",
+          "제50조",
+          "제56조",
+          "제52조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [
+          "group_booking"
+        ],
+        "router_reason": "",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D10",
+        "question": "매장 내부에 휴대전화 충전기 빌릴 수 있나요?",
+        "required": [
+          "제147조"
+        ],
+        "spans": [
+          "충전기와 케이블을 대여하지 않는다"
+        ],
+        "group": "diagnostic",
+        "expected": "ready",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.157,
+        "api_ms": 11.946,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          11.946,
+          14.167,
+          14.044
+        ],
+        "search_samples_ms": [
+          0.157,
+          0.168,
+          0.19
+        ],
+        "vector_top3": [
+          "제147조",
+          "제66조",
+          "제8조"
+        ],
+        "bm25_top3": [
+          "제147조",
+          "제39조",
+          "제9조"
+        ],
+        "rrf_top3": [
+          "제147조",
+          "제39조",
+          "제9조"
+        ],
+        "candidate_union": [
+          "제147조",
+          "제39조",
+          "제9조",
+          "제134조",
+          "제66조",
+          "제8조",
+          "제34조",
+          "제148조",
+          "제37조",
+          "제6조",
+          "제43조",
+          "제54조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D11",
+        "question": "제가 맡긴 우산 아직 매장에 보관 중인가요?",
+        "required": [],
+        "spans": [],
+        "group": "diagnostic",
+        "expected": "needs_review",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.187,
+        "api_ms": 12.125,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          12.125,
+          13.409,
+          12.539
+        ],
+        "search_samples_ms": [
+          0.187,
+          0.19,
+          0.159
+        ],
+        "vector_top3": [
+          "제46조",
+          "제148조",
+          "제129조"
+        ],
+        "bm25_top3": [
+          "제46조",
+          "제69조",
+          "제148조"
+        ],
+        "rrf_top3": [
+          "제46조",
+          "제148조",
+          "제42조"
+        ],
+        "candidate_union": [
+          "제46조",
+          "제148조",
+          "제42조",
+          "제43조",
+          "제69조",
+          "제129조",
+          "제93조",
+          "제17조",
+          "제105조",
+          "제88조",
+          "제103조",
+          "제55조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D12",
+        "question": "이번 제 카드 결제 건 취소가 승인됐나요?",
+        "required": [],
+        "spans": [],
+        "group": "diagnostic",
+        "expected": "needs_review",
+        "articles": [
+          "제13조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 24.449,
+        "api_ms": 40.876,
+        "status": "ready",
+        "answer_articles": [
+          "제13조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 카드 결제 취소는 카드사에 따라 영업일 기준 3일에서 5일이 걸린다. 간편결제는 취소한 날 바로 환불된다. 현금으로 결제했다면 매장에서 바로 돌려준다. 포인트로 결제한 금액은 포인트로 돌려준다.",
+        "api_samples_ms": [
+          40.876,
+          40.107,
+          39.167
+        ],
+        "search_samples_ms": [
+          24.449,
+          24.135,
+          24.431
+        ],
+        "vector_top3": [
+          "제91조",
+          "제13조",
+          "제63조"
+        ],
+        "bm25_top3": [
+          "제63조",
+          "제91조",
+          "제13조"
+        ],
+        "rrf_top3": [
+          "제91조",
+          "제63조",
+          "제13조"
+        ],
+        "candidate_union": [
+          "제91조",
+          "제63조",
+          "제13조",
+          "제109조",
+          "제90조",
+          "제125조",
+          "제29조",
+          "제110조",
+          "제111조",
+          "제64조",
+          "제92조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [
+          "refund_timing"
+        ],
+        "router_reason": "",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D13",
+        "question": "축구 중계를 보려고 하는데 어떤 채널을 틀어 주시나요?",
+        "required": [],
+        "spans": [],
+        "group": "diagnostic",
+        "expected": "needs_review",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.19,
+        "api_ms": 14.601,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          14.601,
+          12.721,
+          12.182
+        ],
+        "search_samples_ms": [
+          0.19,
+          0.217,
+          0.213
+        ],
+        "vector_top3": [
+          "제95조",
+          "제40조",
+          "제39조"
+        ],
+        "bm25_top3": [
+          "제95조",
+          "제133조",
+          "제93조"
+        ],
+        "rrf_top3": [
+          "제95조",
+          "제133조",
+          "제93조"
+        ],
+        "candidate_union": [
+          "제95조",
+          "제133조",
+          "제93조",
+          "제40조",
+          "제39조",
+          "제137조",
+          "제44조",
+          "제146조",
+          "제152조",
+          "제122조",
+          "제126조",
+          "제123조",
+          "제134조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "D14",
+        "question": "초콜릿 케이크를 매장에 가져가도 될까요?",
+        "required": [],
+        "spans": [],
+        "group": "diagnostic",
+        "expected": "needs_review",
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "ms": 0.21,
+        "api_ms": 15.244,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          15.244,
+          12.11,
+          12.265
+        ],
+        "search_samples_ms": [
+          0.21,
+          0.176,
+          0.172
+        ],
+        "vector_top3": [
+          "제25조",
+          "제12조",
+          "제22조"
+        ],
+        "bm25_top3": [
+          "제149조",
+          "제1조",
+          "제153조"
+        ],
+        "rrf_top3": [
+          "제153조",
+          "제149조",
+          "제25조"
+        ],
+        "candidate_union": [
+          "제153조",
+          "제149조",
+          "제25조",
+          "제12조",
+          "제1조",
+          "제22조",
+          "제9조",
+          "제10조",
+          "제120조",
+          "제54조",
+          "제69조",
+          "제124조",
+          "제147조",
+          "제100조",
+          "제65조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      }
+    ],
+    "label": "expanded",
+    "source_commit": "ce33186b2f1297be88e50220cbc29d7517cc802e"
+  }
+}

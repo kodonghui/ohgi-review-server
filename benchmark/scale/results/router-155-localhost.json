@@ -1,0 +1,92 @@
+{
+  "model": "fake-llm",
+  "beer_events": [
+    {
+      "event": "progress",
+      "stage": "retrieve"
+    },
+    {
+      "event": "progress",
+      "stage": "evidence",
+      "reason": "evidence_recovered",
+      "retriedQuestions": [
+        "alcohol_delivery"
+      ]
+    },
+    {
+      "event": "progress",
+      "stage": "draft",
+      "attempt": 1
+    },
+    {
+      "event": "progress",
+      "stage": "review",
+      "attempt": 1
+    },
+    {
+      "event": "final",
+      "reviewId": 4,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 주류는 배달하지 않습니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "model": "fake-llm",
+      "tone": "감사",
+      "needsFollowup": false,
+      "status": "ready",
+      "articleIds": [
+        "제18조"
+      ],
+      "attempts": 1
+    }
+  ],
+  "beer_draft_deltas": 13,
+  "child_chair": {
+    "reviewId": 5,
+    "reply": "실습 손님, 방문해 주셔서 감사합니다. 안전띠가 달린 유아 의자 네 개와 어린이용 컵·수저를 무료로 대여한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+    "model": "fake-llm",
+    "tone": "감사",
+    "needsFollowup": false,
+    "status": "ready",
+    "articleIds": [
+      "제37조"
+    ],
+    "attempts": 1
+  },
+  "combined_final": {
+    "reviewId": 6,
+    "reply": "실습 손님, 방문해 주셔서 감사합니다. 안전띠가 달린 유아 의자 네 개와 어린이용 컵·수저를 무료로 대여한다. 건물 정문에는 계단이 없고, 지하 주차장에서 올라오는 손님은 A구역 승강기를 이용할 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+    "model": "fake-llm",
+    "tone": "감사",
+    "needsFollowup": false,
+    "status": "ready",
+    "articleIds": [
+      "제37조",
+      "제36조"
+    ],
+    "attempts": 1
+  },
+  "combined_revision": {
+    "reviewId": 6,
+    "reply": "실습 손님, 안전띠가 달린 유아 의자 네 개와 어린이용 컵·수저를 무료로 대여한다, 건물 정문에는 계단이 없고, 지하 주차장에서 올라오는 손님은 A구역 승강기를 이용할 수 있다.",
+    "model": "fake-llm",
+    "tone": "감사",
+    "needsFollowup": false,
+    "status": "ready",
+    "articleIds": [
+      "제37조",
+      "제36조"
+    ],
+    "attempts": 1
+  },
+  "private_lookup": {
+    "reviewId": 7,
+    "reply": null,
+    "model": "fake-llm",
+    "tone": null,
+    "needsFollowup": true,
+    "status": "needs_review",
+    "articleIds": [],
+    "attempts": 0
+  },
+  "source_commit": "83a87748f96dbe38705361c04ea28363fde1c862",
+  "articles": 155,
+  "source_sha256": "6c1375683ca14d09a529a201e2e9674285e94319cb9ce2d2c36d2ff163ff3ea5"
+}
