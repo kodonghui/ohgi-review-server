@@ -1,0 +1,54 @@
+{
+  "model": "fake-llm",
+  "beer_events": [
+    {
+      "event": "progress",
+      "stage": "retrieve"
+    },
+    {
+      "event": "progress",
+      "stage": "evidence",
+      "reason": "evidence_recovered",
+      "retriedQuestions": [
+        "alcohol_delivery"
+      ]
+    },
+    {
+      "event": "progress",
+      "stage": "draft",
+      "attempt": 1
+    },
+    {
+      "event": "progress",
+      "stage": "review",
+      "attempt": 1
+    },
+    {
+      "event": "final",
+      "reviewId": 4,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 주류는 배달하지 않습니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "model": "fake-llm",
+      "tone": "감사",
+      "needsFollowup": false,
+      "status": "ready",
+      "articleIds": [
+        "제18조"
+      ],
+      "attempts": 1
+    }
+  ],
+  "beer_draft_deltas": 13,
+  "child_chair": {
+    "reviewId": 5,
+    "reply": null,
+    "model": "fake-llm",
+    "tone": null,
+    "needsFollowup": true,
+    "status": "needs_review",
+    "articleIds": [],
+    "attempts": 0
+  },
+  "source_commit": "c24a37b6134565cadb8914a4f92e5411563cdec7",
+  "articles": 155,
+  "source_sha256": "6c1375683ca14d09a529a201e2e9674285e94319cb9ce2d2c36d2ff163ff3ea5"
+}

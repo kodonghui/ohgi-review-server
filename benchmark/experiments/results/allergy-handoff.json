@@ -1,0 +1,4185 @@
+{
+  "source_commit": "c24a37b6134565cadb8914a4f92e5411563cdec7",
+  "source_sha256": "db8b21b34388c5e0f6fc4eea7c1a64c6cc1c0f88ec413f37cee0a5b35d9ee0fd",
+  "runner_sha256": "7309628888bb2c11fd652e3096fd5447537e1fd26d32e731d2136f712d1ce29f",
+  "openai_requests": 0,
+  "per_case_repetitions": 3,
+  "no_index_probe": {
+    "id": "G15",
+    "group": "gold",
+    "question": "땅콩 알레르기가 심한데 주문해도 안전해?",
+    "required": [
+      "제20조"
+    ],
+    "articles": [],
+    "hold": true,
+    "reason": "staff_allergy_evidence_missing",
+    "retried_questions": [],
+    "handoff_excerpts": [],
+    "ms": 0.006,
+    "api_ms": 4.053,
+    "status": "needs_review",
+    "answer_articles": [],
+    "attempts": 0,
+    "saved": false,
+    "reply": null,
+    "api_samples_ms": [
+      4.053,
+      3.175,
+      3.528
+    ],
+    "search_samples_ms": [
+      0.006,
+      0.005,
+      0.007
+    ]
+  },
+  "current": {
+    "fixed": {
+      "cases": 52,
+      "policy_cases": 44,
+      "search_coverage": 43,
+      "reply_coverage": 43,
+      "groups": {
+        "gold": {
+          "cases": 20,
+          "search_coverage": 19,
+          "reply_coverage": 19
+        },
+        "paraphrase": {
+          "cases": 16,
+          "search_coverage": 16,
+          "reply_coverage": 16
+        },
+        "multi": {
+          "cases": 8,
+          "search_coverage": 8,
+          "reply_coverage": 8
+        }
+      },
+      "retried_requests": 7,
+      "ready_without_all_citations": 0,
+      "policy_hold": 1,
+      "policy_without_articles": 0,
+      "no_policy_correct": 8,
+      "unsupported_saved": 0,
+      "search_median_ms": 9.018,
+      "search_p95_ms": 21.783,
+      "api_median_ms": 14.404,
+      "api_p95_ms": 28.058
+    },
+    "g15": {
+      "id": "G15",
+      "group": "gold",
+      "question": "땅콩 알레르기가 심한데 주문해도 안전해?",
+      "required": [
+        "제20조"
+      ],
+      "articles": [],
+      "hold": true,
+      "reason": "staff_only",
+      "retried_questions": [],
+      "handoff_excerpts": [],
+      "ms": 0.008,
+      "api_ms": 3.746,
+      "status": "needs_review",
+      "answer_articles": [],
+      "attempts": 0,
+      "saved": false,
+      "reply": null,
+      "api_samples_ms": [
+        3.746,
+        3.068,
+        3.111
+      ],
+      "search_samples_ms": [
+        0.008,
+        0.006,
+        0.006
+      ]
+    },
+    "probes": [
+      {
+        "id": "H01",
+        "group": "held_out",
+        "question": "우유 알러지가 있는데 이 메뉴 먹어도 돼요?",
+        "required": [
+          "제20조"
+        ],
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.066,
+        "api_ms": 4.133,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          4.133,
+          3.98,
+          4.411
+        ],
+        "search_samples_ms": [
+          0.066,
+          0.066,
+          0.06
+        ]
+      },
+      {
+        "id": "H02",
+        "group": "held_out",
+        "question": "같은 조리도구를 쓰면 교차 접촉 위험은 없나요?",
+        "required": [
+          "제20조"
+        ],
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.057,
+        "api_ms": 3.639,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.639,
+          3.43,
+          3.124
+        ],
+        "search_samples_ms": [
+          0.057,
+          0.056,
+          0.053
+        ]
+      },
+      {
+        "id": "H03",
+        "group": "held_out",
+        "question": "땅콩 알레르기가 있어서 견과 토핑을 빼 달라고 했는데 제 주문에 반영됐나요?",
+        "required": [
+          "제20조"
+        ],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.008,
+        "api_ms": 4.329,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          4.329,
+          3.879,
+          3.304
+        ],
+        "search_samples_ms": [
+          0.008,
+          0.008,
+          0.007
+        ]
+      },
+      {
+        "id": "H04",
+        "group": "held_out",
+        "question": "알레르기가 있어요. 어떤 메뉴가 저한테 안전한지 추천해 주세요.",
+        "required": [
+          "제20조"
+        ],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.005,
+        "api_ms": 3.198,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.198,
+          3.01,
+          4.297
+        ],
+        "search_samples_ms": [
+          0.005,
+          0.005,
+          0.008
+        ]
+      },
+      {
+        "id": "H05",
+        "group": "held_out",
+        "question": "배달 용기가 깨졌어요. 알레르기도 있는데 이걸 먹어도 돼요?",
+        "required": [
+          "제17조",
+          "제20조"
+        ],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.008,
+        "api_ms": 4.283,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          4.283,
+          4.737,
+          3.198
+        ],
+        "search_samples_ms": [
+          0.008,
+          0.013,
+          0.007
+        ]
+      },
+      {
+        "id": "H06",
+        "group": "held_out",
+        "question": "견과류에 심한 반응이 있는데 이 소스를 먹어도 되나요?",
+        "required": [
+          "제20조"
+        ],
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.061,
+        "api_ms": 3.558,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.558,
+          3.19,
+          3.028
+        ],
+        "search_samples_ms": [
+          0.061,
+          0.059,
+          0.055
+        ]
+      },
+      {
+        "id": "H07",
+        "group": "held_out",
+        "question": "제 카드 결제 건 환불 들어왔나요?",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.007,
+        "api_ms": 3.217,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.217,
+          2.901,
+          3.736
+        ],
+        "search_samples_ms": [
+          0.007,
+          0.007,
+          0.007
+        ]
+      },
+      {
+        "id": "H08",
+        "group": "held_out",
+        "question": "식사 중에 안내해 주셔서 감사해요.",
+        "required": [],
+        "articles": [],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.026,
+        "api_ms": 4.354,
+        "status": "ready",
+        "answer_articles": [],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+        "api_samples_ms": [
+          4.354,
+          4.067,
+          3.888
+        ],
+        "search_samples_ms": [
+          0.026,
+          0.025,
+          0.022
+        ]
+      }
+    ],
+    "cases": [
+      {
+        "id": "G01",
+        "group": "gold",
+        "question": "평일 오후 4시에 매장에서 식사할 수 있어?",
+        "required": [
+          "제1조"
+        ],
+        "articles": [
+          "제1조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 15.282,
+        "api_ms": 25.864,
+        "status": "ready",
+        "answer_articles": [
+          "제1조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장은 매일 오전 11시부터 오후 10시까지 영업한다, 마지막 주문은 오후 9시 30분까지 받는다, 평일(화요일부터 금요일까지)에는 오후 3시부터 오후 5시까지 브레이크타임을 두며, 이 시간에는 매장 식사 주문을 받지 않는다, 포장 주문과 배달 주문은 브레이크타임에도 받는다, 주말과 공휴일에는 브레이크타임 없이 영업한다.",
+        "api_samples_ms": [
+          25.864,
+          15.275,
+          14.606
+        ],
+        "search_samples_ms": [
+          15.282,
+          9.045,
+          9.182
+        ]
+      },
+      {
+        "id": "G02",
+        "group": "gold",
+        "question": "마지막 주문은 몇 시까지 받아?",
+        "required": [
+          "제1조"
+        ],
+        "articles": [
+          "제1조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.052,
+        "api_ms": 13.414,
+        "status": "ready",
+        "answer_articles": [
+          "제1조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장은 매일 오전 11시부터 오후 10시까지 영업한다, 마지막 주문은 오후 9시 30분까지 받는다, 평일(화요일부터 금요일까지)에는 오후 3시부터 오후 5시까지 브레이크타임을 두며, 이 시간에는 매장 식사 주문을 받지 않는다, 포장 주문과 배달 주문은 브레이크타임에도 받는다, 주말과 공휴일에는 브레이크타임 없이 영업한다.",
+        "api_samples_ms": [
+          13.414,
+          15.68,
+          15.064
+        ],
+        "search_samples_ms": [
+          8.052,
+          7.735,
+          9.278
+        ]
+      },
+      {
+        "id": "G03",
+        "group": "gold",
+        "question": "월요일이 공휴일이면 문을 열어?",
+        "required": [
+          "제2조"
+        ],
+        "articles": [
+          "제2조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 11.267,
+        "api_ms": 17.218,
+        "status": "ready",
+        "answer_articles": [
+          "제2조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 정기 휴무일은 매주 월요일이다. 월요일이 공휴일이면 영업하고, 그다음 날인 화요일에 쉰다. 설날과 추석 당일은 휴무한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          17.218,
+          15.417,
+          13.878
+        ],
+        "search_samples_ms": [
+          11.267,
+          9.133,
+          8.738
+        ]
+      },
+      {
+        "id": "G04",
+        "group": "gold",
+        "question": "강아지를 데리고 들어가도 돼?",
+        "required": [
+          "제3조"
+        ],
+        "articles": [
+          "제3조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 7.633,
+        "api_ms": 14.176,
+        "status": "ready",
+        "answer_articles": [
+          "제3조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 반려동물은 매장 안에 들어올 수 없다. 단, 장애인 보조견은 들어올 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          14.176,
+          13.681,
+          14.556
+        ],
+        "search_samples_ms": [
+          7.633,
+          8.044,
+          8.23
+        ]
+      },
+      {
+        "id": "G05",
+        "group": "gold",
+        "question": "25,000원어치 먹으면 주차가 몇 시간 무료야?",
+        "required": [
+          "제4조"
+        ],
+        "articles": [
+          "제4조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.621,
+        "api_ms": 15.989,
+        "status": "ready",
+        "answer_articles": [
+          "제4조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 건물 지하 주차장을 이용할 수 있다. 매장에서 30,000원 이상 결제하면 2시간 무료 주차를 지원하고, 그 미만이면 1시간 무료 주차를 지원한다. 무료 시간을 넘으면 30분마다 1,500원의 주차 요금을 손님이 직접 낸다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          15.989,
+          17.644,
+          16.441
+        ],
+        "search_samples_ms": [
+          9.621,
+          9.264,
+          10.572
+        ]
+      },
+      {
+        "id": "G06",
+        "group": "gold",
+        "question": "전화로 배달 주문할 수 있어?",
+        "required": [
+          "제6조"
+        ],
+        "articles": [
+          "제6조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.99,
+        "api_ms": 14.447,
+        "status": "ready",
+        "answer_articles": [
+          "제6조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장 식사는 테이블에 놓인 태블릿으로 주문한다. 태블릿 사용이 어려운 손님은 직원에게 말로 주문할 수 있다. 포장과 배달은 오지 레스토랑 앱과 홈페이지에서 주문한다. 전화 주문은 받지 않는다.",
+        "api_samples_ms": [
+          14.447,
+          11.656,
+          12.913
+        ],
+        "search_samples_ms": [
+          8.99,
+          6.945,
+          7.569
+        ]
+      },
+      {
+        "id": "G07",
+        "group": "gold",
+        "question": "다른 회사 상품권으로 결제할 수 있어?",
+        "required": [
+          "제8조"
+        ],
+        "articles": [
+          "제8조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.152,
+        "api_ms": 13.297,
+        "status": "ready",
+        "answer_articles": [
+          "제8조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 신용카드, 체크카드, 간편결제(오지페이, 카카오페이, 네이버페이), 현금으로 결제할 수 있다. 상품권은 오지 레스토랑 모바일 상품권만 받는다. 다른 회사의 상품권은 받지 않는다. 한 번의 주문을 여러 결제 수단으로 나누어 낼 수 있으며, 최대 3개까지 나눌 수 있다.",
+        "api_samples_ms": [
+          13.297,
+          13.141,
+          14.089
+        ],
+        "search_samples_ms": [
+          8.152,
+          8.125,
+          8.711
+        ]
+      },
+      {
+        "id": "G08",
+        "group": "gold",
+        "question": "다회용기를 고르면 뭐가 좋아?",
+        "required": [
+          "제10조"
+        ],
+        "articles": [
+          "제10조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.508,
+        "api_ms": 13.65,
+        "status": "ready",
+        "answer_articles": [
+          "제10조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 포장 주문은 다회용기와 일회용기 중에서 고를 수 있다. 다회용기를 고르면 500원을 할인하고, 용기는 7일 안에 매장에 돌려준다. 다회용기를 7일 안에 돌려주지 않으면 용기 보증금 3,000원이 결제된 수단으로 청구된다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          13.65,
+          14.361,
+          13.254
+        ],
+        "search_samples_ms": [
+          8.508,
+          8.954,
+          8.349
+        ]
+      },
+      {
+        "id": "G09",
+        "group": "gold",
+        "question": "조리 중인 주문도 취소할 수 있어?",
+        "required": [
+          "제11조"
+        ],
+        "articles": [
+          "제11조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.119,
+        "api_ms": 13.7,
+        "status": "ready",
+        "answer_articles": [
+          "제11조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 조리가 시작되기 전에는 주문을 전액 취소할 수 있다. 조리가 시작된 뒤에는 취소할 수 없다. 단, 매장의 사정으로 30분 넘게 늦어지면 조리 중이라도 전액 취소할 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          13.7,
+          13.395,
+          14.709
+        ],
+        "search_samples_ms": [
+          9.119,
+          8.325,
+          9.23
+        ]
+      },
+      {
+        "id": "G10",
+        "group": "gold",
+        "question": "맛이 없으면 환불해 줘?",
+        "required": [
+          "제12조"
+        ],
+        "articles": [
+          "제12조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 1.2,
+        "api_ms": 6.344,
+        "status": "ready",
+        "answer_articles": [
+          "제12조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 맛에 대한 불만만으로는 교환이나 환불이 어려운 점을 안내드립니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          6.344,
+          4.928,
+          6.369
+        ],
+        "search_samples_ms": [
+          1.2,
+          0.857,
+          1.241
+        ]
+      },
+      {
+        "id": "G11",
+        "group": "gold",
+        "question": "카드로 결제한 걸 취소하면 언제 돌아와?",
+        "required": [
+          "제13조"
+        ],
+        "articles": [
+          "제13조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.431,
+        "api_ms": 13.092,
+        "status": "ready",
+        "answer_articles": [
+          "제13조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 카드 결제 취소는 카드사에 따라 영업일 기준 3일에서 5일이 걸린다. 간편결제는 취소한 날 바로 환불된다. 현금으로 결제했다면 매장에서 바로 돌려준다. 포인트로 결제한 금액은 포인트로 돌려준다.",
+        "api_samples_ms": [
+          13.092,
+          13.563,
+          12.984
+        ],
+        "search_samples_ms": [
+          8.431,
+          8.386,
+          8.299
+        ]
+      },
+      {
+        "id": "G12",
+        "group": "gold",
+        "question": "12,000원어치 배달시킬 수 있어?",
+        "required": [
+          "제16조"
+        ],
+        "articles": [
+          "제16조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.369,
+        "api_ms": 13.457,
+        "status": "ready",
+        "answer_articles": [
+          "제16조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 배달은 15,000원 이상 주문할 때만 가능하다. 배달비는 3,000원이다. 30,000원 이상 주문하면 배달비를 받지 않는다. 나무 등급 멤버는 주문 금액과 관계없이 배달비를 받지 않는다(제25조).",
+        "api_samples_ms": [
+          13.457,
+          13.537,
+          13.953
+        ],
+        "search_samples_ms": [
+          8.369,
+          8.453,
+          8.52
+        ]
+      },
+      {
+        "id": "G13",
+        "group": "gold",
+        "question": "배달비는 얼마야?",
+        "required": [
+          "제16조"
+        ],
+        "articles": [
+          "제16조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 7.358,
+        "api_ms": 13.034,
+        "status": "ready",
+        "answer_articles": [
+          "제16조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 배달은 15,000원 이상 주문할 때만 가능하다. 배달비는 3,000원이다. 30,000원 이상 주문하면 배달비를 받지 않는다. 나무 등급 멤버는 주문 금액과 관계없이 배달비를 받지 않는다(제25조).",
+        "api_samples_ms": [
+          13.034,
+          11.49,
+          11.847
+        ],
+        "search_samples_ms": [
+          7.358,
+          6.626,
+          7.223
+        ]
+      },
+      {
+        "id": "G14",
+        "group": "gold",
+        "question": "맥주도 배달돼?",
+        "required": [
+          "제18조"
+        ],
+        "articles": [
+          "제18조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "alcohol_delivery"
+        ],
+        "handoff_excerpts": [],
+        "ms": 16.233,
+        "api_ms": 22.543,
+        "status": "ready",
+        "answer_articles": [
+          "제18조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 주류는 배달하지 않습니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          22.543,
+          20.176,
+          20.137
+        ],
+        "search_samples_ms": [
+          16.233,
+          14.83,
+          14.457
+        ]
+      },
+      {
+        "id": "G15",
+        "group": "gold",
+        "question": "땅콩 알레르기가 심한데 주문해도 안전해?",
+        "required": [
+          "제20조"
+        ],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.008,
+        "api_ms": 3.746,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.746,
+          3.068,
+          3.111
+        ],
+        "search_samples_ms": [
+          0.008,
+          0.006,
+          0.006
+        ]
+      },
+      {
+        "id": "G16",
+        "group": "gold",
+        "question": "쇠고기는 어디 거야?",
+        "required": [
+          "제21조"
+        ],
+        "articles": [
+          "제21조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 7.171,
+        "api_ms": 12.536,
+        "status": "ready",
+        "answer_articles": [
+          "제21조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 쌀과 김치(배추, 고춧가루)는 국내산이다. 돼지고기는 국내산, 쇠고기는 호주산, 닭고기는 국내산이다. 수산물 가운데 우럭과 갈치는 국내산, 새우는 베트남산, 오징어는 원양산이다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          12.536,
+          11.502,
+          12.192
+        ],
+        "search_samples_ms": [
+          7.171,
+          7.085,
+          7.538
+        ]
+      },
+      {
+        "id": "G17",
+        "group": "gold",
+        "question": "열매 등급이 되려면 얼마나 써야 해?",
+        "required": [
+          "제24조"
+        ],
+        "articles": [
+          "제24조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.586,
+        "api_ms": 13.761,
+        "status": "ready",
+        "answer_articles": [
+          "제24조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 등급은 매월 1일에 최근 3개월 동안 결제한 금액(취소와 환불 금액을 뺀 금액)으로 다시 정한다. 새싹 : 최근 3개월 결제 금액 30만 원 미만 열매 : 최근 3개월 결제 금액 30만 원 이상 60만 원 미만 나무 : 최근 3개월 결제 금액 60만 원 이상",
+        "api_samples_ms": [
+          13.761,
+          15.259,
+          14.069
+        ],
+        "search_samples_ms": [
+          8.586,
+          9.101,
+          8.885
+        ]
+      },
+      {
+        "id": "G18",
+        "group": "gold",
+        "question": "포인트 800점 있는데 쓸 수 있어?",
+        "required": [
+          "제26조"
+        ],
+        "articles": [
+          "제26조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 6.895,
+        "api_ms": 11.6,
+        "status": "ready",
+        "answer_articles": [
+          "제26조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 포인트는 1,000점 이상 모였을 때부터 1점을 1원으로 사용할 수 있다. 포인트의 유효기간은 적립한 날로부터 1년이다. 기한이 지난 포인트는 자동으로 사라진다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          11.6,
+          11.777,
+          12.098
+        ],
+        "search_samples_ms": [
+          6.895,
+          7.141,
+          6.834
+        ]
+      },
+      {
+        "id": "G19",
+        "group": "gold",
+        "question": "쿠폰 두 장을 같이 쓸 수 있어?",
+        "required": [
+          "제27조"
+        ],
+        "articles": [
+          "제27조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 7.823,
+        "api_ms": 12.621,
+        "status": "ready",
+        "answer_articles": [
+          "제27조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 쿠폰은 한 번의 주문에 1장만 사용할 수 있다. 여러 쿠폰을 함께 사용할 수 없다. 쿠폰과 포인트는 함께 사용할 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          12.621,
+          12.152,
+          13.099
+        ],
+        "search_samples_ms": [
+          7.823,
+          7.538,
+          8.201
+        ]
+      },
+      {
+        "id": "G20",
+        "group": "gold",
+        "question": "12명 단체 예약을 하루 전에 취소하면 예약금은?",
+        "required": [
+          "제31조"
+        ],
+        "articles": [
+          "제31조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.883,
+        "api_ms": 13.669,
+        "status": "ready",
+        "answer_articles": [
+          "제31조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 방문일 2일 전까지 취소하면 예약금을 모두 돌려준다. 방문일 하루 전에 취소하면 예약금의 50%를 돌려준다. 방문일 당일에 취소하거나 연락 없이 오지 않으면 예약금을 돌려주지 않는다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          13.669,
+          14.07,
+          14.966
+        ],
+        "search_samples_ms": [
+          8.883,
+          9.108,
+          9.619
+        ]
+      },
+      {
+        "id": "P01",
+        "group": "paraphrase",
+        "question": "라거 캔도 집으로 가져다줘요?",
+        "required": [
+          "제18조"
+        ],
+        "articles": [
+          "제18조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "alcohol_delivery"
+        ],
+        "handoff_excerpts": [],
+        "ms": 18.349,
+        "api_ms": 23.134,
+        "status": "ready",
+        "answer_articles": [
+          "제18조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 주류는 배달하지 않습니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          23.134,
+          20.552,
+          20.189
+        ],
+        "search_samples_ms": [
+          18.349,
+          15.933,
+          15.281
+        ]
+      },
+      {
+        "id": "P02",
+        "group": "paraphrase",
+        "question": "개점 시간하고 음식 주문 마감이 각각 언제예요?",
+        "required": [
+          "제1조"
+        ],
+        "articles": [
+          "제1조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "store_hours"
+        ],
+        "handoff_excerpts": [],
+        "ms": 16.542,
+        "api_ms": 21.379,
+        "status": "ready",
+        "answer_articles": [
+          "제1조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장은 매일 오전 11시부터 오후 10시까지 영업한다, 마지막 주문은 오후 9시 30분까지 받는다, 평일(화요일부터 금요일까지)에는 오후 3시부터 오후 5시까지 브레이크타임을 두며, 이 시간에는 매장 식사 주문을 받지 않는다, 포장 주문과 배달 주문은 브레이크타임에도 받는다, 주말과 공휴일에는 브레이크타임 없이 영업한다.",
+        "api_samples_ms": [
+          21.379,
+          21.44,
+          20.398
+        ],
+        "search_samples_ms": [
+          16.542,
+          16.459,
+          15.628
+        ]
+      },
+      {
+        "id": "P03",
+        "group": "paraphrase",
+        "question": "월욜에 빨간 날이 끼면 다음날 가도 될까요?",
+        "required": [
+          "제2조"
+        ],
+        "articles": [
+          "제2조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 11.407,
+        "api_ms": 17.774,
+        "status": "ready",
+        "answer_articles": [
+          "제2조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 정기 휴무일은 매주 월요일이다. 월요일이 공휴일이면 영업하고, 그다음 날인 화요일에 쉰다. 설날과 추석 당일은 휴무한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          17.774,
+          17.583,
+          15.246
+        ],
+        "search_samples_ms": [
+          11.407,
+          11.984,
+          10.198
+        ]
+      },
+      {
+        "id": "P04",
+        "group": "paraphrase",
+        "question": "와이파이 암호 어디서 봐요?",
+        "required": [
+          "제5조"
+        ],
+        "articles": [
+          "제5조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 7.698,
+        "api_ms": 12.471,
+        "status": "ready",
+        "answer_articles": [
+          "제5조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장 와이파이는 무료로 사용할 수 있다. 비밀번호는 영수증 하단에 적혀 있다. 콘센트는 창가 2인석에만 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          12.471,
+          13.757,
+          12.409
+        ],
+        "search_samples_ms": [
+          7.698,
+          8.972,
+          7.645
+        ]
+      },
+      {
+        "id": "P05",
+        "group": "paraphrase",
+        "question": "QR이나 태블릿을 못 쓰는데 점원한테 주문해도 되나요?",
+        "required": [
+          "제6조"
+        ],
+        "articles": [
+          "제6조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 15.213,
+        "api_ms": 20.69,
+        "status": "ready",
+        "answer_articles": [
+          "제6조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장 식사는 테이블에 놓인 태블릿으로 주문한다. 태블릿 사용이 어려운 손님은 직원에게 말로 주문할 수 있다. 포장과 배달은 오지 레스토랑 앱과 홈페이지에서 주문한다. 전화 주문은 받지 않는다.",
+        "api_samples_ms": [
+          20.69,
+          19.48,
+          15.189
+        ],
+        "search_samples_ms": [
+          15.213,
+          13.95,
+          9.981
+        ]
+      },
+      {
+        "id": "P06",
+        "group": "paraphrase",
+        "question": "계절 메뉴 재입고 날짜 알려주실래요?",
+        "required": [
+          "제7조"
+        ],
+        "articles": [
+          "제7조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.42,
+        "api_ms": 13.298,
+        "status": "ready",
+        "answer_articles": [
+          "제7조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 재료가 떨어지거나 계절이 지난 메뉴는 '주문 불가'로 표시되며 주문할 수 없다. 주문 불가 메뉴의 재입고 일정은 직원도 미리 알 수 없으므로, 손님에게 재입고 날짜를 약속하지 않는다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          13.298,
+          14.322,
+          13.237
+        ],
+        "search_samples_ms": [
+          8.42,
+          9.049,
+          8.185
+        ]
+      },
+      {
+        "id": "P07",
+        "group": "paraphrase",
+        "question": "결제한 지 사흘 됐는데 현금영수증을 지금 받을 수 있나요?",
+        "required": [
+          "제9조"
+        ],
+        "articles": [
+          "제9조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 10.745,
+        "api_ms": 15.375,
+        "status": "ready",
+        "answer_articles": [
+          "제9조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 현금영수증은 결제할 때 휴대전화 번호나 사업자 번호를 입력하면 발급된다. 결제한 날로부터 5일 안에는 매장에 요청해서 발급받을 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          15.375,
+          15.048,
+          16.227
+        ],
+        "search_samples_ms": [
+          10.745,
+          10.192,
+          10.769
+        ]
+      },
+      {
+        "id": "P08",
+        "group": "paraphrase",
+        "question": "돌려주는 포장 그릇을 일주일 넘게 들고 있으면 어떻게 돼요?",
+        "required": [
+          "제10조"
+        ],
+        "articles": [
+          "제10조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 10.166,
+        "api_ms": 15.405,
+        "status": "ready",
+        "answer_articles": [
+          "제10조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 포장 주문은 다회용기와 일회용기 중에서 고를 수 있다. 다회용기를 고르면 500원을 할인하고, 용기는 7일 안에 매장에 돌려준다. 다회용기를 7일 안에 돌려주지 않으면 용기 보증금 3,000원이 결제된 수단으로 청구된다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          15.405,
+          14.265,
+          16.55
+        ],
+        "search_samples_ms": [
+          10.166,
+          9.608,
+          10.984
+        ]
+      },
+      {
+        "id": "P09",
+        "group": "paraphrase",
+        "question": "세 가지 음식 중 하나만 문제인데 그 메뉴 값만 돌려받을 수 있을까요?",
+        "required": [
+          "제14조"
+        ],
+        "articles": [
+          "제14조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 11.703,
+        "api_ms": 16.933,
+        "status": "ready",
+        "answer_articles": [
+          "제14조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 여러 메뉴 가운데 일부에만 문제가 있으면 그 메뉴의 금액만 환불한다. 쿠폰을 사용한 주문을 부분 환불하면, 쿠폰 할인 금액은 메뉴 가격의 비율에 맞게 나누어 뺀 뒤 환불한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          16.933,
+          18.116,
+          21.673
+        ],
+        "search_samples_ms": [
+          11.703,
+          11.581,
+          15.577
+        ]
+      },
+      {
+        "id": "P10",
+        "group": "paraphrase",
+        "question": "눈 오는 날은 배달이 평소보다 오래 걸려요?",
+        "required": [
+          "제15조"
+        ],
+        "articles": [
+          "제15조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 10.347,
+        "api_ms": 17.354,
+        "status": "ready",
+        "answer_articles": [
+          "제15조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 배달 주문은 오전 11시부터 오후 9시까지 받는다. 배달 예상 시간은 보통 30분에서 50분이며, 비가 오거나 눈이 오는 날은 더 걸릴 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          17.354,
+          18.471,
+          17.167
+        ],
+        "search_samples_ms": [
+          10.347,
+          12.34,
+          11.119
+        ]
+      },
+      {
+        "id": "P11",
+        "group": "paraphrase",
+        "question": "새우는 어느 나라에서 들어와요?",
+        "required": [
+          "제21조"
+        ],
+        "articles": [
+          "제21조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.01,
+        "api_ms": 13.29,
+        "status": "ready",
+        "answer_articles": [
+          "제21조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 쌀과 김치(배추, 고춧가루)는 국내산이다. 돼지고기는 국내산, 쇠고기는 호주산, 닭고기는 국내산이다. 수산물 가운데 우럭과 갈치는 국내산, 새우는 베트남산, 오징어는 원양산이다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          13.29,
+          15.324,
+          15.328
+        ],
+        "search_samples_ms": [
+          8.01,
+          8.89,
+          9.394
+        ]
+      },
+      {
+        "id": "P12",
+        "group": "paraphrase",
+        "question": "초등학생이 먹을 수 있게 맵기를 낮출 수 있어요?",
+        "required": [
+          "제22조"
+        ],
+        "articles": [
+          "제22조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 10.248,
+        "api_ms": 15.791,
+        "status": "ready",
+        "answer_articles": [
+          "제22조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매운 메뉴는 순한맛, 보통맛, 매운맛 가운데 고를 수 있다. 어린이(초등학생 이하)에게는 순한맛을 권한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          15.791,
+          17.193,
+          16.349
+        ],
+        "search_samples_ms": [
+          10.248,
+          11.373,
+          9.472
+        ]
+      },
+      {
+        "id": "P13",
+        "group": "paraphrase",
+        "question": "적립금 모은 지 1년 넘었는데 그대로 쓸 수 있나요?",
+        "required": [
+          "제26조"
+        ],
+        "articles": [
+          "제26조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 10.707,
+        "api_ms": 17.436,
+        "status": "ready",
+        "answer_articles": [
+          "제26조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 포인트는 1,000점 이상 모였을 때부터 1점을 1원으로 사용할 수 있다. 포인트의 유효기간은 적립한 날로부터 1년이다. 기한이 지난 포인트는 자동으로 사라진다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          17.436,
+          15.252,
+          20.85
+        ],
+        "search_samples_ms": [
+          10.707,
+          9.106,
+          13.468
+        ]
+      },
+      {
+        "id": "P14",
+        "group": "paraphrase",
+        "question": "앱 주문하고 사진 찍어 후기 쓰면 몇 점 쌓여요?",
+        "required": [
+          "제33조"
+        ],
+        "articles": [
+          "제33조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 11.046,
+        "api_ms": 19.125,
+        "status": "ready",
+        "answer_articles": [
+          "제33조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 리뷰는 주문 1건에 1번만 적립한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          19.125,
+          18.004,
+          16.295
+        ],
+        "search_samples_ms": [
+          11.046,
+          10.731,
+          10.094
+        ]
+      },
+      {
+        "id": "P15",
+        "group": "paraphrase",
+        "question": "회원 탈퇴하면 생일 정보는 언제 없어지나요?",
+        "required": [
+          "제34조"
+        ],
+        "articles": [
+          "제34조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 12.042,
+        "api_ms": 17.953,
+        "status": "ready",
+        "answer_articles": [
+          "제34조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 멤버십 가입 때 받은 이름, 휴대전화 번호, 생일은 주문 안내와 멤버십 혜택에만 사용한다. 탈퇴하면 개인정보는 바로 지운다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          17.953,
+          14.607,
+          18.869
+        ],
+        "search_samples_ms": [
+          12.042,
+          9.159,
+          11.998
+        ]
+      },
+      {
+        "id": "P16",
+        "group": "paraphrase",
+        "question": "앱 일대일 문의는 보통 언제 답변받아요?",
+        "required": [
+          "제35조"
+        ],
+        "articles": [
+          "제35조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.724,
+        "api_ms": 15.411,
+        "status": "ready",
+        "answer_articles": [
+          "제35조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 규정에 관한 문의는 앱의 1:1 문의나 매장 직원에게 한다. 1:1 문의는 영업일 기준 하루 안에 답한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          15.411,
+          16.199,
+          14.019
+        ],
+        "search_samples_ms": [
+          9.724,
+          10.434,
+          8.772
+        ]
+      },
+      {
+        "id": "M01",
+        "group": "multi",
+        "question": "다른 메뉴가 왔고 용기도 깨져서 쏟아졌어요. 각각 사진을 언제까지 보내나요?",
+        "required": [
+          "제12조",
+          "제17조"
+        ],
+        "articles": [
+          "제12조",
+          "제17조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 1.17,
+        "api_ms": 7.536,
+        "status": "ready",
+        "answer_articles": [
+          "제12조",
+          "제17조"
+        ],
+        "attempts": 2,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 다른 메뉴나 이물질은 수령 후 24시간 이내에 사진과 함께 알려 주세요. 용기 파손이나 내용물 유출은 수령 후 1시간 이내에 사진과 함께 알려 주세요. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          7.536,
+          6.483,
+          5.767
+        ],
+        "search_samples_ms": [
+          1.17,
+          0.948,
+          0.763
+        ]
+      },
+      {
+        "id": "M02",
+        "group": "multi",
+        "question": "열두 명 예약은 인당 얼마를 먼저 내고, 방문 전날 취소하면 몇 퍼센트를 돌려받아요?",
+        "required": [
+          "제30조",
+          "제31조"
+        ],
+        "articles": [
+          "제30조",
+          "제31조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 13.529,
+        "api_ms": 19.093,
+        "status": "ready",
+        "answer_articles": [
+          "제30조",
+          "제31조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 10명 이상이 함께 오는 단체는 방문일 3일 전까지 전화나 앱으로 예약한다, 단체 예약은 1명당 5,000원의 예약금을 미리 받는다, 방문일 2일 전까지 취소하면 예약금을 모두 돌려준다, 방문일 하루 전에 취소하면 예약금의 50%를 돌려준다, 방문일 당일에 취소하거나 연락 없이 오지 않으면 예약금을 돌려주지 않는다.",
+        "api_samples_ms": [
+          19.093,
+          19.542,
+          21.174
+        ],
+        "search_samples_ms": [
+          13.529,
+          14.429,
+          15.384
+        ]
+      },
+      {
+        "id": "M03",
+        "group": "multi",
+        "question": "배달비랑 마지막 매장 주문 시간이 둘 다 궁금해요.",
+        "required": [
+          "제1조",
+          "제16조"
+        ],
+        "articles": [
+          "제16조",
+          "제1조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "delivery_minimum"
+        ],
+        "handoff_excerpts": [],
+        "ms": 18.541,
+        "api_ms": 23.637,
+        "status": "ready",
+        "answer_articles": [
+          "제16조",
+          "제1조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 배달은 15,000원 이상 주문할 때만 가능하다, 배달비는 3,000원이다, 30,000원 이상 주문하면 배달비를 받지 않는다, 나무 등급 멤버는 주문 금액과 관계없이 배달비를 받지 않는다(제25조), 매장은 매일 오전 11시부터 오후 10시까지 영업한다, 마지막 주문은 오후 9시 30분까지 받는다, 평일(화요일부터 금요일까지)에는 오후 3시부터 오후 5시까지 브레이크타임을 두며, 이 시간에는 매장 식사 주문을 받지 않는다, 포장 주문과 배달 주문은 브레이크타임에도 받는다, 주말과 공휴일에는 브레이크타임 없이 영업한다.",
+        "api_samples_ms": [
+          23.637,
+          27.769,
+          25.927
+        ],
+        "search_samples_ms": [
+          18.541,
+          21.258,
+          19.889
+        ]
+      },
+      {
+        "id": "M04",
+        "group": "multi",
+        "question": "포장 용기 안 돌려주면 얼마예요? 차도 가져갈 건데 2만 원만 쓰면 몇 시간 무료죠?",
+        "required": [
+          "제4조",
+          "제10조"
+        ],
+        "articles": [
+          "제4조",
+          "제10조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 24.69,
+        "api_ms": 30.72,
+        "status": "ready",
+        "answer_articles": [
+          "제4조",
+          "제10조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 건물 지하 주차장을 이용할 수 있다, 매장에서 30,000원 이상 결제하면 2시간 무료 주차를 지원하고, 그 미만이면 1시간 무료 주차를 지원한다, 무료 시간을 넘으면 30분마다 1,500원의 주차 요금을 손님이 직접 낸다, 포장 주문은 다회용기와 일회용기 중에서 고를 수 있다, 다회용기를 고르면 500원을 할인하고, 용기는 7일 안에 매장에 돌려준다, 다회용기를 7일 안에 돌려주지 않으면 용기 보증금 3,000원이 결제된 수단으로 청구된다.",
+        "api_samples_ms": [
+          30.72,
+          32.787,
+          34.718
+        ],
+        "search_samples_ms": [
+          24.69,
+          25.55,
+          26.055
+        ]
+      },
+      {
+        "id": "M05",
+        "group": "multi",
+        "question": "앱에서 카드로 주문했는데 조리 시작 전엔 취소할 수 있나요? 카드 환불까지 얼마나 걸려요?",
+        "required": [
+          "제11조",
+          "제13조"
+        ],
+        "articles": [
+          "제11조",
+          "제13조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.587,
+        "api_ms": 15.059,
+        "status": "ready",
+        "answer_articles": [
+          "제11조",
+          "제13조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 조리가 시작되기 전에는 주문을 전액 취소할 수 있다, 조리가 시작된 뒤에는 취소할 수 없다, 단, 매장의 사정으로 30분 넘게 늦어지면 조리 중이라도 전액 취소할 수 있다, 카드 결제 취소는 카드사에 따라 영업일 기준 3일에서 5일이 걸린다, 간편결제는 취소한 날 바로 환불된다, 현금으로 결제했다면 매장에서 바로 돌려준다, 포인트로 결제한 금액은 포인트로 돌려준다.",
+        "api_samples_ms": [
+          15.059,
+          17.109,
+          15.593
+        ],
+        "search_samples_ms": [
+          9.587,
+          11.449,
+          10.1
+        ]
+      },
+      {
+        "id": "M06",
+        "group": "multi",
+        "question": "배달 사고 문의랑 별개로, 맥주도 음식이랑 같이 배달되나요? 용기가 터지면 사진은 언제까지 보내요?",
+        "required": [
+          "제17조",
+          "제18조"
+        ],
+        "articles": [
+          "제17조",
+          "제18조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "alcohol_delivery"
+        ],
+        "handoff_excerpts": [],
+        "ms": 23.358,
+        "api_ms": 30.109,
+        "status": "ready",
+        "answer_articles": [
+          "제17조",
+          "제18조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 용기 파손이나 내용물 유출은 수령 후 1시간 이내에 사진과 함께 알려 주세요. 주류는 배달하지 않습니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          30.109,
+          23.511,
+          26.656
+        ],
+        "search_samples_ms": [
+          23.358,
+          18.65,
+          20.85
+        ]
+      },
+      {
+        "id": "M07",
+        "group": "multi",
+        "question": "주문할 때 쿠폰 두 개를 동시에 쓰고 싶고, 사진 리뷰 포인트도 궁금해요.",
+        "required": [
+          "제27조",
+          "제33조"
+        ],
+        "articles": [
+          "제27조",
+          "제33조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "coupon_use"
+        ],
+        "handoff_excerpts": [],
+        "ms": 24.029,
+        "api_ms": 30.474,
+        "status": "ready",
+        "answer_articles": [
+          "제27조",
+          "제33조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 쿠폰은 한 번의 주문에 1장만 사용할 수 있다. 여러 쿠폰을 함께 사용할 수 없다. 쿠폰과 포인트는 함께 사용할 수 있다. 리뷰는 주문 1건에 1번만 적립한다.",
+        "api_samples_ms": [
+          30.474,
+          24.649,
+          25.806
+        ],
+        "search_samples_ms": [
+          24.029,
+          18.741,
+          20.097
+        ]
+      },
+      {
+        "id": "M08",
+        "group": "multi",
+        "question": "맥주도 배달돼요? 그리고 배달 주문이 밤 몇 시에 마감되나요?",
+        "required": [
+          "제15조",
+          "제18조"
+        ],
+        "articles": [
+          "제18조",
+          "제15조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "alcohol_delivery"
+        ],
+        "handoff_excerpts": [],
+        "ms": 25.353,
+        "api_ms": 30.112,
+        "status": "ready",
+        "answer_articles": [
+          "제18조",
+          "제15조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 주류는 배달하지 않습니다. 배달 주문은 오전 11시부터 오후 9시까지 받는다. 배달 예상 시간은 보통 30분에서 50분이며, 비가 오거나 눈이 오는 날은 더 걸릴 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          30.112,
+          28.927,
+          29.312
+        ],
+        "search_samples_ms": [
+          25.353,
+          23.994,
+          24.182
+        ]
+      },
+      {
+        "id": "N01",
+        "group": "no_policy",
+        "question": "식사하는 동안 친절하게 안내해 주셔서 감사해요.",
+        "required": [],
+        "articles": [],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.032,
+        "api_ms": 5.352,
+        "status": "ready",
+        "answer_articles": [],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+        "api_samples_ms": [
+          5.352,
+          4.358,
+          4.232
+        ],
+        "search_samples_ms": [
+          0.032,
+          0.028,
+          0.025
+        ]
+      },
+      {
+        "id": "N02",
+        "group": "no_policy",
+        "question": "어제 테이블 맡으신 분 성함하고 개인 전화번호를 알려 주세요.",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.012,
+        "api_ms": 4.72,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          4.72,
+          3.776,
+          3.023
+        ],
+        "search_samples_ms": [
+          0.012,
+          0.008,
+          0.007
+        ]
+      },
+      {
+        "id": "N03",
+        "group": "no_policy",
+        "question": "다음 주 수요일 두 시에 창가 2인석이 실제로 비어 있나요?",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.008,
+        "api_ms": 3.679,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.679,
+          3.489,
+          3.561
+        ],
+        "search_samples_ms": [
+          0.008,
+          0.009,
+          0.008
+        ]
+      },
+      {
+        "id": "N04",
+        "group": "no_policy",
+        "question": "토요일 생일 파티에 케이크를 가져가도 되나요?",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.053,
+        "api_ms": 3.424,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.424,
+          3.215,
+          3.549
+        ],
+        "search_samples_ms": [
+          0.053,
+          0.057,
+          0.054
+        ]
+      },
+      {
+        "id": "N05",
+        "group": "no_policy",
+        "question": "파손된 배달 주문인데 제 주문 환불이 이미 승인됐는지 알려줘요.",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.006,
+        "api_ms": 3.348,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.348,
+          2.997,
+          3.323
+        ],
+        "search_samples_ms": [
+          0.006,
+          0.006,
+          0.007
+        ]
+      },
+      {
+        "id": "N06",
+        "group": "no_policy",
+        "question": "갈릭미역파르페의 1인분 칼로리를 알려 주세요.",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.006,
+        "api_ms": 2.911,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          2.911,
+          3.367,
+          3.373
+        ],
+        "search_samples_ms": [
+          0.006,
+          0.007,
+          0.007
+        ]
+      },
+      {
+        "id": "N07",
+        "group": "no_policy",
+        "question": "예약 손님용 와인잔 대여료는 정확히 얼마예요?",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.007,
+        "api_ms": 4.395,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          4.395,
+          3.208,
+          2.847
+        ],
+        "search_samples_ms": [
+          0.007,
+          0.006,
+          0.006
+        ]
+      },
+      {
+        "id": "N08",
+        "group": "no_policy",
+        "question": "제 카드 결제 건에 환불금이 지금 입금됐는지 봐 주세요.",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.006,
+        "api_ms": 3.084,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.084,
+          4.418,
+          3.491
+        ],
+        "search_samples_ms": [
+          0.006,
+          0.012,
+          0.009
+        ]
+      }
+    ]
+  },
+  "prototype": {
+    "fixed": {
+      "cases": 52,
+      "policy_cases": 44,
+      "search_coverage": 44,
+      "reply_coverage": 43,
+      "groups": {
+        "gold": {
+          "cases": 20,
+          "search_coverage": 20,
+          "reply_coverage": 19
+        },
+        "paraphrase": {
+          "cases": 16,
+          "search_coverage": 16,
+          "reply_coverage": 16
+        },
+        "multi": {
+          "cases": 8,
+          "search_coverage": 8,
+          "reply_coverage": 8
+        }
+      },
+      "retried_requests": 7,
+      "ready_without_all_citations": 0,
+      "policy_hold": 1,
+      "policy_without_articles": 0,
+      "no_policy_correct": 8,
+      "unsupported_saved": 0,
+      "search_median_ms": 9.247,
+      "search_p95_ms": 19.304,
+      "api_median_ms": 14.859,
+      "api_p95_ms": 25.023
+    },
+    "g15": {
+      "id": "G15",
+      "group": "gold",
+      "question": "땅콩 알레르기가 심한데 주문해도 안전해?",
+      "required": [
+        "제20조"
+      ],
+      "articles": [
+        "제20조"
+      ],
+      "hold": true,
+      "reason": "staff_allergy_with_evidence",
+      "retried_questions": [],
+      "handoff_excerpts": [
+        "같은 주방에서 조리하므로 미량이 섞일 가능성을 완전히 없앨 수는 없다."
+      ],
+      "ms": 1.073,
+      "api_ms": 4.761,
+      "status": "needs_review",
+      "answer_articles": [],
+      "attempts": 0,
+      "saved": false,
+      "reply": null,
+      "api_samples_ms": [
+        4.761,
+        4.942,
+        5.448
+      ],
+      "search_samples_ms": [
+        1.073,
+        0.922,
+        1.154
+      ]
+    },
+    "probes": [
+      {
+        "id": "H01",
+        "group": "held_out",
+        "question": "우유 알러지가 있는데 이 메뉴 먹어도 돼요?",
+        "required": [
+          "제20조"
+        ],
+        "articles": [
+          "제20조"
+        ],
+        "hold": true,
+        "reason": "staff_allergy_with_evidence",
+        "retried_questions": [],
+        "handoff_excerpts": [
+          "같은 주방에서 조리하므로 미량이 섞일 가능성을 완전히 없앨 수는 없다."
+        ],
+        "ms": 0.906,
+        "api_ms": 4.346,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          4.346,
+          4.023,
+          3.744
+        ],
+        "search_samples_ms": [
+          0.906,
+          0.786,
+          0.686
+        ]
+      },
+      {
+        "id": "H02",
+        "group": "held_out",
+        "question": "같은 조리도구를 쓰면 교차 접촉 위험은 없나요?",
+        "required": [
+          "제20조"
+        ],
+        "articles": [
+          "제20조"
+        ],
+        "hold": true,
+        "reason": "staff_allergy_with_evidence",
+        "retried_questions": [],
+        "handoff_excerpts": [
+          "같은 주방에서 조리하므로 미량이 섞일 가능성을 완전히 없앨 수는 없다."
+        ],
+        "ms": 0.771,
+        "api_ms": 3.872,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.872,
+          3.904,
+          3.987
+        ],
+        "search_samples_ms": [
+          0.771,
+          0.684,
+          0.707
+        ]
+      },
+      {
+        "id": "H03",
+        "group": "held_out",
+        "question": "땅콩 알레르기가 있어서 견과 토핑을 빼 달라고 했는데 제 주문에 반영됐나요?",
+        "required": [
+          "제20조"
+        ],
+        "articles": [
+          "제20조"
+        ],
+        "hold": true,
+        "reason": "staff_allergy_with_evidence",
+        "retried_questions": [],
+        "handoff_excerpts": [
+          "같은 주방에서 조리하므로 미량이 섞일 가능성을 완전히 없앨 수는 없다."
+        ],
+        "ms": 0.72,
+        "api_ms": 4.274,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          4.274,
+          4.022,
+          4.022
+        ],
+        "search_samples_ms": [
+          0.72,
+          0.834,
+          0.714
+        ]
+      },
+      {
+        "id": "H04",
+        "group": "held_out",
+        "question": "알레르기가 있어요. 어떤 메뉴가 저한테 안전한지 추천해 주세요.",
+        "required": [
+          "제20조"
+        ],
+        "articles": [
+          "제20조"
+        ],
+        "hold": true,
+        "reason": "staff_allergy_with_evidence",
+        "retried_questions": [],
+        "handoff_excerpts": [
+          "같은 주방에서 조리하므로 미량이 섞일 가능성을 완전히 없앨 수는 없다."
+        ],
+        "ms": 0.723,
+        "api_ms": 3.871,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.871,
+          4.38,
+          3.983
+        ],
+        "search_samples_ms": [
+          0.723,
+          0.878,
+          0.723
+        ]
+      },
+      {
+        "id": "H05",
+        "group": "held_out",
+        "question": "배달 용기가 깨졌어요. 알레르기도 있는데 이걸 먹어도 돼요?",
+        "required": [
+          "제17조",
+          "제20조"
+        ],
+        "articles": [
+          "제20조"
+        ],
+        "hold": true,
+        "reason": "staff_allergy_with_evidence",
+        "retried_questions": [],
+        "handoff_excerpts": [
+          "같은 주방에서 조리하므로 미량이 섞일 가능성을 완전히 없앨 수는 없다."
+        ],
+        "ms": 0.792,
+        "api_ms": 4.204,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          4.204,
+          4.136,
+          4.32
+        ],
+        "search_samples_ms": [
+          0.792,
+          1.046,
+          0.796
+        ]
+      },
+      {
+        "id": "H06",
+        "group": "held_out",
+        "question": "견과류에 심한 반응이 있는데 이 소스를 먹어도 되나요?",
+        "required": [
+          "제20조"
+        ],
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.061,
+        "api_ms": 3.119,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.119,
+          3.472,
+          3.414
+        ],
+        "search_samples_ms": [
+          0.061,
+          0.061,
+          0.063
+        ]
+      },
+      {
+        "id": "H07",
+        "group": "held_out",
+        "question": "제 카드 결제 건 환불 들어왔나요?",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.01,
+        "api_ms": 3.876,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.876,
+          3.479,
+          3.117
+        ],
+        "search_samples_ms": [
+          0.01,
+          0.009,
+          0.008
+        ]
+      },
+      {
+        "id": "H08",
+        "group": "held_out",
+        "question": "식사 중에 안내해 주셔서 감사해요.",
+        "required": [],
+        "articles": [],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.029,
+        "api_ms": 5.315,
+        "status": "ready",
+        "answer_articles": [],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+        "api_samples_ms": [
+          5.315,
+          3.993,
+          4.815
+        ],
+        "search_samples_ms": [
+          0.029,
+          0.027,
+          0.029
+        ]
+      }
+    ],
+    "cases": [
+      {
+        "id": "G01",
+        "group": "gold",
+        "question": "평일 오후 4시에 매장에서 식사할 수 있어?",
+        "required": [
+          "제1조"
+        ],
+        "articles": [
+          "제1조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.971,
+        "api_ms": 16.379,
+        "status": "ready",
+        "answer_articles": [
+          "제1조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장은 매일 오전 11시부터 오후 10시까지 영업한다, 마지막 주문은 오후 9시 30분까지 받는다, 평일(화요일부터 금요일까지)에는 오후 3시부터 오후 5시까지 브레이크타임을 두며, 이 시간에는 매장 식사 주문을 받지 않는다, 포장 주문과 배달 주문은 브레이크타임에도 받는다, 주말과 공휴일에는 브레이크타임 없이 영업한다.",
+        "api_samples_ms": [
+          16.379,
+          13.266,
+          13.162
+        ],
+        "search_samples_ms": [
+          9.971,
+          8.146,
+          8.631
+        ]
+      },
+      {
+        "id": "G02",
+        "group": "gold",
+        "question": "마지막 주문은 몇 시까지 받아?",
+        "required": [
+          "제1조"
+        ],
+        "articles": [
+          "제1조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 7.375,
+        "api_ms": 12.616,
+        "status": "ready",
+        "answer_articles": [
+          "제1조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장은 매일 오전 11시부터 오후 10시까지 영업한다, 마지막 주문은 오후 9시 30분까지 받는다, 평일(화요일부터 금요일까지)에는 오후 3시부터 오후 5시까지 브레이크타임을 두며, 이 시간에는 매장 식사 주문을 받지 않는다, 포장 주문과 배달 주문은 브레이크타임에도 받는다, 주말과 공휴일에는 브레이크타임 없이 영업한다.",
+        "api_samples_ms": [
+          12.616,
+          11.592,
+          11.392
+        ],
+        "search_samples_ms": [
+          7.375,
+          7.102,
+          6.873
+        ]
+      },
+      {
+        "id": "G03",
+        "group": "gold",
+        "question": "월요일이 공휴일이면 문을 열어?",
+        "required": [
+          "제2조"
+        ],
+        "articles": [
+          "제2조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.99,
+        "api_ms": 13.979,
+        "status": "ready",
+        "answer_articles": [
+          "제2조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 정기 휴무일은 매주 월요일이다. 월요일이 공휴일이면 영업하고, 그다음 날인 화요일에 쉰다. 설날과 추석 당일은 휴무한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          13.979,
+          15.151,
+          14.414
+        ],
+        "search_samples_ms": [
+          8.99,
+          9.413,
+          9.107
+        ]
+      },
+      {
+        "id": "G04",
+        "group": "gold",
+        "question": "강아지를 데리고 들어가도 돼?",
+        "required": [
+          "제3조"
+        ],
+        "articles": [
+          "제3조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.068,
+        "api_ms": 13.861,
+        "status": "ready",
+        "answer_articles": [
+          "제3조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 반려동물은 매장 안에 들어올 수 없다. 단, 장애인 보조견은 들어올 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          13.861,
+          13.472,
+          12.598
+        ],
+        "search_samples_ms": [
+          8.068,
+          7.997,
+          7.684
+        ]
+      },
+      {
+        "id": "G05",
+        "group": "gold",
+        "question": "25,000원어치 먹으면 주차가 몇 시간 무료야?",
+        "required": [
+          "제4조"
+        ],
+        "articles": [
+          "제4조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.471,
+        "api_ms": 14.504,
+        "status": "ready",
+        "answer_articles": [
+          "제4조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 건물 지하 주차장을 이용할 수 있다. 매장에서 30,000원 이상 결제하면 2시간 무료 주차를 지원하고, 그 미만이면 1시간 무료 주차를 지원한다. 무료 시간을 넘으면 30분마다 1,500원의 주차 요금을 손님이 직접 낸다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          14.504,
+          13.693,
+          14.701
+        ],
+        "search_samples_ms": [
+          9.471,
+          9.007,
+          9.308
+        ]
+      },
+      {
+        "id": "G06",
+        "group": "gold",
+        "question": "전화로 배달 주문할 수 있어?",
+        "required": [
+          "제6조"
+        ],
+        "articles": [
+          "제6조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.628,
+        "api_ms": 14.165,
+        "status": "ready",
+        "answer_articles": [
+          "제6조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장 식사는 테이블에 놓인 태블릿으로 주문한다. 태블릿 사용이 어려운 손님은 직원에게 말로 주문할 수 있다. 포장과 배달은 오지 레스토랑 앱과 홈페이지에서 주문한다. 전화 주문은 받지 않는다.",
+        "api_samples_ms": [
+          14.165,
+          12.838,
+          12.711
+        ],
+        "search_samples_ms": [
+          8.628,
+          7.492,
+          8.167
+        ]
+      },
+      {
+        "id": "G07",
+        "group": "gold",
+        "question": "다른 회사 상품권으로 결제할 수 있어?",
+        "required": [
+          "제8조"
+        ],
+        "articles": [
+          "제8조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.013,
+        "api_ms": 15.064,
+        "status": "ready",
+        "answer_articles": [
+          "제8조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 신용카드, 체크카드, 간편결제(오지페이, 카카오페이, 네이버페이), 현금으로 결제할 수 있다. 상품권은 오지 레스토랑 모바일 상품권만 받는다. 다른 회사의 상품권은 받지 않는다. 한 번의 주문을 여러 결제 수단으로 나누어 낼 수 있으며, 최대 3개까지 나눌 수 있다.",
+        "api_samples_ms": [
+          15.064,
+          16.441,
+          12.883
+        ],
+        "search_samples_ms": [
+          9.013,
+          10.619,
+          7.7
+        ]
+      },
+      {
+        "id": "G08",
+        "group": "gold",
+        "question": "다회용기를 고르면 뭐가 좋아?",
+        "required": [
+          "제10조"
+        ],
+        "articles": [
+          "제10조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.085,
+        "api_ms": 14.723,
+        "status": "ready",
+        "answer_articles": [
+          "제10조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 포장 주문은 다회용기와 일회용기 중에서 고를 수 있다. 다회용기를 고르면 500원을 할인하고, 용기는 7일 안에 매장에 돌려준다. 다회용기를 7일 안에 돌려주지 않으면 용기 보증금 3,000원이 결제된 수단으로 청구된다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          14.723,
+          13.392,
+          14.456
+        ],
+        "search_samples_ms": [
+          8.085,
+          8.128,
+          8.942
+        ]
+      },
+      {
+        "id": "G09",
+        "group": "gold",
+        "question": "조리 중인 주문도 취소할 수 있어?",
+        "required": [
+          "제11조"
+        ],
+        "articles": [
+          "제11조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.303,
+        "api_ms": 13.323,
+        "status": "ready",
+        "answer_articles": [
+          "제11조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 조리가 시작되기 전에는 주문을 전액 취소할 수 있다. 조리가 시작된 뒤에는 취소할 수 없다. 단, 매장의 사정으로 30분 넘게 늦어지면 조리 중이라도 전액 취소할 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          13.323,
+          14.023,
+          13.816
+        ],
+        "search_samples_ms": [
+          8.303,
+          8.987,
+          8.424
+        ]
+      },
+      {
+        "id": "G10",
+        "group": "gold",
+        "question": "맛이 없으면 환불해 줘?",
+        "required": [
+          "제12조"
+        ],
+        "articles": [
+          "제12조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 1.002,
+        "api_ms": 5.882,
+        "status": "ready",
+        "answer_articles": [
+          "제12조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 맛에 대한 불만만으로는 교환이나 환불이 어려운 점을 안내드립니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          5.882,
+          5.602,
+          87.771
+        ],
+        "search_samples_ms": [
+          1.002,
+          1.069,
+          1.042
+        ]
+      },
+      {
+        "id": "G11",
+        "group": "gold",
+        "question": "카드로 결제한 걸 취소하면 언제 돌아와?",
+        "required": [
+          "제13조"
+        ],
+        "articles": [
+          "제13조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 12.033,
+        "api_ms": 17.995,
+        "status": "ready",
+        "answer_articles": [
+          "제13조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 카드 결제 취소는 카드사에 따라 영업일 기준 3일에서 5일이 걸린다. 간편결제는 취소한 날 바로 환불된다. 현금으로 결제했다면 매장에서 바로 돌려준다. 포인트로 결제한 금액은 포인트로 돌려준다.",
+        "api_samples_ms": [
+          17.995,
+          19.028,
+          16.895
+        ],
+        "search_samples_ms": [
+          12.033,
+          10.741,
+          9.529
+        ]
+      },
+      {
+        "id": "G12",
+        "group": "gold",
+        "question": "12,000원어치 배달시킬 수 있어?",
+        "required": [
+          "제16조"
+        ],
+        "articles": [
+          "제16조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 11.383,
+        "api_ms": 17.113,
+        "status": "ready",
+        "answer_articles": [
+          "제16조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 배달은 15,000원 이상 주문할 때만 가능하다. 배달비는 3,000원이다. 30,000원 이상 주문하면 배달비를 받지 않는다. 나무 등급 멤버는 주문 금액과 관계없이 배달비를 받지 않는다(제25조).",
+        "api_samples_ms": [
+          17.113,
+          18.75,
+          14.868
+        ],
+        "search_samples_ms": [
+          11.383,
+          12.084,
+          9.404
+        ]
+      },
+      {
+        "id": "G13",
+        "group": "gold",
+        "question": "배달비는 얼마야?",
+        "required": [
+          "제16조"
+        ],
+        "articles": [
+          "제16조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 8.78,
+        "api_ms": 16.715,
+        "status": "ready",
+        "answer_articles": [
+          "제16조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 배달은 15,000원 이상 주문할 때만 가능하다. 배달비는 3,000원이다. 30,000원 이상 주문하면 배달비를 받지 않는다. 나무 등급 멤버는 주문 금액과 관계없이 배달비를 받지 않는다(제25조).",
+        "api_samples_ms": [
+          16.715,
+          16.407,
+          13.126
+        ],
+        "search_samples_ms": [
+          8.78,
+          8.972,
+          7.764
+        ]
+      },
+      {
+        "id": "G14",
+        "group": "gold",
+        "question": "맥주도 배달돼?",
+        "required": [
+          "제18조"
+        ],
+        "articles": [
+          "제18조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "alcohol_delivery"
+        ],
+        "handoff_excerpts": [],
+        "ms": 16.54,
+        "api_ms": 21.718,
+        "status": "ready",
+        "answer_articles": [
+          "제18조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 주류는 배달하지 않습니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          21.718,
+          21.739,
+          19.975
+        ],
+        "search_samples_ms": [
+          16.54,
+          15.807,
+          14.788
+        ]
+      },
+      {
+        "id": "G15",
+        "group": "gold",
+        "question": "땅콩 알레르기가 심한데 주문해도 안전해?",
+        "required": [
+          "제20조"
+        ],
+        "articles": [
+          "제20조"
+        ],
+        "hold": true,
+        "reason": "staff_allergy_with_evidence",
+        "retried_questions": [],
+        "handoff_excerpts": [
+          "같은 주방에서 조리하므로 미량이 섞일 가능성을 완전히 없앨 수는 없다."
+        ],
+        "ms": 1.073,
+        "api_ms": 4.761,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          4.761,
+          4.942,
+          5.448
+        ],
+        "search_samples_ms": [
+          1.073,
+          0.922,
+          1.154
+        ]
+      },
+      {
+        "id": "G16",
+        "group": "gold",
+        "question": "쇠고기는 어디 거야?",
+        "required": [
+          "제21조"
+        ],
+        "articles": [
+          "제21조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 7.577,
+        "api_ms": 13.296,
+        "status": "ready",
+        "answer_articles": [
+          "제21조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 쌀과 김치(배추, 고춧가루)는 국내산이다. 돼지고기는 국내산, 쇠고기는 호주산, 닭고기는 국내산이다. 수산물 가운데 우럭과 갈치는 국내산, 새우는 베트남산, 오징어는 원양산이다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          13.296,
+          13.456,
+          14.302
+        ],
+        "search_samples_ms": [
+          7.577,
+          7.519,
+          8.075
+        ]
+      },
+      {
+        "id": "G17",
+        "group": "gold",
+        "question": "열매 등급이 되려면 얼마나 써야 해?",
+        "required": [
+          "제24조"
+        ],
+        "articles": [
+          "제24조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.814,
+        "api_ms": 15.709,
+        "status": "ready",
+        "answer_articles": [
+          "제24조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 등급은 매월 1일에 최근 3개월 동안 결제한 금액(취소와 환불 금액을 뺀 금액)으로 다시 정한다. 새싹 : 최근 3개월 결제 금액 30만 원 미만 열매 : 최근 3개월 결제 금액 30만 원 이상 60만 원 미만 나무 : 최근 3개월 결제 금액 60만 원 이상",
+        "api_samples_ms": [
+          15.709,
+          18.264,
+          15.675
+        ],
+        "search_samples_ms": [
+          9.814,
+          11.273,
+          9.185
+        ]
+      },
+      {
+        "id": "G18",
+        "group": "gold",
+        "question": "포인트 800점 있는데 쓸 수 있어?",
+        "required": [
+          "제26조"
+        ],
+        "articles": [
+          "제26조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 6.774,
+        "api_ms": 11.573,
+        "status": "ready",
+        "answer_articles": [
+          "제26조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 포인트는 1,000점 이상 모였을 때부터 1점을 1원으로 사용할 수 있다. 포인트의 유효기간은 적립한 날로부터 1년이다. 기한이 지난 포인트는 자동으로 사라진다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          11.573,
+          11.989,
+          11.837
+        ],
+        "search_samples_ms": [
+          6.774,
+          7.065,
+          6.867
+        ]
+      },
+      {
+        "id": "G19",
+        "group": "gold",
+        "question": "쿠폰 두 장을 같이 쓸 수 있어?",
+        "required": [
+          "제27조"
+        ],
+        "articles": [
+          "제27조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 7.977,
+        "api_ms": 12.724,
+        "status": "ready",
+        "answer_articles": [
+          "제27조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 쿠폰은 한 번의 주문에 1장만 사용할 수 있다. 여러 쿠폰을 함께 사용할 수 없다. 쿠폰과 포인트는 함께 사용할 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          12.724,
+          13.686,
+          13.166
+        ],
+        "search_samples_ms": [
+          7.977,
+          8.559,
+          7.912
+        ]
+      },
+      {
+        "id": "G20",
+        "group": "gold",
+        "question": "12명 단체 예약을 하루 전에 취소하면 예약금은?",
+        "required": [
+          "제31조"
+        ],
+        "articles": [
+          "제31조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.466,
+        "api_ms": 15.277,
+        "status": "ready",
+        "answer_articles": [
+          "제31조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 방문일 2일 전까지 취소하면 예약금을 모두 돌려준다. 방문일 하루 전에 취소하면 예약금의 50%를 돌려준다. 방문일 당일에 취소하거나 연락 없이 오지 않으면 예약금을 돌려주지 않는다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          15.277,
+          13.784,
+          16.793
+        ],
+        "search_samples_ms": [
+          9.466,
+          8.848,
+          10.995
+        ]
+      },
+      {
+        "id": "P01",
+        "group": "paraphrase",
+        "question": "라거 캔도 집으로 가져다줘요?",
+        "required": [
+          "제18조"
+        ],
+        "articles": [
+          "제18조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "alcohol_delivery"
+        ],
+        "handoff_excerpts": [],
+        "ms": 16.802,
+        "api_ms": 22.477,
+        "status": "ready",
+        "answer_articles": [
+          "제18조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 주류는 배달하지 않습니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          22.477,
+          24.028,
+          20.804
+        ],
+        "search_samples_ms": [
+          16.802,
+          18.02,
+          15.472
+        ]
+      },
+      {
+        "id": "P02",
+        "group": "paraphrase",
+        "question": "개점 시간하고 음식 주문 마감이 각각 언제예요?",
+        "required": [
+          "제1조"
+        ],
+        "articles": [
+          "제1조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "store_hours"
+        ],
+        "handoff_excerpts": [],
+        "ms": 15.957,
+        "api_ms": 21.344,
+        "status": "ready",
+        "answer_articles": [
+          "제1조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장은 매일 오전 11시부터 오후 10시까지 영업한다, 마지막 주문은 오후 9시 30분까지 받는다, 평일(화요일부터 금요일까지)에는 오후 3시부터 오후 5시까지 브레이크타임을 두며, 이 시간에는 매장 식사 주문을 받지 않는다, 포장 주문과 배달 주문은 브레이크타임에도 받는다, 주말과 공휴일에는 브레이크타임 없이 영업한다.",
+        "api_samples_ms": [
+          21.344,
+          23.285,
+          23.537
+        ],
+        "search_samples_ms": [
+          15.957,
+          17.167,
+          17.961
+        ]
+      },
+      {
+        "id": "P03",
+        "group": "paraphrase",
+        "question": "월욜에 빨간 날이 끼면 다음날 가도 될까요?",
+        "required": [
+          "제2조"
+        ],
+        "articles": [
+          "제2조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 10.564,
+        "api_ms": 15.903,
+        "status": "ready",
+        "answer_articles": [
+          "제2조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 정기 휴무일은 매주 월요일이다. 월요일이 공휴일이면 영업하고, 그다음 날인 화요일에 쉰다. 설날과 추석 당일은 휴무한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          15.903,
+          16.672,
+          17.625
+        ],
+        "search_samples_ms": [
+          10.564,
+          11.155,
+          11.517
+        ]
+      },
+      {
+        "id": "P04",
+        "group": "paraphrase",
+        "question": "와이파이 암호 어디서 봐요?",
+        "required": [
+          "제5조"
+        ],
+        "articles": [
+          "제5조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 7.302,
+        "api_ms": 12.727,
+        "status": "ready",
+        "answer_articles": [
+          "제5조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장 와이파이는 무료로 사용할 수 있다. 비밀번호는 영수증 하단에 적혀 있다. 콘센트는 창가 2인석에만 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          12.727,
+          14.658,
+          12.851
+        ],
+        "search_samples_ms": [
+          7.302,
+          9.075,
+          7.741
+        ]
+      },
+      {
+        "id": "P05",
+        "group": "paraphrase",
+        "question": "QR이나 태블릿을 못 쓰는데 점원한테 주문해도 되나요?",
+        "required": [
+          "제6조"
+        ],
+        "articles": [
+          "제6조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.464,
+        "api_ms": 14.505,
+        "status": "ready",
+        "answer_articles": [
+          "제6조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매장 식사는 테이블에 놓인 태블릿으로 주문한다. 태블릿 사용이 어려운 손님은 직원에게 말로 주문할 수 있다. 포장과 배달은 오지 레스토랑 앱과 홈페이지에서 주문한다. 전화 주문은 받지 않는다.",
+        "api_samples_ms": [
+          14.505,
+          16.115,
+          15.2
+        ],
+        "search_samples_ms": [
+          9.464,
+          10.735,
+          10.106
+        ]
+      },
+      {
+        "id": "P06",
+        "group": "paraphrase",
+        "question": "계절 메뉴 재입고 날짜 알려주실래요?",
+        "required": [
+          "제7조"
+        ],
+        "articles": [
+          "제7조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.577,
+        "api_ms": 16.025,
+        "status": "ready",
+        "answer_articles": [
+          "제7조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 재료가 떨어지거나 계절이 지난 메뉴는 '주문 불가'로 표시되며 주문할 수 없다. 주문 불가 메뉴의 재입고 일정은 직원도 미리 알 수 없으므로, 손님에게 재입고 날짜를 약속하지 않는다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          16.025,
+          13.77,
+          14.007
+        ],
+        "search_samples_ms": [
+          9.577,
+          8.5,
+          8.982
+        ]
+      },
+      {
+        "id": "P07",
+        "group": "paraphrase",
+        "question": "결제한 지 사흘 됐는데 현금영수증을 지금 받을 수 있나요?",
+        "required": [
+          "제9조"
+        ],
+        "articles": [
+          "제9조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 10.375,
+        "api_ms": 15.527,
+        "status": "ready",
+        "answer_articles": [
+          "제9조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 현금영수증은 결제할 때 휴대전화 번호나 사업자 번호를 입력하면 발급된다. 결제한 날로부터 5일 안에는 매장에 요청해서 발급받을 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          15.527,
+          17.212,
+          21.538
+        ],
+        "search_samples_ms": [
+          10.375,
+          10.908,
+          15.598
+        ]
+      },
+      {
+        "id": "P08",
+        "group": "paraphrase",
+        "question": "돌려주는 포장 그릇을 일주일 넘게 들고 있으면 어떻게 돼요?",
+        "required": [
+          "제10조"
+        ],
+        "articles": [
+          "제10조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 11.689,
+        "api_ms": 17.792,
+        "status": "ready",
+        "answer_articles": [
+          "제10조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 포장 주문은 다회용기와 일회용기 중에서 고를 수 있다. 다회용기를 고르면 500원을 할인하고, 용기는 7일 안에 매장에 돌려준다. 다회용기를 7일 안에 돌려주지 않으면 용기 보증금 3,000원이 결제된 수단으로 청구된다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          17.792,
+          17.04,
+          17.801
+        ],
+        "search_samples_ms": [
+          11.689,
+          11.003,
+          12.628
+        ]
+      },
+      {
+        "id": "P09",
+        "group": "paraphrase",
+        "question": "세 가지 음식 중 하나만 문제인데 그 메뉴 값만 돌려받을 수 있을까요?",
+        "required": [
+          "제14조"
+        ],
+        "articles": [
+          "제14조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 11.624,
+        "api_ms": 16.979,
+        "status": "ready",
+        "answer_articles": [
+          "제14조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 여러 메뉴 가운데 일부에만 문제가 있으면 그 메뉴의 금액만 환불한다. 쿠폰을 사용한 주문을 부분 환불하면, 쿠폰 할인 금액은 메뉴 가격의 비율에 맞게 나누어 뺀 뒤 환불한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          16.979,
+          17.171,
+          16.868
+        ],
+        "search_samples_ms": [
+          11.624,
+          11.754,
+          11.604
+        ]
+      },
+      {
+        "id": "P10",
+        "group": "paraphrase",
+        "question": "눈 오는 날은 배달이 평소보다 오래 걸려요?",
+        "required": [
+          "제15조"
+        ],
+        "articles": [
+          "제15조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 10.478,
+        "api_ms": 17.077,
+        "status": "ready",
+        "answer_articles": [
+          "제15조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 배달 주문은 오전 11시부터 오후 9시까지 받는다. 배달 예상 시간은 보통 30분에서 50분이며, 비가 오거나 눈이 오는 날은 더 걸릴 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          17.077,
+          16.362,
+          18.002
+        ],
+        "search_samples_ms": [
+          10.478,
+          9.693,
+          11.816
+        ]
+      },
+      {
+        "id": "P11",
+        "group": "paraphrase",
+        "question": "새우는 어느 나라에서 들어와요?",
+        "required": [
+          "제21조"
+        ],
+        "articles": [
+          "제21조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 7.625,
+        "api_ms": 12.349,
+        "status": "ready",
+        "answer_articles": [
+          "제21조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 쌀과 김치(배추, 고춧가루)는 국내산이다. 돼지고기는 국내산, 쇠고기는 호주산, 닭고기는 국내산이다. 수산물 가운데 우럭과 갈치는 국내산, 새우는 베트남산, 오징어는 원양산이다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          12.349,
+          15.218,
+          16.379
+        ],
+        "search_samples_ms": [
+          7.625,
+          8.581,
+          9.654
+        ]
+      },
+      {
+        "id": "P12",
+        "group": "paraphrase",
+        "question": "초등학생이 먹을 수 있게 맵기를 낮출 수 있어요?",
+        "required": [
+          "제22조"
+        ],
+        "articles": [
+          "제22조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.303,
+        "api_ms": 15.204,
+        "status": "ready",
+        "answer_articles": [
+          "제22조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 매운 메뉴는 순한맛, 보통맛, 매운맛 가운데 고를 수 있다. 어린이(초등학생 이하)에게는 순한맛을 권한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          15.204,
+          16.335,
+          14.822
+        ],
+        "search_samples_ms": [
+          9.303,
+          10.216,
+          9.293
+        ]
+      },
+      {
+        "id": "P13",
+        "group": "paraphrase",
+        "question": "적립금 모은 지 1년 넘었는데 그대로 쓸 수 있나요?",
+        "required": [
+          "제26조"
+        ],
+        "articles": [
+          "제26조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 10.648,
+        "api_ms": 15.827,
+        "status": "ready",
+        "answer_articles": [
+          "제26조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 포인트는 1,000점 이상 모였을 때부터 1점을 1원으로 사용할 수 있다. 포인트의 유효기간은 적립한 날로부터 1년이다. 기한이 지난 포인트는 자동으로 사라진다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          15.827,
+          15.571,
+          14.85
+        ],
+        "search_samples_ms": [
+          10.648,
+          9.888,
+          9.538
+        ]
+      },
+      {
+        "id": "P14",
+        "group": "paraphrase",
+        "question": "앱 주문하고 사진 찍어 후기 쓰면 몇 점 쌓여요?",
+        "required": [
+          "제33조"
+        ],
+        "articles": [
+          "제33조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 10.308,
+        "api_ms": 16.471,
+        "status": "ready",
+        "answer_articles": [
+          "제33조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 리뷰는 주문 1건에 1번만 적립한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          16.471,
+          15.631,
+          15.205
+        ],
+        "search_samples_ms": [
+          10.308,
+          10.26,
+          9.903
+        ]
+      },
+      {
+        "id": "P15",
+        "group": "paraphrase",
+        "question": "회원 탈퇴하면 생일 정보는 언제 없어지나요?",
+        "required": [
+          "제34조"
+        ],
+        "articles": [
+          "제34조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 9.968,
+        "api_ms": 17.014,
+        "status": "ready",
+        "answer_articles": [
+          "제34조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 멤버십 가입 때 받은 이름, 휴대전화 번호, 생일은 주문 안내와 멤버십 혜택에만 사용한다. 탈퇴하면 개인정보는 바로 지운다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          17.014,
+          14.296,
+          14.665
+        ],
+        "search_samples_ms": [
+          9.968,
+          8.88,
+          9.202
+        ]
+      },
+      {
+        "id": "P16",
+        "group": "paraphrase",
+        "question": "앱 일대일 문의는 보통 언제 답변받아요?",
+        "required": [
+          "제35조"
+        ],
+        "articles": [
+          "제35조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 12.399,
+        "api_ms": 19.568,
+        "status": "ready",
+        "answer_articles": [
+          "제35조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 규정에 관한 문의는 앱의 1:1 문의나 매장 직원에게 한다. 1:1 문의는 영업일 기준 하루 안에 답한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          19.568,
+          16.126,
+          15.654
+        ],
+        "search_samples_ms": [
+          12.399,
+          9.822,
+          9.616
+        ]
+      },
+      {
+        "id": "M01",
+        "group": "multi",
+        "question": "다른 메뉴가 왔고 용기도 깨져서 쏟아졌어요. 각각 사진을 언제까지 보내나요?",
+        "required": [
+          "제12조",
+          "제17조"
+        ],
+        "articles": [
+          "제12조",
+          "제17조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 1.226,
+        "api_ms": 7.076,
+        "status": "ready",
+        "answer_articles": [
+          "제12조",
+          "제17조"
+        ],
+        "attempts": 2,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 다른 메뉴나 이물질은 수령 후 24시간 이내에 사진과 함께 알려 주세요. 용기 파손이나 내용물 유출은 수령 후 1시간 이내에 사진과 함께 알려 주세요. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          7.076,
+          8.27,
+          8.686
+        ],
+        "search_samples_ms": [
+          1.226,
+          1.271,
+          1.412
+        ]
+      },
+      {
+        "id": "M02",
+        "group": "multi",
+        "question": "열두 명 예약은 인당 얼마를 먼저 내고, 방문 전날 취소하면 몇 퍼센트를 돌려받아요?",
+        "required": [
+          "제30조",
+          "제31조"
+        ],
+        "articles": [
+          "제30조",
+          "제31조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 14.541,
+        "api_ms": 21.621,
+        "status": "ready",
+        "answer_articles": [
+          "제30조",
+          "제31조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 10명 이상이 함께 오는 단체는 방문일 3일 전까지 전화나 앱으로 예약한다, 단체 예약은 1명당 5,000원의 예약금을 미리 받는다, 방문일 2일 전까지 취소하면 예약금을 모두 돌려준다, 방문일 하루 전에 취소하면 예약금의 50%를 돌려준다, 방문일 당일에 취소하거나 연락 없이 오지 않으면 예약금을 돌려주지 않는다.",
+        "api_samples_ms": [
+          21.621,
+          23.987,
+          17.86
+        ],
+        "search_samples_ms": [
+          14.541,
+          17.675,
+          12.239
+        ]
+      },
+      {
+        "id": "M03",
+        "group": "multi",
+        "question": "배달비랑 마지막 매장 주문 시간이 둘 다 궁금해요.",
+        "required": [
+          "제1조",
+          "제16조"
+        ],
+        "articles": [
+          "제16조",
+          "제1조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "delivery_minimum"
+        ],
+        "handoff_excerpts": [],
+        "ms": 17.101,
+        "api_ms": 22.027,
+        "status": "ready",
+        "answer_articles": [
+          "제16조",
+          "제1조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 배달은 15,000원 이상 주문할 때만 가능하다, 배달비는 3,000원이다, 30,000원 이상 주문하면 배달비를 받지 않는다, 나무 등급 멤버는 주문 금액과 관계없이 배달비를 받지 않는다(제25조), 매장은 매일 오전 11시부터 오후 10시까지 영업한다, 마지막 주문은 오후 9시 30분까지 받는다, 평일(화요일부터 금요일까지)에는 오후 3시부터 오후 5시까지 브레이크타임을 두며, 이 시간에는 매장 식사 주문을 받지 않는다, 포장 주문과 배달 주문은 브레이크타임에도 받는다, 주말과 공휴일에는 브레이크타임 없이 영업한다.",
+        "api_samples_ms": [
+          22.027,
+          24.882,
+          25.832
+        ],
+        "search_samples_ms": [
+          17.101,
+          19.226,
+          18.618
+        ]
+      },
+      {
+        "id": "M04",
+        "group": "multi",
+        "question": "포장 용기 안 돌려주면 얼마예요? 차도 가져갈 건데 2만 원만 쓰면 몇 시간 무료죠?",
+        "required": [
+          "제4조",
+          "제10조"
+        ],
+        "articles": [
+          "제4조",
+          "제10조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 21.533,
+        "api_ms": 27.65,
+        "status": "ready",
+        "answer_articles": [
+          "제4조",
+          "제10조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 건물 지하 주차장을 이용할 수 있다, 매장에서 30,000원 이상 결제하면 2시간 무료 주차를 지원하고, 그 미만이면 1시간 무료 주차를 지원한다, 무료 시간을 넘으면 30분마다 1,500원의 주차 요금을 손님이 직접 낸다, 포장 주문은 다회용기와 일회용기 중에서 고를 수 있다, 다회용기를 고르면 500원을 할인하고, 용기는 7일 안에 매장에 돌려준다, 다회용기를 7일 안에 돌려주지 않으면 용기 보증금 3,000원이 결제된 수단으로 청구된다.",
+        "api_samples_ms": [
+          27.65,
+          25.445,
+          24.88
+        ],
+        "search_samples_ms": [
+          21.533,
+          18.765,
+          19.659
+        ]
+      },
+      {
+        "id": "M05",
+        "group": "multi",
+        "question": "앱에서 카드로 주문했는데 조리 시작 전엔 취소할 수 있나요? 카드 환불까지 얼마나 걸려요?",
+        "required": [
+          "제11조",
+          "제13조"
+        ],
+        "articles": [
+          "제11조",
+          "제13조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 10.089,
+        "api_ms": 15.071,
+        "status": "ready",
+        "answer_articles": [
+          "제11조",
+          "제13조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 조리가 시작되기 전에는 주문을 전액 취소할 수 있다, 조리가 시작된 뒤에는 취소할 수 없다, 단, 매장의 사정으로 30분 넘게 늦어지면 조리 중이라도 전액 취소할 수 있다, 카드 결제 취소는 카드사에 따라 영업일 기준 3일에서 5일이 걸린다, 간편결제는 취소한 날 바로 환불된다, 현금으로 결제했다면 매장에서 바로 돌려준다, 포인트로 결제한 금액은 포인트로 돌려준다.",
+        "api_samples_ms": [
+          15.071,
+          19.588,
+          14.749
+        ],
+        "search_samples_ms": [
+          10.089,
+          13.742,
+          9.722
+        ]
+      },
+      {
+        "id": "M06",
+        "group": "multi",
+        "question": "배달 사고 문의랑 별개로, 맥주도 음식이랑 같이 배달되나요? 용기가 터지면 사진은 언제까지 보내요?",
+        "required": [
+          "제17조",
+          "제18조"
+        ],
+        "articles": [
+          "제17조",
+          "제18조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "alcohol_delivery"
+        ],
+        "handoff_excerpts": [],
+        "ms": 19.794,
+        "api_ms": 24.473,
+        "status": "ready",
+        "answer_articles": [
+          "제17조",
+          "제18조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 불편을 드려 죄송합니다. 용기 파손이나 내용물 유출은 수령 후 1시간 이내에 사진과 함께 알려 주세요. 주류는 배달하지 않습니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          24.473,
+          24.174,
+          24.627
+        ],
+        "search_samples_ms": [
+          19.794,
+          19.247,
+          19.475
+        ]
+      },
+      {
+        "id": "M07",
+        "group": "multi",
+        "question": "주문할 때 쿠폰 두 개를 동시에 쓰고 싶고, 사진 리뷰 포인트도 궁금해요.",
+        "required": [
+          "제27조",
+          "제33조"
+        ],
+        "articles": [
+          "제27조",
+          "제33조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "coupon_use"
+        ],
+        "handoff_excerpts": [],
+        "ms": 20.973,
+        "api_ms": 26.071,
+        "status": "ready",
+        "answer_articles": [
+          "제27조",
+          "제33조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 쿠폰은 한 번의 주문에 1장만 사용할 수 있다. 여러 쿠폰을 함께 사용할 수 없다. 쿠폰과 포인트는 함께 사용할 수 있다. 리뷰는 주문 1건에 1번만 적립한다.",
+        "api_samples_ms": [
+          26.071,
+          23.113,
+          23.584
+        ],
+        "search_samples_ms": [
+          20.973,
+          17.932,
+          18.877
+        ]
+      },
+      {
+        "id": "M08",
+        "group": "multi",
+        "question": "맥주도 배달돼요? 그리고 배달 주문이 밤 몇 시에 마감되나요?",
+        "required": [
+          "제15조",
+          "제18조"
+        ],
+        "articles": [
+          "제18조",
+          "제15조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "alcohol_delivery"
+        ],
+        "handoff_excerpts": [],
+        "ms": 22.902,
+        "api_ms": 28.473,
+        "status": "ready",
+        "answer_articles": [
+          "제18조",
+          "제15조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 주류는 배달하지 않습니다. 배달 주문은 오전 11시부터 오후 9시까지 받는다. 배달 예상 시간은 보통 30분에서 50분이며, 비가 오거나 눈이 오는 날은 더 걸릴 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          28.473,
+          29.549,
+          30.852
+        ],
+        "search_samples_ms": [
+          22.902,
+          23.876,
+          24.103
+        ]
+      },
+      {
+        "id": "N01",
+        "group": "no_policy",
+        "question": "식사하는 동안 친절하게 안내해 주셔서 감사해요.",
+        "required": [],
+        "articles": [],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.028,
+        "api_ms": 6.142,
+        "status": "ready",
+        "answer_articles": [],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 남겨 주신 의견을 매장 운영에 반영하겠습니다.",
+        "api_samples_ms": [
+          6.142,
+          4.732,
+          4.596
+        ],
+        "search_samples_ms": [
+          0.028,
+          0.028,
+          0.025
+        ]
+      },
+      {
+        "id": "N02",
+        "group": "no_policy",
+        "question": "어제 테이블 맡으신 분 성함하고 개인 전화번호를 알려 주세요.",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.013,
+        "api_ms": 4.492,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          4.492,
+          4.051,
+          5.312
+        ],
+        "search_samples_ms": [
+          0.013,
+          0.01,
+          0.012
+        ]
+      },
+      {
+        "id": "N03",
+        "group": "no_policy",
+        "question": "다음 주 수요일 두 시에 창가 2인석이 실제로 비어 있나요?",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.011,
+        "api_ms": 5.726,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          5.726,
+          5.181,
+          2.995
+        ],
+        "search_samples_ms": [
+          0.011,
+          0.007,
+          0.008
+        ]
+      },
+      {
+        "id": "N04",
+        "group": "no_policy",
+        "question": "토요일 생일 파티에 케이크를 가져가도 되나요?",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "unknown_question",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.054,
+        "api_ms": 3.004,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.004,
+          3.814,
+          3.241
+        ],
+        "search_samples_ms": [
+          0.054,
+          0.055,
+          0.055
+        ]
+      },
+      {
+        "id": "N05",
+        "group": "no_policy",
+        "question": "파손된 배달 주문인데 제 주문 환불이 이미 승인됐는지 알려줘요.",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.009,
+        "api_ms": 4.148,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          4.148,
+          3.44,
+          3.232
+        ],
+        "search_samples_ms": [
+          0.009,
+          0.009,
+          0.009
+        ]
+      },
+      {
+        "id": "N06",
+        "group": "no_policy",
+        "question": "갈릭미역파르페의 1인분 칼로리를 알려 주세요.",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.008,
+        "api_ms": 3.542,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.542,
+          3.163,
+          3.595
+        ],
+        "search_samples_ms": [
+          0.008,
+          0.008,
+          0.008
+        ]
+      },
+      {
+        "id": "N07",
+        "group": "no_policy",
+        "question": "예약 손님용 와인잔 대여료는 정확히 얼마예요?",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.008,
+        "api_ms": 3.752,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.752,
+          3.238,
+          3.872
+        ],
+        "search_samples_ms": [
+          0.008,
+          0.007,
+          0.008
+        ]
+      },
+      {
+        "id": "N08",
+        "group": "no_policy",
+        "question": "제 카드 결제 건에 환불금이 지금 입금됐는지 봐 주세요.",
+        "required": [],
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "handoff_excerpts": [],
+        "ms": 0.008,
+        "api_ms": 3.23,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          3.23,
+          3.203,
+          2.936
+        ],
+        "search_samples_ms": [
+          0.008,
+          0.008,
+          0.007
+        ]
+      }
+    ]
+  }
+}
