@@ -31,10 +31,23 @@ STAFF_ONLY = re.compile(
     r"(?:환불|취소|입금|승인)(?:금)?[이가은는]?\s*(?:이미\s*)?(?:됐|되었)(?:는지|나요|어요|습니까|[?？])|"
     r"(?:주차\s*지원|차량?\s*번호)[^.!?\n]{0,35}등록\s*(?:됐|되었|되어\s*있)|"
     r"(?:분실물|지갑|가방|우산|휴대폰)[^.!?\n]{0,35}(?:들어와\s*있|습득\s*됐|접수\s*됐|보관\s*중)|"
+    r"(?:케이크|외부\s*음식|음식물)[^.!?\n]{0,18}(?:가져가|가져와|반입)[^.!?\n]{0,20}(?:되나|돼요|될까|가능|허용)|"
     r"대기\s*(?:순서|순번|번호)[^.!?\n]{0,18}(?:몇\s*번|어디까지|제\s*차례)|"
     r"관리자[^.!?\n]{0,12}(?:암호|비밀번호|패스워드)|"
     r"쿠폰[^.!?]{0,18}(?:발급|보상|주세요|주실|줘|달라|준다고|드린다고|안\s*됐)"
 )
+FOLLOWUP_QUESTION = re.compile(r"(?:각각\s*)?(?:사진을?\s*언제까지\s*보내나요[?？]?|환불해\s*주세요[.!]?)")
+
+
+def article_sentences(article: Document) -> tuple[str, ...]:
+    lines = article.page_content.splitlines()
+    if len(lines) > 1 and lines[0].startswith(str(article.id)):
+        lines = lines[1:]
+    return tuple(
+        sentence.strip().removeprefix("- ")
+        for sentence in re.split(r"(?<=[.!?。])\s+|\n+", "\n".join(lines))
+        if sentence.strip()
+    )
 
 
 @dataclass(frozen=True)
@@ -74,13 +87,7 @@ class PolicyRule:
         )
 
     def evidence(self, article: Document) -> PolicyEvidence | None:
-        lines = article.page_content.splitlines()
-        if len(lines) > 1 and lines[0].startswith(self.article_id):
-            lines = lines[1:]
-        clauses = re.split(r"(?<=[.!?。])\s+|\n+", "\n".join(lines))
-        excerpts = tuple(
-            clause.removeprefix("- ").strip() for clause in clauses if self.source_pattern.search(clause)
-        )
+        excerpts = tuple(clause for clause in article_sentences(article) if self.source_pattern.search(clause))
         if not excerpts:
             return None
         hours = re.search(r"(\d+)\s*시간", excerpts[0]) if self.deadline else None
@@ -150,7 +157,7 @@ RULES = (
     rule("membership_tier", 24, "멤버십 새싹 열매 나무 등급 기준 결제 금액",
          r"(?:등급|열매|새싹|나무)[^.?!]{0,28}(?:되려|써야|산정|기준|올라)", r"등급은 매월|최근 3개월 결제"),
     rule("points", 26, "포인트 사용 조건 유효기간",
-         r"(?:포인트|적립금)[^.?!]{0,32}(?:쓸|사용|유효|만료)|모은\s*지", r"포인트는|포인트의|기한이 지난"),
+         r"(?:포인트|적립금)[^.?!]{0,32}(?:쓸|사용|유효|만료)|모은\s*지", r"포인트는|포인트로는|포인트의|기한이 지난"),
     rule("coupon_use", 27, "쿠폰 장수 중복 사용 포인트 함께",
          r"쿠폰[^.?!]{0,32}(?:두\s*장|두\s*개|동시|같이|함께|중복)", r"쿠폰은 한 번|여러 쿠폰|함께 사용할"),
     rule("group_booking", 30, "단체 예약 인원 10명 예약금 인당 5,000원",
@@ -167,10 +174,10 @@ RULES = (
 )
 
 
-def questions_in(text: str) -> tuple[tuple[tuple[PolicyRule, str], ...], str]:
-    """문의별 검색 문장과 규정집만으로 처리할 수 없는 사유를 반환한다."""
+def route_questions(text: str) -> tuple[tuple[tuple[PolicyRule, str], ...], tuple[str, ...], str]:
+    """Return registered rules and the questions that need document-based lookup."""
     if STAFF_ONLY.search(text):
-        return (), "staff_only"
+        return (), (), "staff_only"
 
     topics: dict[str, tuple[PolicyRule, str]] = {}
     unresolved = []
@@ -197,7 +204,14 @@ def questions_in(text: str) -> tuple[tuple[tuple[PolicyRule, str], ...], str]:
         taste = next(item for item in RULES if item.topic == "taste_refund")
         if taste.question_pattern.search(text.replace("\n", " ")):
             topics.setdefault(taste.topic, (taste, text))
-    related = re.compile(r"(?:각각\s*)?(?:사진을?\s*언제까지\s*보내나요[?？]?|환불해\s*주세요[.!]?)")
-    if any(not (topics and related.fullmatch(part)) for part in unresolved):
+    missing = tuple(part for part in unresolved if not (topics and FOLLOWUP_QUESTION.fullmatch(part)))
+    matches = tuple(topics[item.topic] for item in RULES if item.topic in topics)
+    return matches, missing, ""
+
+
+def questions_in(text: str) -> tuple[tuple[tuple[PolicyRule, str], ...], str]:
+    """Return the rule-based router's decision for comparison and diagnostics."""
+    matches, missing, reason = route_questions(text)
+    if missing:
         return (), "unknown_question"
-    return tuple(topics[item.topic] for item in RULES if item.topic in topics), ""
+    return matches, reason

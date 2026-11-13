@@ -61,13 +61,15 @@ async def lifespan(app: FastAPI):
 
         try:
             index = await anyio.to_thread.run_sync(open_policy_index, settings.runtime_dir)
-            hybrid = HybridRetriever(index, load_articles()) if index is not None else None
+            articles = load_articles() if index is not None else []
+            hybrid = HybridRetriever(index, articles) if index is not None else None
         except (OSError, ValueError, KeyError, RuntimeError, ChromaError) as error:
             logger.warning("규정 인덱스 로드 실패 (%s). 인덱스를 다시 만드세요.", type(error).__name__)
             index = hybrid = None
+            articles = []
         if index is None:
             logger.info("규정 인덱스 없음. 규정이 필요한 요청은 매장 확인 상태로 처리합니다.")
-        search = PolicySearch(index, hybrid)
+        search = PolicySearch(index, hybrid, articles)
         serializer = JsonPlusSerializer(allowed_msgpack_modules=[
             (cls.__module__, cls.__name__)
             for cls in (ReplyPreferences, GroundedReplyDraft, PolicySearchResult, PolicyEvidence)

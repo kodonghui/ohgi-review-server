@@ -98,6 +98,7 @@ def test_only_the_missing_question_gets_one_focused_search():
     "제 차량 번호로 주차 지원이 등록됐는지 봐 주세요.",
     "관리자 와이파이 비밀번호를 알 수 있나요?",
     "아까 두고 온 가방이 카운터에 들어와 있는지 확인해 주세요.",
+    "토요일에 케이크를 가져가도 되나요?",
 ])
 def test_order_status_stops_even_if_a_general_policy_is_known(query):
     index = TestIndex()
@@ -119,6 +120,64 @@ def test_denied_wrong_delivery_does_not_require_the_wrong_delivery_deadline():
 
 def test_question_outside_the_policy_cannot_continue_as_regular_praise():
     index = TestIndex()
-    result = asyncio.run(PolicySearch(index).retrieve("토요일에 케이크를 가져가도 되나요?"))
+    result = asyncio.run(PolicySearch(index).retrieve("공연 장비를 빌릴 수 있나요?"))
     assert result.needs_manual_review is True
     assert result.reason == "unknown_question"
+
+
+def new_article(number, title, text):
+    article_id = f"제{number}조"
+    heading = f"{article_id} ({title})"
+    return Document(id=article_id, page_content=f"{heading}\n{text}",
+                    metadata={"article": heading, "article_no": article_id})
+
+
+def test_new_article_can_override_a_broad_rule_when_it_answers_the_question():
+    index = TestIndex()
+    query = "지하 주차장에서 휠체어로 올라갈 때 어느 승강기를 타나요?"
+    mobility = new_article(903, "휠체어 승강기", "휠체어 이용 손님은 지하 주차장에서 C구역 승강기를 이용한다.")
+    parking = index.articles["제4조"]
+    hybrid = TestRetriever({query: ranked(parking, mobility)})
+    result = asyncio.run(PolicySearch(index, hybrid, [parking, mobility]).retrieve(query))
+    assert result.needs_manual_review is False
+    assert result.required_ids == ("제903조",)
+    assert result.evidence[0].excerpts == (
+        "휠체어 이용 손님은 지하 주차장에서 C구역 승강기를 이용한다.",
+    )
+    assert hybrid.queries == [query]
+
+
+def test_unknown_topic_uses_source_without_registering_an_article_number():
+    index = TestIndex()
+    query = "방음 부스는 몇 개 있어요?"
+    booths = new_article(904, "방음 부스", "매장에는 방음 부스 세 개가 있다. 통로에는 안내판을 둔다.")
+    hybrid = TestRetriever({query: ranked(booths)})
+    result = asyncio.run(PolicySearch(index, hybrid, [booths]).retrieve(query))
+    assert result.required_ids == ("제904조",)
+    assert result.evidence[0].excerpts == ("매장에는 방음 부스 세 개가 있다.",)
+    assert result.needs_manual_review is False
+
+
+def test_related_article_does_not_answer_a_quantity_it_never_states():
+    index = TestIndex()
+    query = "방음 부스는 몇 개 있어요?"
+    booths = new_article(904, "방음 부스", "방음 부스 사용 방법은 직원에게 확인한다.")
+    hybrid = TestRetriever({query: ranked(booths)})
+    result = asyncio.run(PolicySearch(index, hybrid, [booths]).retrieve(query))
+    assert result.needs_manual_review is True
+    assert result.reason == "evidence_missing"
+
+
+def test_unanswered_part_holds_the_whole_reply():
+    index = TestIndex()
+    query = "방음 부스는 몇 개 있어요?"
+    combined = f"{query} 악기 대여는 몇 시간 할 수 있어요?"
+    booths = new_article(904, "방음 부스", "매장에는 방음 부스 세 개가 있다.")
+    hybrid = TestRetriever({
+        combined: ranked(booths),
+        "악기 대여는 몇 시간 할 수 있어요?": ranked(booths),
+    })
+    result = asyncio.run(PolicySearch(index, hybrid, [booths]).retrieve(combined))
+    assert result.needs_manual_review is True
+    assert result.required_ids == ("제904조",)
+    assert result.reason == "evidence_missing"

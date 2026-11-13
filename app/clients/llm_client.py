@@ -21,6 +21,7 @@ from app.core.config import Settings
 from app.core.exceptions import AiRequestError
 from app.schemas.reply_draft import GroundedReplyDraft, ReplyVerdict
 from app.schemas.review import ReplyPreferences
+from app.services.policy_passages import DOCUMENT_TOPIC
 
 if TYPE_CHECKING:
     from app.services.reply_workflow import ReplyWorkflowState
@@ -74,8 +75,9 @@ def draft_values(state: ReplyWorkflowState) -> dict:
         for item in evidence.evidence
     )
     notices = "\n".join(notice for item in evidence.evidence if (notice := item.required_notice()))
+    known_ids = {item.article_id for item in evidence.evidence if item.topic != DOCUMENT_TOPIC}
     context = "\n\n".join(filter(None, [
-        "\n\n".join(article.page_content for article in evidence.articles),
+        "\n\n".join(article.page_content for article in evidence.articles if article.id in known_ids),
         "[질문별 확인한 원문]\n" + excerpts if excerpts else "",
         "[필수 안내]\n" + notices if notices else "",
     ]))
