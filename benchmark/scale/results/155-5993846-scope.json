@@ -1,0 +1,1183 @@
+{
+  "expanded": {
+    "timestamp_utc": "2026-11-13T06:50:56+00:00",
+    "index": {
+      "version": 1,
+      "source_sha256": "6c1375683ca14d09a529a201e2e9674285e94319cb9ce2d2c36d2ff163ff3ea5",
+      "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+      "article_count": 155
+    },
+    "index_bytes": 1515684,
+    "build_seconds": 17.53,
+    "startup_seconds": 2.744,
+    "environment": {
+      "fastapi": "0.162.0",
+      "chromadb": "1.5.9",
+      "langgraph": "1.2.19",
+      "fastembed": "0.9.1"
+    },
+    "run": {
+      "repetitions": 3,
+      "warmups": 3,
+      "transport": "FastAPI TestClient",
+      "fake_delay_seconds": 0,
+      "openai_requests": 0,
+      "diagnostics_only": true,
+      "new_queries_sha256": "cfc55b2d17872b853d28475f83e764167db2f60f20bfa7291df1c1e9878b504c",
+      "course_queries_sha256": "5a5aa961a57c136a1e668392ca38708f9e02a1fde1a7daa647e877872098c793",
+      "fixed_additions_sha256": "903534471c2eb9698eec48d3ad4ca0da3cd059b54685a12ae534edb127b86252",
+      "lock_sha256": "02e2093aa04056d1c4f783872bc751fb3b45cacd0ff1f6f352ee298665ef9580",
+      "runner_sha256": "adc6e166c54496ab3a211f08d48c16a071f2bdfe1f5f975f247ac613c43d803c"
+    },
+    "summary": {
+      "diagnostic": {
+        "requests": 16,
+        "with_reference": 11,
+        "full_top3_vector": 4,
+        "full_top3_bm25": 6,
+        "full_top3_rrf": 4,
+        "full_candidate_union": 10,
+        "reference_spans_in_union": 10,
+        "reference_spans_saved": 11,
+        "full_api_retrieval": 11,
+        "full_api_save": 11,
+        "full_save_with_spans": 11,
+        "requires_staff": 5,
+        "staff_correctly_held": 5,
+        "saved_missing_reference": 0,
+        "retries": 2,
+        "api_p50_ms": 43.45,
+        "api_p95_ms": 93.003,
+        "search_p50_ms": 27.695,
+        "search_p95_ms": 73.917
+      }
+    },
+    "cases": [
+      {
+        "id": "R01",
+        "group": "scope",
+        "question": "포장해 둔 음식을 친구가 대신 찾아가도 될까요?",
+        "required": [
+          "제69조"
+        ],
+        "spans": [
+          "주문자가 주문번호를 전달하면 가능하다"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제69조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 28.924,
+        "api_ms": 45.77,
+        "status": "ready",
+        "answer_articles": [
+          "제69조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리 수령은 주문자가 주문번호를 전달하면 가능하다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          45.77,
+          46.173,
+          45.244
+        ],
+        "search_samples_ms": [
+          28.924,
+          27.53,
+          27.364
+        ],
+        "vector_top3": [
+          "제12조",
+          "제103조",
+          "제105조"
+        ],
+        "bm25_top3": [
+          "제81조",
+          "제71조",
+          "제59조"
+        ],
+        "rrf_top3": [
+          "제12조",
+          "제81조",
+          "제103조"
+        ],
+        "candidate_union": [
+          "제12조",
+          "제81조",
+          "제103조",
+          "제71조",
+          "제105조",
+          "제59조",
+          "제20조",
+          "제41조",
+          "제44조",
+          "제80조",
+          "제17조",
+          "제77조",
+          "제149조",
+          "제86조",
+          "제114조",
+          "제69조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      },
+      {
+        "id": "R02",
+        "group": "scope",
+        "question": "주문자가 못 가는데 가족이 포장 주문을 대신 받으려면 뭘 준비하나요?",
+        "required": [
+          "제69조"
+        ],
+        "spans": [
+          "주문자가 주문번호를 전달하면 가능하다"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제69조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 30.636,
+        "api_ms": 47.171,
+        "status": "ready",
+        "answer_articles": [
+          "제69조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리 수령은 주문자가 주문번호를 전달하면 가능하다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          47.171,
+          48.876,
+          45.106
+        ],
+        "search_samples_ms": [
+          30.636,
+          31.115,
+          28.883
+        ],
+        "vector_top3": [
+          "제10조",
+          "제69조",
+          "제105조"
+        ],
+        "bm25_top3": [
+          "제69조",
+          "제141조",
+          "제108조"
+        ],
+        "rrf_top3": [
+          "제69조",
+          "제10조",
+          "제141조"
+        ],
+        "candidate_union": [
+          "제69조",
+          "제10조",
+          "제141조",
+          "제105조",
+          "제108조",
+          "제114조",
+          "제81조",
+          "제25조",
+          "제80조",
+          "제154조",
+          "제71조",
+          "제129조",
+          "제151조",
+          "제116조",
+          "제20조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      },
+      {
+        "id": "R03",
+        "group": "scope",
+        "question": "가족에게 포장 음식 픽업을 맡겨도 되나요?",
+        "required": [
+          "제69조"
+        ],
+        "spans": [
+          "주문자가 주문번호를 전달하면 가능하다"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제69조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 32.661,
+        "api_ms": 49.615,
+        "status": "ready",
+        "answer_articles": [
+          "제69조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리 수령은 주문자가 주문번호를 전달하면 가능하다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          49.615,
+          43.571,
+          44.566
+        ],
+        "search_samples_ms": [
+          32.661,
+          26.84,
+          28.802
+        ],
+        "vector_top3": [
+          "제149조",
+          "제105조",
+          "제10조"
+        ],
+        "bm25_top3": [
+          "제81조",
+          "제77조",
+          "제71조"
+        ],
+        "rrf_top3": [
+          "제105조",
+          "제77조",
+          "제103조"
+        ],
+        "candidate_union": [
+          "제105조",
+          "제77조",
+          "제103조",
+          "제80조",
+          "제149조",
+          "제81조",
+          "제10조",
+          "제71조",
+          "제69조",
+          "제12조",
+          "제100조",
+          "제42조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      },
+      {
+        "id": "R04",
+        "group": "scope",
+        "question": "포장 주문은 본인 말고 동생이 받아 가도 될까요?",
+        "required": [
+          "제69조"
+        ],
+        "spans": [
+          "주문자가 주문번호를 전달하면 가능하다"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제69조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 27.86,
+        "api_ms": 43.251,
+        "status": "ready",
+        "answer_articles": [
+          "제69조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리 수령은 주문자가 주문번호를 전달하면 가능하다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          43.251,
+          43.328,
+          39.908
+        ],
+        "search_samples_ms": [
+          27.86,
+          29.081,
+          24.712
+        ],
+        "vector_top3": [
+          "제25조",
+          "제129조",
+          "제69조"
+        ],
+        "bm25_top3": [
+          "제1조",
+          "제10조",
+          "제81조"
+        ],
+        "rrf_top3": [
+          "제81조",
+          "제10조",
+          "제1조"
+        ],
+        "candidate_union": [
+          "제81조",
+          "제10조",
+          "제1조",
+          "제25조",
+          "제129조",
+          "제69조",
+          "제6조",
+          "제116조",
+          "제140조",
+          "제108조",
+          "제76조",
+          "제15조",
+          "제65조",
+          "제86조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      },
+      {
+        "id": "R05",
+        "group": "scope",
+        "question": "포장 음식을 대리로 받으려면 무슨 정보가 필요한가요?",
+        "required": [
+          "제69조"
+        ],
+        "spans": [
+          "주문자가 주문번호를 전달하면 가능하다"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제69조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 25.58,
+        "api_ms": 40.235,
+        "status": "ready",
+        "answer_articles": [
+          "제69조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리 수령은 주문자가 주문번호를 전달하면 가능하다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          40.235,
+          41.085,
+          39.769
+        ],
+        "search_samples_ms": [
+          25.58,
+          25.258,
+          23.959
+        ],
+        "vector_top3": [
+          "제77조",
+          "제105조",
+          "제103조"
+        ],
+        "bm25_top3": [
+          "제81조",
+          "제71조",
+          "제84조"
+        ],
+        "rrf_top3": [
+          "제69조",
+          "제81조",
+          "제77조"
+        ],
+        "candidate_union": [
+          "제69조",
+          "제81조",
+          "제77조",
+          "제105조",
+          "제71조",
+          "제103조",
+          "제84조",
+          "제141조",
+          "제42조",
+          "제149조",
+          "제96조",
+          "제76조",
+          "제80조",
+          "제59조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      },
+      {
+        "id": "R06",
+        "group": "scope",
+        "question": "포장 주문의 대리 픽업 조건이 궁금해요.",
+        "required": [
+          "제69조"
+        ],
+        "spans": [
+          "주문자가 주문번호를 전달하면 가능하다"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제69조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 22.609,
+        "api_ms": 36.573,
+        "status": "ready",
+        "answer_articles": [
+          "제69조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리 수령은 주문자가 주문번호를 전달하면 가능하다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          36.573,
+          43.699,
+          36.563
+        ],
+        "search_samples_ms": [
+          22.609,
+          28.377,
+          22.401
+        ],
+        "vector_top3": [
+          "제10조",
+          "제69조",
+          "제76조"
+        ],
+        "bm25_top3": [
+          "제141조",
+          "제105조",
+          "제69조"
+        ],
+        "rrf_top3": [
+          "제69조",
+          "제105조",
+          "제10조"
+        ],
+        "candidate_union": [
+          "제69조",
+          "제105조",
+          "제10조",
+          "제141조",
+          "제76조",
+          "제120조",
+          "제65조",
+          "제128조",
+          "제71조",
+          "제81조",
+          "제104조",
+          "제43조",
+          "제66조",
+          "제80조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      },
+      {
+        "id": "R07",
+        "group": "scope",
+        "question": "분실한 지갑을 가족이 대신 찾아가려면 어떻게 해야 해요?",
+        "required": [
+          "제43조"
+        ],
+        "spans": [
+          "대리 수령 이름과 현장 이름을 확인한다"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제43조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 29.063,
+        "api_ms": 44.444,
+        "status": "ready",
+        "answer_articles": [
+          "제43조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리인이 오면 소유자가 앱 1:1 문의에 남긴 대리 수령 이름과 현장 이름을 확인한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          44.444,
+          47.952,
+          43.138
+        ],
+        "search_samples_ms": [
+          29.063,
+          32.103,
+          28.469
+        ],
+        "vector_top3": [
+          "제42조",
+          "제66조",
+          "제34조"
+        ],
+        "bm25_top3": [
+          "제114조",
+          "제108조",
+          "제43조"
+        ],
+        "rrf_top3": [
+          "제114조",
+          "제42조",
+          "제108조"
+        ],
+        "candidate_union": [
+          "제114조",
+          "제42조",
+          "제108조",
+          "제66조",
+          "제34조",
+          "제43조",
+          "제86조",
+          "제9조",
+          "제148조",
+          "제98조",
+          "제37조",
+          "제94조",
+          "제44조",
+          "제8조",
+          "제30조",
+          "제67조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      },
+      {
+        "id": "R08",
+        "group": "scope",
+        "question": "매장 분실물 대리 수령에 이름이 필요한가요?",
+        "required": [
+          "제43조"
+        ],
+        "spans": [
+          "대리 수령 이름과 현장 이름을 확인한다"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제43조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 25.525,
+        "api_ms": 40.23,
+        "status": "ready",
+        "answer_articles": [
+          "제43조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리인이 오면 소유자가 앱 1:1 문의에 남긴 대리 수령 이름과 현장 이름을 확인한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          40.23,
+          42.792,
+          42.681
+        ],
+        "search_samples_ms": [
+          25.525,
+          27.138,
+          27.052
+        ],
+        "vector_top3": [
+          "제141조",
+          "제43조",
+          "제117조"
+        ],
+        "bm25_top3": [
+          "제43조",
+          "제141조",
+          "제69조"
+        ],
+        "rrf_top3": [
+          "제141조",
+          "제43조",
+          "제75조"
+        ],
+        "candidate_union": [
+          "제141조",
+          "제43조",
+          "제75조",
+          "제117조",
+          "제69조",
+          "제86조",
+          "제148조",
+          "제153조",
+          "제46조",
+          "제47조",
+          "제55조",
+          "제127조",
+          "제129조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      },
+      {
+        "id": "R09",
+        "group": "scope",
+        "question": "주문 내역을 대신 문의할 때 누가 어떤 정보를 알려야 하나요?",
+        "required": [
+          "제141조"
+        ],
+        "spans": [
+          "대리인의 이름과 요청 범위"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제141조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 30.943,
+        "api_ms": 47.124,
+        "status": "ready",
+        "answer_articles": [
+          "제141조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리인이 접수할 때는 주문자가 앱 문의에서 대리인의 이름과 요청 범위를 알려 줄 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          47.124,
+          49.803,
+          46.846
+        ],
+        "search_samples_ms": [
+          30.943,
+          33.873,
+          30.609
+        ],
+        "vector_top3": [
+          "제24조",
+          "제129조",
+          "제25조"
+        ],
+        "bm25_top3": [
+          "제133조",
+          "제140조",
+          "제141조"
+        ],
+        "rrf_top3": [
+          "제133조",
+          "제24조",
+          "제129조"
+        ],
+        "candidate_union": [
+          "제133조",
+          "제24조",
+          "제129조",
+          "제140조",
+          "제141조",
+          "제25조",
+          "제137조",
+          "제49조",
+          "제75조",
+          "제95조",
+          "제12조",
+          "제65조",
+          "제67조",
+          "제113조",
+          "제134조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      },
+      {
+        "id": "R10",
+        "group": "scope",
+        "question": "통로를 막는 삼각대 설치가 허용되나요?",
+        "required": [
+          "제44조"
+        ],
+        "spans": [
+          "허용하지 않는다"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제44조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 28.743,
+        "api_ms": 46.327,
+        "status": "ready",
+        "answer_articles": [
+          "제44조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 통로를 막는 삼각대 설치와 조명을 쓰는 촬영은 매장 내 일반 이용 시간에는 허용하지 않는다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          46.327,
+          47.074,
+          50.951
+        ],
+        "search_samples_ms": [
+          28.743,
+          29.784,
+          29.462
+        ],
+        "vector_top3": [
+          "제146조",
+          "제155조",
+          "제45조"
+        ],
+        "bm25_top3": [
+          "제44조",
+          "제56조",
+          "제148조"
+        ],
+        "rrf_top3": [
+          "제148조",
+          "제46조",
+          "제146조"
+        ],
+        "candidate_union": [
+          "제148조",
+          "제46조",
+          "제146조",
+          "제44조",
+          "제155조",
+          "제56조",
+          "제45조",
+          "제74조",
+          "제37조",
+          "제49조",
+          "제36조",
+          "제55조",
+          "제107조",
+          "제61조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      },
+      {
+        "id": "R11",
+        "group": "scope",
+        "question": "안전띠 달린 유아 의자는 몇 개 있나요? 포장 주문도 다른 사람이 대신 받아 가도 돼요?",
+        "required": [
+          "제37조",
+          "제69조"
+        ],
+        "spans": [
+          "유아 의자 네 개",
+          "주문자가 주문번호를 전달하면 가능하다"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제37조",
+          "제69조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [
+          "document_question"
+        ],
+        "ms": 80.429,
+        "api_ms": 99.104,
+        "status": "ready",
+        "answer_articles": [
+          "제37조",
+          "제69조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 안전띠가 달린 유아 의자 네 개와 어린이용 컵·수저를 무료로 대여한다. 대리 수령은 주문자가 주문번호를 전달하면 가능하다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          99.104,
+          99.924,
+          101.357
+        ],
+        "search_samples_ms": [
+          80.429,
+          79.658,
+          81.617
+        ],
+        "vector_top3": [
+          "제37조",
+          "제50조",
+          "제148조"
+        ],
+        "bm25_top3": [
+          "제37조",
+          "제86조",
+          "제81조"
+        ],
+        "rrf_top3": [
+          "제37조",
+          "제50조",
+          "제86조"
+        ],
+        "candidate_union": [
+          "제37조",
+          "제50조",
+          "제86조",
+          "제148조",
+          "제81조",
+          "제36조",
+          "제40조",
+          "제80조",
+          "제100조",
+          "제149조",
+          "제56조",
+          "제98조",
+          "제114조",
+          "제20조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      },
+      {
+        "id": "R12",
+        "group": "scope",
+        "question": "포장한 음식 친구가 받아갔나요?",
+        "required": [],
+        "spans": [],
+        "expected": "needs_review",
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "ms": 0.041,
+        "api_ms": 32.326,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          32.326,
+          30.642,
+          30.504
+        ],
+        "search_samples_ms": [
+          0.041,
+          0.065,
+          0.062
+        ],
+        "vector_top3": [
+          "제69조",
+          "제80조",
+          "제12조"
+        ],
+        "bm25_top3": [
+          "제81조",
+          "제103조",
+          "제77조"
+        ],
+        "rrf_top3": [
+          "제69조",
+          "제81조",
+          "제80조"
+        ],
+        "candidate_union": [
+          "제69조",
+          "제81조",
+          "제80조",
+          "제77조",
+          "제105조",
+          "제103조",
+          "제12조",
+          "제100조",
+          "제25조",
+          "제71조",
+          "제20조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "staff_only",
+        "answer_spans_found": false
+      },
+      {
+        "id": "R13",
+        "group": "scope",
+        "question": "제 대신 누군가 포장 주문을 이미 가져갔는지 확인해 주세요.",
+        "required": [],
+        "spans": [],
+        "expected": "needs_review",
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "ms": 0.076,
+        "api_ms": 32.427,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          32.427,
+          25.81,
+          18.441
+        ],
+        "search_samples_ms": [
+          0.076,
+          0.06,
+          0.034
+        ],
+        "vector_top3": [
+          "제69조",
+          "제65조",
+          "제76조"
+        ],
+        "bm25_top3": [
+          "제131조",
+          "제71조",
+          "제125조"
+        ],
+        "rrf_top3": [
+          "제69조",
+          "제131조",
+          "제65조"
+        ],
+        "candidate_union": [
+          "제69조",
+          "제131조",
+          "제65조",
+          "제71조",
+          "제125조",
+          "제76조",
+          "제29조",
+          "제81조",
+          "제60조",
+          "제96조",
+          "제77조",
+          "제64조",
+          "제79조",
+          "제10조",
+          "제86조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "staff_only",
+        "answer_spans_found": false
+      },
+      {
+        "id": "R14",
+        "group": "scope",
+        "question": "제가 잃어버린 우산을 가족이 이미 수령했나요?",
+        "required": [],
+        "spans": [],
+        "expected": "needs_review",
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "ms": 0.043,
+        "api_ms": 19.637,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          19.637,
+          22.958,
+          21.325
+        ],
+        "search_samples_ms": [
+          0.043,
+          0.054,
+          0.046
+        ],
+        "vector_top3": [
+          "제46조",
+          "제148조",
+          "제50조"
+        ],
+        "bm25_top3": [
+          "제108조",
+          "제114조",
+          "제46조"
+        ],
+        "rrf_top3": [
+          "제46조",
+          "제108조",
+          "제114조"
+        ],
+        "candidate_union": [
+          "제46조",
+          "제108조",
+          "제114조",
+          "제148조",
+          "제50조",
+          "제110조",
+          "제17조",
+          "제31조",
+          "제73조",
+          "제29조",
+          "제42조",
+          "제3조",
+          "제43조",
+          "제121조",
+          "제58조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "staff_only",
+        "answer_spans_found": false
+      },
+      {
+        "id": "R15",
+        "group": "scope",
+        "question": "대리 수령 조건만 알려주세요.",
+        "required": [],
+        "spans": [],
+        "expected": "needs_review",
+        "articles": [],
+        "hold": true,
+        "reason": "evidence_missing",
+        "retried_questions": [
+          "document_question"
+        ],
+        "ms": 63.255,
+        "api_ms": 81.672,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          81.672,
+          80.27,
+          66.414
+        ],
+        "search_samples_ms": [
+          63.255,
+          60.296,
+          49.333
+        ],
+        "vector_top3": [
+          "제49조",
+          "제24조",
+          "제25조"
+        ],
+        "bm25_top3": [
+          "제43조",
+          "제141조",
+          "제69조"
+        ],
+        "rrf_top3": [
+          "제141조",
+          "제129조",
+          "제43조"
+        ],
+        "candidate_union": [
+          "제141조",
+          "제129조",
+          "제43조",
+          "제49조",
+          "제24조",
+          "제25조",
+          "제69조",
+          "제71조",
+          "제154조",
+          "제105조",
+          "제138조",
+          "제75조",
+          "제135조",
+          "제39조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": false
+      },
+      {
+        "id": "R16",
+        "group": "scope",
+        "question": "제 주문을 다른 사람이 찾았는지 알려 주세요.",
+        "required": [],
+        "spans": [],
+        "expected": "needs_review",
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "ms": 0.041,
+        "api_ms": 17.959,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          17.959,
+          14.473,
+          16.994
+        ],
+        "search_samples_ms": [
+          0.041,
+          0.036,
+          0.04
+        ],
+        "vector_top3": [
+          "제76조",
+          "제75조",
+          "제138조"
+        ],
+        "bm25_top3": [
+          "제151조",
+          "제71조",
+          "제140조"
+        ],
+        "rrf_top3": [
+          "제137조",
+          "제151조",
+          "제76조"
+        ],
+        "candidate_union": [
+          "제137조",
+          "제151조",
+          "제76조",
+          "제71조",
+          "제75조",
+          "제138조",
+          "제140조",
+          "제47조",
+          "제109조",
+          "제95조",
+          "제141조",
+          "제65조",
+          "제70조",
+          "제117조",
+          "제136조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "staff_only",
+        "answer_spans_found": false
+      }
+    ],
+    "label": "expanded",
+    "source_commit": "5993846c86a6e38ff4a7f501c7e6f677e49ef375"
+  }
+}

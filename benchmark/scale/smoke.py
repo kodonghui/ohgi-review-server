@@ -114,12 +114,42 @@ def measure_new_topics(http):
     return {"combined_final": final, "combined_revision": revised, "private_lookup": held}
 
 
+def measure_policy_scope(http):
+    cases = (
+        ("takeout_pickup", "제가 직접 가지 못하면 포장 음식 대리 수령 가능한가요?",
+         "제69조", "주문자가 주문번호를 전달하면 가능하다"),
+        ("pickup_without_number", "주문번호 없이도 대리 수령을 할 수 있나요?",
+         "제69조", "주문자가 주문번호를 전달하면 가능하다"),
+        ("lost_property_pickup", "분실한 우산을 지인이 대신 가져가도 될까요?",
+         "제43조", "대리 수령 이름과 현장 이름을 확인한다"),
+    )
+    result = {}
+    for name, question, article_id, passage in cases:
+        path = review_path(http, question)
+        response = http.post(path + "/reply")
+        response.raise_for_status()
+        reply = response.json()
+        assert reply["status"] == "ready" and reply["articleIds"] == [article_id], reply
+        assert passage in reply["reply"] and http.get(path).json()["reply"] == reply["reply"], reply
+        result[name] = reply
+
+    path = review_path(http, "포장 주문을 친구가 이미 받아 갔는지 알려 주세요.")
+    response = http.post(path + "/reply")
+    response.raise_for_status()
+    held = response.json()
+    assert held["status"] == "needs_review" and held["attempts"] == 0, held
+    assert http.get(path).json()["reply"] is None
+    result["pickup_status"] = held
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--markdown", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--source-commit", default="c24a37b")
     parser.add_argument("--expect-new-topics", action="store_true")
+    parser.add_argument("--expect-policy-scope", action="store_true")
     args = parser.parse_args()
     source_commit = subprocess.check_output(
         ["git", "rev-parse", "--verify", f"{args.source_commit}^{{commit}}"], cwd=REPO, text=True,
@@ -155,7 +185,9 @@ def main():
                 try:
                     with httpx.Client(base_url=f"http://127.0.0.1:{port}", timeout=8, trust_env=False) as http:
                         wait_for_server(http, process)
-                        result = measure_http(http, args.expect_new_topics)
+                        result = measure_http(http, args.expect_new_topics or args.expect_policy_scope)
+                        if args.expect_policy_scope:
+                            result.update(measure_policy_scope(http))
                 finally:
                     stop_server(process)
         result.update(source_commit=source_commit, articles=index["article_count"], source_sha256=index["source_sha256"])

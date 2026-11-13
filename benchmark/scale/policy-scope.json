@@ -1,0 +1,18 @@
+[
+  {"id":"R01","group":"scope","question":"포장해 둔 음식을 친구가 대신 찾아가도 될까요?","required":["제69조"],"spans":["주문자가 주문번호를 전달하면 가능하다"],"expected":"ready"},
+  {"id":"R02","group":"scope","question":"주문자가 못 가는데 가족이 포장 주문을 대신 받으려면 뭘 준비하나요?","required":["제69조"],"spans":["주문자가 주문번호를 전달하면 가능하다"],"expected":"ready"},
+  {"id":"R03","group":"scope","question":"가족에게 포장 음식 픽업을 맡겨도 되나요?","required":["제69조"],"spans":["주문자가 주문번호를 전달하면 가능하다"],"expected":"ready"},
+  {"id":"R04","group":"scope","question":"포장 주문은 본인 말고 동생이 받아 가도 될까요?","required":["제69조"],"spans":["주문자가 주문번호를 전달하면 가능하다"],"expected":"ready"},
+  {"id":"R05","group":"scope","question":"포장 음식을 대리로 받으려면 무슨 정보가 필요한가요?","required":["제69조"],"spans":["주문자가 주문번호를 전달하면 가능하다"],"expected":"ready"},
+  {"id":"R06","group":"scope","question":"포장 주문의 대리 픽업 조건이 궁금해요.","required":["제69조"],"spans":["주문자가 주문번호를 전달하면 가능하다"],"expected":"ready"},
+  {"id":"R07","group":"scope","question":"분실한 지갑을 가족이 대신 찾아가려면 어떻게 해야 해요?","required":["제43조"],"spans":["대리 수령 이름과 현장 이름을 확인한다"],"expected":"ready"},
+  {"id":"R08","group":"scope","question":"매장 분실물 대리 수령에 이름이 필요한가요?","required":["제43조"],"spans":["대리 수령 이름과 현장 이름을 확인한다"],"expected":"ready"},
+  {"id":"R09","group":"scope","question":"주문 내역을 대신 문의할 때 누가 어떤 정보를 알려야 하나요?","required":["제141조"],"spans":["대리인의 이름과 요청 범위"],"expected":"ready"},
+  {"id":"R10","group":"scope","question":"통로를 막는 삼각대 설치가 허용되나요?","required":["제44조"],"spans":["허용하지 않는다"],"expected":"ready"},
+  {"id":"R11","group":"scope","question":"안전띠 달린 유아 의자는 몇 개 있나요? 포장 주문도 다른 사람이 대신 받아 가도 돼요?","required":["제37조","제69조"],"spans":["유아 의자 네 개","주문자가 주문번호를 전달하면 가능하다"],"expected":"ready"},
+  {"id":"R12","group":"scope","question":"포장한 음식 친구가 받아갔나요?","required":[],"spans":[],"expected":"needs_review"},
+  {"id":"R13","group":"scope","question":"제 대신 누군가 포장 주문을 이미 가져갔는지 확인해 주세요.","required":[],"spans":[],"expected":"needs_review"},
+  {"id":"R14","group":"scope","question":"제가 잃어버린 우산을 가족이 이미 수령했나요?","required":[],"spans":[],"expected":"needs_review"},
+  {"id":"R15","group":"scope","question":"대리 수령 조건만 알려주세요.","required":[],"spans":[],"expected":"needs_review"},
+  {"id":"R16","group":"scope","question":"제 주문을 다른 사람이 찾았는지 알려 주세요.","required":[],"spans":[],"expected":"needs_review"}
+]

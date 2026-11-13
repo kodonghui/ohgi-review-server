@@ -31,7 +31,7 @@ def link_model_file(source, target):
         return shutil.copy2(source, target)
 
 
-def measure_version(source_commit, source_archive, temp, label, policy, output, runs, diagnostics_only):
+def measure_version(source_commit, source_archive, temp, label, policy, output, runs, diagnostic_file):
     snapshot = temp / label
     with ZipFile(source_archive) as archive:
         archive.extractall(snapshot)
@@ -44,8 +44,8 @@ def measure_version(source_commit, source_archive, temp, label, policy, output, 
     env = {**os.environ, "PYTHONUTF8": "1", "FAKE_LLM": "true", "LANGSMITH_TRACING": "false", "HF_HUB_OFFLINE": "1"}
     env.pop("OPENAI_API_KEY", None)
     command = [sys.executable, str(__file__), "--worker", "--runs", str(runs), "--output", str(output)]
-    if diagnostics_only:
-        command.append("--diagnostics-only")
+    if diagnostic_file:
+        command.extend(("--diagnostic-file", str(diagnostic_file)))
     completed = subprocess.run(
         command,
         cwd=snapshot, env=env, capture_output=True, text=True, encoding="utf-8",
@@ -131,7 +131,7 @@ async def observe_candidates(index, cases):
     return seen
 
 
-def worker(output, runs, diagnostics_only):
+def worker(output, runs, diagnostic_file):
     import asyncio
     from importlib.metadata import version
     from time import perf_counter
@@ -151,9 +151,9 @@ def worker(output, runs, diagnostics_only):
         if case["id"] == "G15":
             case["expected"] = "needs_review"
     cases.extend(json.loads((HERE / "questions.json").read_text(encoding="utf-8")))
-    if diagnostics_only:
-        cases = json.loads((HERE / "diagnostics.json").read_text(encoding="utf-8"))
-    warmup_indices = (0, len(cases) // 4, len(cases) // 2) if diagnostics_only else (0, 13, 21)
+    if diagnostic_file:
+        cases = json.loads(diagnostic_file.read_text(encoding="utf-8"))
+    warmup_indices = (0, len(cases) // 4, len(cases) // 2) if diagnostic_file else (0, 13, 21)
     runtime = Path.cwd() / ".local"
     articles_by_id = {
         article.id: normalize(article.page_content)
@@ -199,7 +199,7 @@ def worker(output, runs, diagnostics_only):
         "mixed": [row for row in rows if row["group"] == "mixed"],
         "new_controls": [row for row in rows if row["group"] == "control"],
     }
-    if diagnostics_only:
+    if diagnostic_file:
         grouped = {"diagnostic": rows}
     result = {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -209,8 +209,8 @@ def worker(output, runs, diagnostics_only):
         "startup_seconds": round(startup_seconds, 3),
         "environment": {pkg: version(pkg) for pkg in ("fastapi", "chromadb", "langgraph", "fastembed")},
         "run": {"repetitions": runs, "warmups": 3, "transport": "FastAPI TestClient", "fake_delay_seconds": 0,
-                "openai_requests": 0, "diagnostics_only": diagnostics_only,
-                "new_queries_sha256": digest(HERE / ("diagnostics.json" if diagnostics_only else "questions.json")),
+                "openai_requests": 0, "diagnostics_only": diagnostic_file is not None,
+                "new_queries_sha256": digest(diagnostic_file or HERE / "questions.json"),
                 "course_queries_sha256": digest(Path("data/golden_set.json")),
                 "fixed_additions_sha256": digest(HERE.parent / "policy_cases.json"),
                 "lock_sha256": digest(Path("uv.lock")), "runner_sha256": digest(Path(__file__))},
@@ -227,15 +227,21 @@ def main():
     parser.add_argument("--source-commit", default="c24a37b")
     parser.add_argument("--expanded-only", action="store_true", help="155조 확장판만 측정합니다.")
     parser.add_argument("--diagnostics-only", action="store_true", help="155조의 추가 진단 문항만 측정합니다.")
+    parser.add_argument("--diagnostic-file", type=Path, help="별도 문항 JSON으로 155조를 측정합니다.")
     parser.add_argument("--runs", type=int, default=3)
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.runs < 1:
         parser.error("--runs는 1 이상이어야 합니다.")
     output = args.output.resolve()
+    diagnostic_file = args.diagnostic_file
+    if args.diagnostics_only:
+        diagnostic_file = diagnostic_file or HERE / "diagnostics.json"
+    if diagnostic_file:
+        diagnostic_file = diagnostic_file.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     if args.worker:
-        worker(output, args.runs, args.diagnostics_only)
+        worker(output, args.runs, diagnostic_file)
         return
     if args.markdown is None or not args.markdown.read_bytes().startswith(BASE.read_bytes()):
         parser.error("--markdown은 기존 규정 35조를 그대로 포함한 확장 문서를 지정하세요.")
@@ -248,12 +254,12 @@ def main():
         subprocess.run(["git", "archive", "--format=zip", f"--output={archive}", source_commit], cwd=REPO, check=True)
         results = {}
         corpora = [("expanded", args.markdown.resolve())]
-        if not (args.expanded_only or args.diagnostics_only):
+        if not (args.expanded_only or diagnostic_file):
             corpora.insert(0, ("original", None))
         for label, policy in corpora:
             print(f"{label} · {source_commit[:7]}", flush=True)
             results[label] = measure_version(
-                source_commit, archive, temp, label, policy, temp / f"{label}.json", args.runs, args.diagnostics_only,
+                source_commit, archive, temp, label, policy, temp / f"{label}.json", args.runs, diagnostic_file,
             )
             print(json.dumps(results[label]["summary"], ensure_ascii=False), flush=True)
     output.write_text(json.dumps(results, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

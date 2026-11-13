@@ -1,112 +1,138 @@
 # 오지 레스토랑 리뷰 서버
 
-기존 FastAPI 리뷰 과제에 LangChain과 LangGraph를 연결했습니다. 리뷰를 등록하면 매장 규정을 찾아 사장님 답글을 작성하고 검토합니다. 통과한 답글을 저장해 리뷰 조회에서 읽거나 한 줄 지시로 수정할 수 있습니다.
+리뷰에 담긴 질문을 나누고 매장 규정의 근거를 찾은 뒤, 사장님 답글을 작성·검토하는 FastAPI 실습입니다. 통과한 답글은 리뷰에 저장하며 JSON, SSE, 한 문장 수정 경로에서 같은 LangGraph를 사용합니다.
+
+| 검증한 동작 | 초기 → 최종 |
+| --- | ---: |
+| 35조 규정집 · 필요한 조문을 모두 포함해 저장 | 6/44 → 43/44 |
+| 50페이지·155조 규정집 · 새 조문의 번호와 핵심 구절까지 저장 | 0/24 → 24/24 |
+| 155조 대리 수령 등 적용 범위 진단 · 번호와 핵심 구절까지 저장 | 5/11 → 11/11 |
+| 같은 진단의 실제 상태·대상 불명 문의 · 올바르게 보류 | 2/5 → 5/5 |
+
+[35조 버전별 측정](benchmark/RESULTS.md) · [155조 버전별 측정과 응답 원본](benchmark/scale/VERSIONS.md)
 
 ## 로컬 실행
 
-Python 3.14와 uv가 필요합니다. 아래는 프로젝트 루트에서 실행하는 PowerShell 명령입니다.
+Python 3.14와 uv가 필요합니다. 다음은 Windows PowerShell에서 저장소 루트로 이동해 실행하는 명령입니다.
 
 ```powershell
 uv sync --locked
-uv run python -m app.services.policy_index
-uv run python -m app.services.policy_index --evaluate
-
-$env:FAKE_LLM = "true"
-uv run fastapi run --host 127.0.0.1 --port 8000
+uv run --locked python -m app.services.policy_index
+$env:FAKE_LLM = 'true'
+$env:LANGSMITH_TRACING = 'false'
+uv run --locked fastapi run --host 127.0.0.1 --port 8000
 ```
 
-첫 인덱스 구축은 공개 다국어 임베딩 모델을 다운로드합니다. 강의의 `data/ohgi_regulations.md`를 35개 조문으로 나눠 Chroma에 저장합니다. 앱 시작 시 준비된 인덱스와 모델 캐시를 로컬에서 읽습니다. 규정이 바뀌면 인덱스를 다시 만든 뒤 앱을 재시작합니다. 기본 데이터 경로는 `.local/`입니다.
+첫 인덱스 구축 때 다국어 MiniLM 임베딩 모델을 내려받습니다. 기본 앱은 [실습 규정집 35조](data/ohgi_regulations.md)와 `.local/`을 사용합니다. 앱 시작 전에 인덱스를 만들고 규정이 바뀌면 인덱스를 다시 만든 뒤 서버를 재시작합니다. 가짜 모델 모드로 OpenAI 키 없이 전체 흐름을 실행할 수 있습니다.
 
-[Swagger UI](http://127.0.0.1:8000/docs)에서 등록·조회·답글·설정 API를 호출할 수 있습니다. 가짜 모드의 그래프는 정해진 예문과 판정을 사용합니다. `/reply/sync`는 과제의 프롬프트 반향 응답을 유지합니다. `FAKE_LLM=true`를 사용하면 키 설정과 관계없이 OpenAI 비용 없이 실습할 수 있습니다.
+[Swagger UI](http://127.0.0.1:8000/docs)에서 리뷰 등록·답글 생성·조회·수정을 실행할 수 있습니다. 155조와 제69조 대리 수령은 아래 확장판 재현 명령으로 실행합니다.
+
+## 아키텍처
+
+```mermaid
+flowchart TD
+    A["FastAPI · 등록된 리뷰의 답글 요청"] --> R["질문 분리와 적용 규정 확인"]
+    R -->|"개별 주문 상태 등"| H["needs_review · 직원 확인"]
+    R -->|"등록된 사건 규정"| ID["필수 조문 ID 조회"]
+    R -->|"문서 검색"| S["Chroma 벡터 + BM25 → RRF 후보"]
+    ID --> E["질문별 적용 범위와 근거 문장 확인"]
+    S --> E
+    E -->|"일부 근거 부족"| Q["해당 질문만 한 번 재검색 후 확인"]
+    Q -->|"근거 부족"| H
+    E -->|"근거 확보 또는 일반 후기"| D["구조화 답글 초안"]
+    Q -->|"근거 확보"| D
+    D --> V["필수 조문·조건 확인 및 모델 검토"]
+    V -->|"첫 실패"| D
+    V -->|"두 번째 실패"| H
+    V -->|"통과"| P["ready · 답글 저장"]
+```
+
+- **검색** · Chroma는 임베딩으로 의미가 가까운 조문을, BM25는 한국어 단어와 글자 쌍이 겹치는 조문을 찾습니다. 각각 최대 8개 후보를 RRF로 정렬하고, 상위 몇 개 밖에 있는 조문도 직접 근거를 찾을 때 사용합니다. [검색기](app/services/hybrid_retriever.py) · [질문별 검색](app/services/policy_search.py)
+- **근거 선택** · ‘포장 음식을 대신 받는다’와 ‘분실물을 대신 받는다’는 행동이 같아도 적용 대상이 다릅니다. 제목과 본문에서 대상을 확인하고, 그 행동의 조건을 설명하는 문장을 고릅니다. 제69조는 질문에 주문번호가 없어도 안내할 수 있습니다. 실제로 누군가 받아 갔는지는 매장 기록이 필요합니다. [문장 선택](app/services/policy_passages.py)
+- **작성과 검토** · 그래프는 필요한 조문이 확보됐을 때 초안을 작성합니다. 사건별 필수 안내와 모델의 구조화 판정을 통과하면 `ready`를 반환합니다. 최대 초안 2회, 그래프 단계 한도 8, 비동기 요청 시간 기본 60초입니다. [그래프](app/services/reply_workflow.py)
+- **상태** · `InMemorySaver`가 `review:{id}`별 체크포인트를 관리합니다. SQLite Store의 `("stores", "ohgi", "reply")` 네임스페이스에는 매장 말투와 문장 상한을 저장합니다. 설정은 재시작 후 다시 읽으며 리뷰·답글·체크포인트는 메모리에서 초기화됩니다. [앱 초기화](app/main.py) · [답글 서비스](app/services/reply_service.py)
+
+### 실습 1–6단계
+
+| 단계 | 구현 |
+| --- | --- |
+| 1 | [LCEL 체인](app/clients/llm_client.py)의 `ChatPromptTemplate → ChatOpenAI → StrOutputParser` |
+| 2 | [구조화 응답](app/schemas/reply_draft.py)의 Pydantic 초안·검토 스키마 |
+| 3 | [LangGraph](app/services/reply_workflow.py)의 `retrieve → draft → review`와 제한된 재작성 |
+| 4 | [SSE](app/routers/review_router.py)의 진행·초안 조각·최종 상태 |
+| 5 | [체크포인터와 Store](app/main.py)의 리뷰별 상태·매장 선호·답글 수정 |
+| 6 | [규정 RAG](app/services/policy_index.py)의 사전 인덱싱, 하이브리드 검색, 질문별 원문 검증 |
 
 ## API
 
 | 메서드 | 경로 | 결과 |
-|---|---|---|
+| --- | --- | --- |
 | POST | `/api/reviews` | 리뷰 등록 201 |
 | GET | `/api/reviews`, `/api/reviews/{id}` | 목록과 개별 리뷰 조회 |
-| POST | `/api/reviews/{id}/reply` | 검색·작성·검토 후 구조화 결과 |
-| POST | `/api/reviews/{id}/reply/stream` | 같은 그래프의 진행·초안 조각·최종 결과 |
+| POST | `/api/reviews/{id}/reply` | 구조화 답글 결과 |
+| POST | `/api/reviews/{id}/reply/stream` | SSE 진행·초안 조각·최종 결과 |
 | POST | `/api/reviews/{id}/reply/revise` | `instruction`으로 직전 저장 답글 수정 |
-| POST | `/api/reviews/{id}/reply/sync` | 동기 LCEL 실습 경로. `reviewId`, `reply`, `model` 반환 |
+| POST | `/api/reviews/{id}/reply/sync` | 동기 LCEL 실습 경로 |
 | GET, PUT | `/api/reply-preferences` | 매장 말투와 문장 상한 읽기·저장 |
 
-리뷰 등록 키는 `customerName`(1~20자), `rating`(1~5 정수), `content`(1~500자)입니다. 리뷰 1~3은 서버가 시작할 때 생성됩니다. 답글 결과에는 `status`, `reply`, `tone`, `needsFollowup`, `articleIds`, `attempts`가 들어갑니다.
+등록 키는 `customerName`(1~20자), `rating`(1~5 정수), `content`(1~500자)입니다. 답글 결과에는 `status`, `reply`, `tone`, `needsFollowup`, `articleIds`, `attempts`가 포함됩니다. `ready`는 저장을 뜻합니다. `needs_review`의 `reply`는 `null`이며 기존 답글을 유지합니다. `needsFollowup`은 매장에서 추가 확인할 내용이 있다는 표시입니다.
 
-- `status=ready`이면 서버가 초안을 저장합니다. `needsFollowup=true`는 주문이나 사진을 매장에서 추가 확인해야 한다는 뜻입니다.
-- `status=needs_review`이면 `reply=null`이고, 앞서 저장한 답글이 있다면 유지됩니다.
-- 404는 없는 리뷰, 409는 같은 리뷰를 이미 처리 중이거나 수정할 답글이 없는 경우입니다. JSON 응답에서 모델 실패는 502입니다.
-- SSE는 응답 전 404·409를 HTTP로, 응답 시작 뒤 실패를 `error` 이벤트로 전달합니다. `progress`에서 근거 보류·재검색과 초안 검토 실패를 볼 수 있습니다. `draft_delta`는 검토 중인 글이고 `attempt`가 바뀌면 미리보기를 새로 시작합니다. 저장 결과는 `final`에서 확인합니다. POST는 `fetch`의 스트림이나 `curl.exe -N`으로 읽을 수 있습니다.
+404는 없는 리뷰, 409는 같은 리뷰의 처리 중 충돌 또는 수정할 답글이 없는 경우입니다. JSON 경로는 모델 실패를 502로 반환하고 SSE는 전송을 시작한 뒤의 실패를 `error` 이벤트로 보냅니다. `draft_delta`는 임시 텍스트이며 `attempt`가 달라지면 미리보기를 새로 시작합니다. 저장 여부는 `final`에서 확인합니다.
 
 ### 복합 리뷰 실습
 
-서버를 실행한 뒤 다른 PowerShell 창에서 아래를 실행합니다.
+서버를 실행한 뒤 다른 PowerShell 창에서 실행합니다. 가짜 모델의 두 번째 초안과 한 문장 수정에서 제12조의 24시간과 제17조의 1시간 및 사진 조건을 확인할 수 있습니다.
 
 ```powershell
-$base = "http://127.0.0.1:8000"
+$base = 'http://127.0.0.1:8000'
 $body = @{
-    customerName = "실습 손님"
+    customerName = '실습 손님'
     rating = 1
-    content = "주문한 메뉴와 다른 음식이 왔고 배달 용기가 깨져 국물이 쏟아졌어요."
+    content = '주문한 메뉴와 다른 음식이 왔고 배달 용기가 깨져 국물이 쏟아졌어요.'
 } | ConvertTo-Json
 $review = Invoke-RestMethod -Method Post -Uri "$base/api/reviews" `
-    -ContentType "application/json; charset=utf-8" -Body $body
+    -ContentType 'application/json; charset=utf-8' -Body $body
 $reviewUrl = "$base/api/reviews/$($review.reviewId)"
 curl.exe -N -X POST "$reviewUrl/reply/stream"
 Invoke-RestMethod -Uri $reviewUrl
 Invoke-RestMethod -Method Post -Uri "$reviewUrl/reply/revise" `
-    -ContentType "application/json; charset=utf-8" `
-    -Body (@{ instruction = "한 문장으로 줄여 주세요." } | ConvertTo-Json)
+    -ContentType 'application/json; charset=utf-8' `
+    -Body (@{ instruction = '한 문장으로 줄여 주세요.' } | ConvertTo-Json)
 ```
 
-첫 초안에서 빠진 배달 사고 조건이 검토에서 발견됩니다. 가짜 모드의 두 번째 초안에는 제12조의 24시간과 제17조의 1시간, 각각의 사진 제출이 들어갑니다. 이어서 한 문장 수정에서도 두 기한을 확인할 수 있습니다.
+`PUT /api/reply-preferences`에 `{"style":"따뜻","maxSentences":3}`을 보내 매장 선호를 바꿀 수 있습니다. 말투는 `정중` 또는 `따뜻`, 문장 상한은 1~5입니다.
 
-### 매장 선호
+## 벤치마크
+
+### 기본 규정 35조
+
+강의 골든셋 20개를 검색기에 직접 넣었을 때, Chroma 벡터는 Hit@1 **13/20**, Hit@3 **15/20**, BM25는 **14/20**, **20/20**, RRF는 **17/20**, **19/20**이었습니다. 이 세트에서는 RRF가 첫 후보를 더 자주 맞혔고 BM25가 상위 세 후보에서 더 많이 찾았습니다. [평가 명령과 전체 기록](benchmark/RESULTS.md)
+
+답글 API 벤치에서는 44건 중 필요한 조문을 모두 포함해 저장한 수가 6건에서 43건으로 늘었습니다. 남은 G15는 중증 땅콩 알레르기가 있는 손님의 특정 주문 안전 문의입니다. 검색 후보의 제20조는 같은 주방에서 미량이 섞일 수 있다는 일반 근거를 담고 있어, 실제 안전 판단은 매장 확인으로 넘겼습니다. [35조 버전별 수치](benchmark/RESULTS.md) · [제20조 근거 보존 시제품](benchmark/experiments/ANSWERABILITY.md)
+
+### 50페이지·155조 확장판
+
+기존 규정 35조에 가상 규정 120조를 붙였습니다. 시작 버전은 새 조문 24건 중 23건에서 원질문 검색 후보에 정답 근거가 있었지만, 이를 전부 답글에 반영해 저장한 건 0건이었습니다. 질문별 근거를 연결한 뒤 24/24를 저장했고, 적용 범위를 확인하는 버전에서 추가 진단 10/10과 대리 수령 등 변형 11/11을 확인했습니다. 기존 43/44와 확장판 고정 대조군 보류 7/7도 유지했습니다. [규정집 크기 비교](benchmark/scale/RESULTS.md) · [155조 버전별 측정](benchmark/scale/VERSIONS.md)
+
+초기 실행의 35조 인덱스와 임베딩 캐시를 준비한 뒤 아래를 실행합니다. PDF 생성기는 Windows 맑은 고딕을 사용합니다. 확장판 벤치와 HTTP 점검은 선택한 Git 커밋을 임시 경로에 풀어 해당 규정집을 인덱싱합니다.
 
 ```powershell
-Invoke-RestMethod -Method Put -Uri "$base/api/reply-preferences" `
-    -ContentType "application/json; charset=utf-8" `
-    -Body (@{ style = "따뜻"; maxSentences = 3 } | ConvertTo-Json)
+$book = '.local/benchmark/regulations-50p.md'
+$version = '5993846'
+uv run --no-project --with reportlab python benchmark/scale/render_book.py --markdown $book --pdf .local/benchmark/regulations-50p.pdf
+uv run --locked python benchmark/scale/run.py --expanded-only --source-commit $version --markdown $book --output .local/benchmark/router-155.json
+uv run --locked python benchmark/scale/run.py --diagnostic-file benchmark/scale/policy-scope.json --source-commit $version --markdown $book --output .local/benchmark/router-155-scope.json
+uv run --locked python benchmark/scale/smoke.py --expect-policy-scope --source-commit $version --markdown $book --output .local/benchmark/router-155-http.json
 ```
 
-`style`은 `정중` 또는 `따뜻`, `maxSentences`는 1~5입니다. SQLite Store에 보관해 재시작 뒤에도 이 값을 사용합니다. 리뷰, 답글과 리뷰별 체크포인트는 프로세스 메모리에 있으므로 재시작하면 초기화됩니다. 실습 서버는 한 매장·한 프로세스를 전제로 합니다.
-
-## 구현 순서
-
-| 단계 | 구현 | 위치 |
-|---|---|---|
-| 1 | `ChatPromptTemplate → ChatOpenAI → StrOutputParser` LCEL | `app/clients/llm_client.py` |
-| 2 | Pydantic 스키마로 초안과 검토 결과를 파싱 | `app/schemas/reply_draft.py` |
-| 3 | `retrieve → draft → review` 후 미통과 시 한 번 재작성 | `app/services/reply_workflow.py` |
-| 4 | `astream()`의 진행, 초안 조각, 완료 상태를 SSE로 변환 | `app/services/reply_service.py`, `app/routers/review_router.py` |
-| 5 | 리뷰별 `thread_id` 체크포인트와 SQLite 매장 선호 Store | `app/services/reply_service.py`, `app/main.py` |
-| 6 | 필수 조문 ID 조회 + Chroma 벡터·BM25 검색과 RRF 순위 결합 | `app/services/policy_search.py`, `app/services/hybrid_retriever.py`, `app/services/policy_index.py` |
-
-초안은 최대 2회입니다. 그래프 단계 한도는 8, 비동기 요청 시간 상한 기본값은 60초입니다. 초안과 검토가 모두 모델을 쓰는 경우 최대 4번의 모델 작업이 일어납니다. SDK 재시도는 호출별 연결 장애 처리로 별도 적용합니다. 규정 인덱스가 준비되지 않으면 규정 근거가 필요한 요청을 매장 확인으로 보냅니다.
-
-## 검색 평가
-
-강의 골든셋 20개에서 정답 조문이 앞의 한 개 또는 세 개 후보에 들어오는지 측정했습니다. 이 평가는 답글 생성 전에 실행하며, 필수 조문 ID 조회는 순위 비교에서 제외합니다.
-
-| 검색 | Hit@1 | Hit@3 |
-|---|---:|---:|
-| Chroma 벡터 | 13/20 | 15/20 |
-| BM25 | 14/20 | 20/20 |
-| 하이브리드 RRF | 17/20 | 19/20 |
-
-하이브리드는 이 실습 자료에서 첫 후보를 더 자주 맞혔고, 주류 배달 질문은 BM25의 세 후보에만 정답이 들었습니다. 실제 요청에서는 오배송·이물질·배달 사고 등 적용 규정이 확인된 경우 정확한 조문 ID를 우선 확보합니다. 범용 매장 FAQ의 생성 정확도는 이 검색 결과로 판단할 수 없습니다.
-
-질문별 근거 검색, 부족한 근거의 한 번 재검색과 사건별 답글 검증을 적용한 커밋별 측정 결과는 [버전별 벤치마크](benchmark/RESULTS.md)에 있습니다. 같은 문항으로 검색한 조문과 API에 저장된 답글을 각각 비교할 수 있습니다.
-
-## 테스트와 동시 요청
+## 검증 범위
 
 ```powershell
-$env:FAKE_LLM = "true"
-uv run pytest -q
+$env:FAKE_LLM = 'true'
+$env:LANGSMITH_TRACING = 'false'
+uv run --locked pytest -q
 ```
 
-테스트는 가짜 모델과 `httpx.MockTransport`를 사용합니다. 모의 전송으로 실제 `ChatOpenAI`의 구조화 파싱과 토큰 조각, 끊긴 응답·실패 응답을 확인합니다.
+`5993846`에서 테스트 89개가 통과했습니다. 155조는 실제 Chroma·BM25를 사용한 FastAPI `TestClient`와 로컬 Uvicorn으로 JSON·SSE·수정·재조회·보류를 검증했습니다. 측정의 OpenAI 요청은 0회입니다. 가짜 모델과 개발에 사용한 회귀 문항으로는 실제 모델의 문장 품질, 새로운 사용자 질문의 성능, 운영 지연을 판단할 수 없습니다. [HTTP 점검 원본](benchmark/scale/results/155-5993846-localhost.json)
 
-부하 실습은 가짜 모델 로컬 서버를 8000번에 띄운 상태에서 `uv run python benchmark/benchmark.py`를 실행합니다. 도구는 `/health`로 모델을 확인하고 시험용 리뷰 100개를 등록합니다. 두 경로의 응답 시간(p50·p95), 처리량(RPS), 실패 건수를 비교합니다. 동기 체인과 비동기 그래프에는 서로 다른 작업량이 포함됩니다.
-
-리팩토링 전 OpenAI 호출 결과와 동기·비동기 측정치는 기준 커밋의 README에 보존되어 있습니다. `git show d13fba9:README.md`
+가짜 모델 로컬 서버를 8000번 포트에 띄운 뒤 `uv run --locked python benchmark/benchmark.py`로 동기·비동기 경로의 지연과 처리량을 비교할 수 있습니다. 두 경로의 작업량은 다릅니다. [리팩토링 전 README와 실제 OpenAI 예시](https://github.com/kodonghui/ohgi-review-server/blob/d13fba9510a31f517b983f933e9348187b87741a/README.md)
