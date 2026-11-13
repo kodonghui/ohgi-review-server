@@ -8,7 +8,7 @@ from langchain_core.documents import Document
 from app.services.hybrid_retriever import SearchRankings
 from app.services.policy_index import load_articles
 from app.services.policy_search import PolicySearch
-from app.services.policy_topics import RULES
+from app.services.policy_topics import RULES, route_questions
 from app.services.reply_workflow import policy_notice_problem
 
 
@@ -181,3 +181,11 @@ def test_unanswered_part_holds_the_whole_reply():
     assert result.needs_manual_review is True
     assert result.required_ids == ("제904조",)
     assert result.reason == "evidence_missing"
+
+
+def test_a_repeated_rule_hit_does_not_discard_the_other_question():
+    review = "12명 단체 예약은 며칠 전에 해야 해요? 4명 예약도 같은가요?"
+    known, unresolved, reason = route_questions(review)
+    assert reason == ""
+    assert [rule.article_id for rule, _ in known] == ["제30조"]
+    assert unresolved == ("4명 예약도 같은가요?",)

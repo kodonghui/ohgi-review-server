@@ -197,15 +197,18 @@ def route_questions(text: str) -> tuple[tuple[tuple[PolicyRule, str], ...], tupl
             found = [item for item in found if item.topic != "payments"]
         for item in found:
             topics.setdefault(item.topic, (item, part))
-        if not found and inquiry:
+        if inquiry:
             unresolved.append(part)
 
     if any("환불" in part for part in unresolved):
         taste = next(item for item in RULES if item.topic == "taste_refund")
         if taste.question_pattern.search(text.replace("\n", " ")):
             topics.setdefault(taste.topic, (taste, text))
-    missing = tuple(part for part in unresolved if not (topics and FOLLOWUP_QUESTION.fullmatch(part)))
     matches = tuple(topics[item.topic] for item in RULES if item.topic in topics)
+    covered = {part for _, part in matches}
+    missing = tuple(part for part in unresolved if part not in covered and not (
+        topics and FOLLOWUP_QUESTION.fullmatch(part)
+    ))
     return matches, missing, ""
 
 
