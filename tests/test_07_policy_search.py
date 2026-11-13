@@ -7,6 +7,7 @@ from langchain_core.documents import Document
 from app.services.hybrid_retriever import SearchRankings
 from app.services.policy_index import load_articles
 from app.services.policy_search import PolicySearch
+from app.services.policy_topics import RULES
 
 
 class TestIndex:
@@ -37,6 +38,10 @@ def ranked(*articles):
     return SearchRankings(list(articles), [], list(articles))
 
 
+def focused_query(topic):
+    return next(item.query for item in RULES if item.topic == topic)
+
+
 def test_explicit_questions_resolve_to_distinct_article_excerpts():
     index = TestIndex()
     alcohol, hours = "맥주도 배달돼요?", "그리고 배달 주문이 밤 몇 시에 마감되나요?"
@@ -54,10 +59,29 @@ def test_correct_article_number_without_the_direct_sentence_does_not_pass():
     index = TestIndex()
     query = "맥주도 배달돼요?"
     article = Document(id="제18조", metadata={"article_no": "제18조"}, page_content="신분증을 확인한다.")
-    result = asyncio.run(PolicySearch(index, TestRetriever({query: ranked(article)})).retrieve(query))
+    hybrid = TestRetriever({query: ranked(article), focused_query("alcohol_delivery"): ranked(article)})
+    result = asyncio.run(PolicySearch(index, hybrid).retrieve(query))
     assert result.needs_manual_review is True
     assert result.reason == "evidence_missing"
     assert result.evidence == ()
+    assert result.retried_questions == ("alcohol_delivery",)
+    assert hybrid.queries == [query, focused_query("alcohol_delivery")]
+
+
+def test_only_the_missing_question_gets_one_focused_search():
+    index = TestIndex()
+    alcohol, hours = "맥주도 배달돼요?", "배달 주문이 몇 시에 마감되나요?"
+    first = [index.articles[key] for key in ("제16조", "제25조", "제17조", "제18조")]
+    hybrid = TestRetriever({
+        alcohol: ranked(*first),
+        hours: ranked(index.articles["제15조"]),
+        focused_query("alcohol_delivery"): ranked(index.articles["제16조"]),
+    })
+    result = asyncio.run(PolicySearch(index, hybrid).retrieve(f"{alcohol} {hours}"))
+    assert hybrid.queries == [alcohol, focused_query("alcohol_delivery"), hours]
+    assert result.retried_questions == ("alcohol_delivery",)
+    assert [item.id for item in result.articles] == ["제18조", "제15조"]
+    assert result.needs_manual_review is False
 
 
 def test_order_status_stops_even_if_general_damage_policy_is_known():

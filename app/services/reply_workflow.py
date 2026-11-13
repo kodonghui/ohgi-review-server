@@ -79,8 +79,12 @@ def build_reply_workflow(
         }
         if evidence.needs_manual_review:
             initial.update(status="needs_review", feedback="적용할 규정을 매장에서 확인해 주세요.")
-        if evidence.reason:
-            get_stream_writer()({"event": "progress", "stage": "evidence", "reason": evidence.reason})
+        if evidence.reason or evidence.retried_questions:
+            get_stream_writer()({
+                "event": "progress", "stage": "evidence",
+                "reason": evidence.reason or "evidence_recovered",
+                "retriedQuestions": list(evidence.retried_questions),
+            })
         return initial
 
     def after_retrieval(state: ReplyWorkflowState) -> Literal["draft", "__end__"]:
