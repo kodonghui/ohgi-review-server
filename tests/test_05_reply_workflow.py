@@ -101,10 +101,7 @@ def test_draft_is_rewritten_with_feedback_and_reuses_evidence(policy_search: Pol
         generation_feedback.append(state["feedback"])
         reply = "사진을 보내 주시면 매장에서 확인하겠습니다."
         if state["feedback"]:
-            reply = (
-                "다른 메뉴는 수령 후 24시간 이내, 용기 파손은 1시간 이내에 사진과 함께 알려 주세요. "
-                "매장에서 확인하겠습니다."
-            )
+            reply = " ".join(item.required_notice() for item in state["evidence"].evidence)
         return GroundedReplyDraft(
             reply=reply,
             tone="사과",
@@ -115,9 +112,7 @@ def test_draft_is_rewritten_with_feedback_and_reuses_evidence(policy_search: Pol
     async def review(state: ReplyWorkflowState):
         draft = state["draft"]
         assert draft is not None
-        contains_both_deadlines = (
-            "다른 메뉴는 수령 후 24시간" in draft.reply and "용기 파손은 1시간" in draft.reply
-        )
+        contains_both_deadlines = all(item.required_notice() in draft.reply for item in state["evidence"].evidence)
         return ReplyVerdict(passed=contains_both_deadlines, reason="오배송과 파손 안내를 각각 써 주세요.")
 
     graph = build_reply_workflow(retrieve)
@@ -127,7 +122,8 @@ def test_draft_is_rewritten_with_feedback_and_reuses_evidence(policy_search: Pol
     draft = result["draft"]
     assert draft is not None
     assert draft.article_ids == ARTICLE_IDS
-    assert generation_feedback == ["", "규정의 접수 기한(24시간, 1시간)과 사진 제출 조건을 모두 안내해 주세요."]
+    assert generation_feedback == ["", "확인한 안내를 빠짐없이 써 주세요. "
+                                       "다른 메뉴나 이물질은 수령 후 24시간 이내에 사진과 함께 알려 주세요."]
     assert searched == [REVIEW["review_text"]]
 
 
@@ -174,7 +170,7 @@ def test_second_failed_verdict_withholds_draft(policy_search: PolicySearch):
 
     async def draft(state: ReplyWorkflowState):
         return GroundedReplyDraft(
-            reply="다른 메뉴는 1시간, 용기 파손은 24시간 안에 사진과 함께 알려 주세요.",
+            reply=" ".join(item.required_notice() for item in state["evidence"].evidence),
             tone="사과",
             needs_followup=True,
             article_ids=ARTICLE_IDS,
@@ -190,3 +186,22 @@ def test_second_failed_verdict_withholds_draft(policy_search: PolicySearch):
     assert result["status"] == "needs_review"
     assert result["draft"] is None
     assert result["feedback"] == "두 조문의 접수 기한을 안내해 주세요."
+
+
+@pytest.mark.parametrize("reply", [
+    "오배송 사진은 수령 1시간 안에, 용기 파손 사진은 수령 24시간 안에 알려 주세요.",
+    "다른 메뉴나 이물질은 수령 후 24시간 이내에 사진과 함께 알려 주세요. "
+    "용기 파손이나 내용물 유출은 수령 후 1시간 이내에 사진과 함께 알려 주세요. 오배송은 1시간 안에 알려 주세요.",
+])
+def test_swapped_or_added_deadlines_never_reach_the_model_judge(policy_search: PolicySearch, reply: str):
+    async def draft(_state):
+        return GroundedReplyDraft(reply=reply, tone="사과", needs_followup=True, article_ids=ARTICLE_IDS)
+
+    async def should_not_run(_state):
+        pytest.fail("잘못된 사건별 기한을 모델 판정으로 넘겼습니다.")
+
+    graph = build_reply_workflow(policy_search.retrieve)
+    result = asyncio.run(graph.ainvoke(REVIEW, context=ReplyModelCalls(draft, should_not_run)))
+    assert result["status"] == "needs_review"
+    assert result["attempts"] == 2
+    assert result["draft"] is None

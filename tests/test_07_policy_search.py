@@ -8,6 +8,7 @@ from app.services.hybrid_retriever import SearchRankings
 from app.services.policy_index import load_articles
 from app.services.policy_search import PolicySearch
 from app.services.policy_topics import RULES
+from app.services.reply_workflow import policy_notice_problem
 
 
 class TestIndex:
@@ -53,6 +54,10 @@ def test_explicit_questions_resolve_to_distinct_article_excerpts():
     assert "주류는 배달하지 않는다." in result.evidence[0].excerpts
     assert any("오후 9시까지" in line for line in result.evidence[1].excerpts)
     assert result.needs_manual_review is False
+    assert policy_notice_problem("맥주도 배달할 수 있습니다.", result)
+    assert policy_notice_problem("주류는 배달하지 않습니다. 그래도 맥주는 보내 드릴 수 있습니다.", result)
+    assert not policy_notice_problem("주류는 배달하지 않습니다. 배달 주문은 오후 9시까지 받습니다.", result)
+    assert not policy_notice_problem("주류는 배달하지 않습니다. 맥주도 배달이 불가능합니다.", result)
 
 
 def test_correct_article_number_without_the_direct_sentence_does_not_pass():

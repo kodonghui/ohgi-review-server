@@ -31,10 +31,18 @@ STAFF_ONLY = re.compile(
 class PolicyEvidence:
     topic: str
     article_id: str
-    question: str
     excerpts: tuple[str, ...]
     hours: str | None
     followup: bool
+
+    def required_notice(self) -> str | None:
+        if self.topic == "quality_incident":
+            return f"다른 메뉴나 이물질은 수령 후 {self.hours}시간 이내에 사진과 함께 알려 주세요."
+        if self.topic == "delivery_damage":
+            return f"용기 파손이나 내용물 유출은 수령 후 {self.hours}시간 이내에 사진과 함께 알려 주세요."
+        if self.topic == "alcohol_delivery":
+            return "주류는 배달하지 않습니다."
+        return None
 
 
 @dataclass(frozen=True)
@@ -48,7 +56,7 @@ class PolicyRule:
     followup: bool = False
     deadline: bool = False
 
-    def evidence(self, article: Document, question: str) -> PolicyEvidence | None:
+    def evidence(self, article: Document) -> PolicyEvidence | None:
         lines = article.page_content.splitlines()
         if len(lines) > 1 and lines[0].startswith(self.article_id):
             lines = lines[1:]
@@ -61,7 +69,7 @@ class PolicyRule:
         hours = re.search(r"(\d+)\s*시간", excerpts[0]) if self.deadline else None
         if self.deadline and hours is None:
             return None
-        return PolicyEvidence(self.topic, self.article_id, question, excerpts,
+        return PolicyEvidence(self.topic, self.article_id, excerpts,
                               hours.group(1) if hours else None, self.followup)
 
 

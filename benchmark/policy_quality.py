@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 from collections import Counter
+from datetime import datetime, timezone
 from importlib.metadata import version
 from pathlib import Path
 from statistics import median, quantiles
@@ -31,7 +32,6 @@ from app.services.policy_search import PolicySearch
 
 HERE = Path(__file__).resolve().parent
 DATA = Path.cwd() / "data"
-MODEL_FILES = ("tokenizer.json", "onnx/model_qint8_avx512_vnni.onnx")
 INCIDENT = "주문한 메뉴와 다른 음식이 왔고 배달 용기가 깨져 국물이 쏟아졌어요."
 SWAPPED = "오배송 사진은 수령 1시간 안에, 용기 파손 사진은 수령 24시간 안에 알려 주세요."
 INCIDENT_PHOTO = r"(?:오배송|다른 메뉴|이물질)[^.?!]{0,35}24\s*시간[^.?!]{0,25}사진"
@@ -193,8 +193,6 @@ def main():
                             runtime_dir=data, thread_pool_size=None)
         real_index = server.open_policy_index
         override = {"get_settings": lambda: settings, "open_policy_index": lambda _: real_index(runtime)}
-        if hasattr(settings, "policy_reranker_dir"):
-            settings = settings.model_copy(update={"policy_reranker_dir": runtime / "policy-reranker"})
         active, observe_search = capture_search()
         with patch.multiple(server, **override), observe_search, TestClient(server.app) as http:
             assert http.get("/health").json()["model"] == "fake-llm"
@@ -206,14 +204,14 @@ def main():
         "regulations": sha256(DATA / "ohgi_regulations.md"),
         "course_questions": sha256(DATA / "golden_set.json"),
         "extra_questions": sha256(HERE / "policy_cases.json"),
+        "runner": sha256(Path(__file__)),
+        "lockfile": sha256(Path("uv.lock")),
         "embedding_model": manifest["embedding_model"],
-        "reranker_assets": {
-            name: sha256(runtime / "policy-reranker" / name)
-            for name in MODEL_FILES if (runtime / "policy-reranker" / name).is_file()
-        },
+        "indexed_articles": manifest["article_count"],
     }
     result = {
         "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+        "recorded_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "inputs": inputs,
         "environment": {"python": platform.python_version(), "os": platform.system(),
                         **{name: version(name) for name in ("fastapi", "chromadb", "langgraph", "fastembed", "onnxruntime")}},

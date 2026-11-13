@@ -42,6 +42,8 @@ DRAFT_PROMPT = ChatPromptTemplate.from_messages([
      "환불·쿠폰·재배달·재조리는 확인 전에 확정하거나 약속하지 마세요. 적용 조건이 부족하면 매장 확인이 필요하다고 안내하세요. "
      "기한이 다른 사건은 각각 해당하는 기한과 사진 조건을 안내하세요. 제12조의 단순 맛 불만과 오배송 조건은 다릅니다. "
      "질문별로 확인한 원문이 있으면 각 항목을 빠짐없이 반영하세요. "
+     "서버가 준 [필수 안내] 문구는 마지막 마침표를 제외한 글자를 그대로 포함하세요. "
+     "확인된 안내 문구 바깥에 접수 기한을 추가하거나 반대 의미를 쓰지 마세요. "
      "규정 내용은 주어진 근거에서만 가져오고 reply 본문에 내부 조문 번호를 적지 마세요. "
      "article_ids에는 답글에 실제로 사용한 조문 번호만 넣으세요. 환불 요청이나 이물질 신고는 needs_followup을 true로 표시하세요."
      "\n\n[검색된 운영 규정]\n{evidence}"),
@@ -68,17 +70,22 @@ def draft_values(state: ReplyWorkflowState) -> dict:
     preferences = state.get("preferences") or ReplyPreferences()
     evidence = state["evidence"]
     excerpts = "\n".join(
-        f"[{item.article_id}] 문의: {item.question}\n" + "\n".join(item.excerpts)
+        f"[{item.article_id}]\n" + "\n".join(item.excerpts)
         for item in evidence.evidence
     )
+    notices = "\n".join(notice for item in evidence.evidence if (notice := item.required_notice()))
+    context = "\n\n".join(filter(None, [
+        "\n\n".join(article.page_content for article in evidence.articles),
+        "[질문별 확인한 원문]\n" + excerpts if excerpts else "",
+        "[필수 안내]\n" + notices if notices else "",
+    ]))
     return {
         "customer_name": state["customer_name"],
         "rating": state["rating"],
         "review_text": state["review_text"],
         "style": preferences.style,
         "max_sentences": preferences.max_sentences,
-        "evidence": "\n\n".join(article.page_content for article in evidence.articles)
-                    + ("\n\n[질문별 확인한 원문]\n" + excerpts if excerpts else "") or "없음",
+        "evidence": context or "없음",
         "required_ids": ", ".join(evidence.required_ids) or "없음",
         "previous_reply": state.get("previous_reply") or "없음",
         "revision_instruction": state.get("revision_instruction") or "없음",
@@ -192,10 +199,8 @@ class FakeLlmClient:
 
         details = []
         for item in evidence.evidence:
-            if item.topic == "quality_incident":
-                details.append(f"다른 메뉴나 이물질은 수령 후 {item.hours}시간 이내에 사진과 함께 알려 주세요.")
-            elif item.topic == "delivery_damage":
-                details.append(f"용기 파손이나 내용물 유출은 수령 후 {item.hours}시간 이내에 사진과 함께 알려 주세요.")
+            if notice := item.required_notice():
+                details.append(notice)
             elif item.topic == "taste_refund":
                 details.append("맛에 대한 불만만으로는 교환이나 환불이 어려운 점을 안내드립니다.")
             else:
@@ -205,7 +210,7 @@ class FakeLlmClient:
         article_ids = list(required)
         if len(evidence.required_hours) > 1 and not state["feedback"] and not previous:
             omitted = next(item for item in evidence.evidence if item.topic == "delivery_damage")
-            details = [part for part in details if not part.startswith("용기 파손이나 내용물 유출은")]
+            details.remove(omitted.required_notice())
             # 실습에서 첫 검토 실패와 재작성 경로를 보여 준다.
             article_ids.remove(omitted.article_id)
 

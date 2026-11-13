@@ -1,6 +1,7 @@
 """규정 근거가 있는 답글을 작성하고, 검토에 실패하면 한 번 더 작성한다."""
 
 import re
+import unicodedata
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Literal, NotRequired, TypedDict
@@ -24,6 +25,36 @@ COMPENSATION_PROMISE = re.compile(
     r"(?:(?:바로|즉시)\s*)?"
     r"(?:해\s*드리겠습니다|드리겠습니다|진행하겠습니다|확정했습니다|지급하겠습니다|완료했습니다)"
 )
+DEADLINE_MENTION = re.compile(r"\d+(?:\.\d+)?\s*(?:시간|분\s*이내|일\s*이내)")
+INCIDENT_CONTEXT = re.compile(
+    r"오배송|다른\s*(?:메뉴|음식)|이물질|용기\s*파손|내용물\s*유출|기한|수령|사진|접수"
+)
+ALCOHOL_DELIVERY_PROMISE = re.compile(
+    r"(?:주류|맥주|와인|라거|소주|막걸리|술)[^,.!?。]{0,20}(?:배달|배송|보내|가져다)"
+    r"[^,.!?。]{0,12}(?:(?<!불)가능(?!하지\s*않)|됩니다|할\s*수\s*있|해\s*드리|드릴\s*수\s*있)"
+)
+
+
+def policy_notice_problem(reply: str, evidence: PolicySearchResult) -> str:
+    """필수 문구를 사건별로 확인하고 별도로 덧붙인 접수 기한을 걸러낸다."""
+    notices = [notice for item in evidence.evidence if (notice := item.required_notice())]
+    if not notices:
+        return ""
+    text = " ".join(unicodedata.normalize("NFC", reply).split())
+    for notice in notices:
+        body = notice.removesuffix(".")
+        match = re.search(rf"(?:^|(?<=[ ,.!?。])){re.escape(body)}(?=$|[.,!?。])", text)
+        if match is None:
+            return f"확인한 안내를 빠짐없이 써 주세요. {notice}"
+        text = text[:match.start()] + text[match.end():]
+    clauses = re.split(r"[,!?。]|\.(?=\s|$)", text)
+    if evidence.required_hours and any(
+        DEADLINE_MENTION.search(clause) and INCIDENT_CONTEXT.search(clause) for clause in clauses
+    ):
+        return "접수 기한은 확인된 사건별 안내 문구에만 넣어 주세요."
+    if any(item.topic == "alcohol_delivery" for item in evidence.evidence) and ALCOHOL_DELIVERY_PROMISE.search(text):
+        return "주류 배달 여부는 확인된 안내 문구대로 써 주세요."
+    return ""
 
 
 class ReplyWorkflowInput(TypedDict):
@@ -112,12 +143,8 @@ def build_reply_workflow(
             feedback = "안내를 뒷받침하는 조문을 확인하고 표시해 주세요."
         elif COMPENSATION_PROMISE.search(draft.reply):
             feedback = "확인하기 전에는 환불이나 보상을 약속할 수 없습니다."
-        elif evidence.required_hours and (
-            "사진" not in draft.reply
-            or not set(evidence.required_hours).issubset(re.findall(r"(\d+)\s*시간", draft.reply))
-        ):
-            hours = ", ".join(f"{hour}시간" for hour in evidence.required_hours)
-            feedback = f"규정의 접수 기한({hours})과 사진 제출 조건을 모두 안내해 주세요."
+        elif issue := policy_notice_problem(draft.reply, evidence):
+            feedback = issue
         else:
             verdict = await runtime.context.review(state)
             if verdict.passed:
@@ -129,6 +156,9 @@ def build_reply_workflow(
                 }
             feedback = verdict.reason.strip() or "리뷰와 규정 적용 조건을 다시 확인해 주세요."
 
+        get_stream_writer()({
+            "event": "progress", "stage": "review_failed", "attempt": state["attempts"],
+        })
         if state["attempts"] >= MAX_DRAFT_ATTEMPTS:
             return {"status": "needs_review", "draft": None, "feedback": feedback}
         return {"feedback": feedback}

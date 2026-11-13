@@ -36,13 +36,11 @@ def valid_article(article: Document) -> bool:
     return bool(article.id and article.id == article.metadata.get("article_no") and article.page_content.strip())
 
 
-def find_evidence(
-    rule: PolicyRule, question: str, candidates: list[Document],
-) -> tuple[Document, PolicyEvidence] | None:
+def find_evidence(rule: PolicyRule, candidates: list[Document]) -> tuple[Document, PolicyEvidence] | None:
     for article in candidates:
         if article.id != rule.article_id or not valid_article(article):
             continue
-        evidence = rule.evidence(article, question)
+        evidence = rule.evidence(article)
         if evidence is not None:
             return article, evidence
     return None
@@ -81,19 +79,19 @@ class PolicySearch:
             for rule, question in questions:
                 if rule.direct:
                     article = by_id.get(rule.article_id)
-                    found = find_evidence(rule, question, [article]) if article is not None else None
+                    found = find_evidence(rule, [article]) if article is not None else None
                 else:
                     found = None
                     if self._hybrid is not None:
                         if question not in rankings:
                             rankings[question] = await self._hybrid.search(question)
                         initial = rankings[question]
-                        found = find_evidence(rule, question, initial.hybrid[:MAX_CONTEXT_ARTICLES])
+                        found = find_evidence(rule, initial.hybrid[:MAX_CONTEXT_ARTICLES])
                         if found is None:
                             retried.append(rule.topic)
                             focused = await self._hybrid.search(rule.query)
                             # RRF가 먼저 제외한 후보까지 복원한 뒤 해당 문의에 답하는 원문을 확인한다.
-                            found = find_evidence(rule, question, focused.hybrid + initial.hybrid)
+                            found = find_evidence(rule, focused.hybrid + initial.hybrid)
                 if found is not None:
                     article, item = found
                     articles[rule.article_id] = article
