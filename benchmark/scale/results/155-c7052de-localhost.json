@@ -1,0 +1,148 @@
+{
+  "model": "fake-llm",
+  "beer_events": [
+    {
+      "event": "progress",
+      "stage": "retrieve"
+    },
+    {
+      "event": "progress",
+      "stage": "evidence",
+      "reason": "evidence_recovered",
+      "retriedQuestions": [
+        "alcohol_delivery"
+      ]
+    },
+    {
+      "event": "progress",
+      "stage": "draft",
+      "attempt": 1
+    },
+    {
+      "event": "progress",
+      "stage": "review",
+      "attempt": 1
+    },
+    {
+      "event": "final",
+      "reviewId": 4,
+      "reply": "실습 손님, 방문해 주셔서 감사합니다. 주류는 배달하지 않습니다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+      "model": "fake-llm",
+      "tone": "감사",
+      "needsFollowup": false,
+      "status": "ready",
+      "articleIds": [
+        "제18조"
+      ],
+      "attempts": 1
+    }
+  ],
+  "beer_draft_deltas": 13,
+  "child_chair": {
+    "reviewId": 5,
+    "reply": "실습 손님, 방문해 주셔서 감사합니다. 안전띠가 달린 유아 의자 네 개와 어린이용 컵·수저를 무료로 대여한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+    "model": "fake-llm",
+    "tone": "감사",
+    "needsFollowup": false,
+    "status": "ready",
+    "articleIds": [
+      "제37조"
+    ],
+    "attempts": 1
+  },
+  "combined_final": {
+    "reviewId": 6,
+    "reply": "실습 손님, 방문해 주셔서 감사합니다. 안전띠가 달린 유아 의자 네 개와 어린이용 컵·수저를 무료로 대여한다. 건물 정문에는 계단이 없고, 지하 주차장에서 올라오는 손님은 A구역 승강기를 이용할 수 있다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+    "model": "fake-llm",
+    "tone": "감사",
+    "needsFollowup": false,
+    "status": "ready",
+    "articleIds": [
+      "제37조",
+      "제36조"
+    ],
+    "attempts": 1
+  },
+  "combined_revision": {
+    "reviewId": 6,
+    "reply": "실습 손님, 안전띠가 달린 유아 의자 네 개와 어린이용 컵·수저를 무료로 대여한다, 건물 정문에는 계단이 없고, 지하 주차장에서 올라오는 손님은 A구역 승강기를 이용할 수 있다.",
+    "model": "fake-llm",
+    "tone": "감사",
+    "needsFollowup": false,
+    "status": "ready",
+    "articleIds": [
+      "제37조",
+      "제36조"
+    ],
+    "attempts": 1
+  },
+  "private_lookup": {
+    "reviewId": 7,
+    "reply": null,
+    "model": "fake-llm",
+    "tone": null,
+    "needsFollowup": true,
+    "status": "needs_review",
+    "articleIds": [],
+    "attempts": 0
+  },
+  "takeout_pickup": {
+    "reviewId": 8,
+    "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리 수령은 주문자가 주문번호를 전달하면 가능하다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+    "model": "fake-llm",
+    "tone": "감사",
+    "needsFollowup": false,
+    "status": "ready",
+    "articleIds": [
+      "제69조"
+    ],
+    "attempts": 1
+  },
+  "pickup_without_number": {
+    "reviewId": 9,
+    "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리 수령은 주문자가 주문번호를 전달하면 가능하다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+    "model": "fake-llm",
+    "tone": "감사",
+    "needsFollowup": false,
+    "status": "ready",
+    "articleIds": [
+      "제69조"
+    ],
+    "attempts": 1
+  },
+  "lost_property_pickup": {
+    "reviewId": 10,
+    "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리인이 오면 소유자가 앱 1:1 문의에 남긴 대리 수령 이름과 현장 이름을 확인한다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+    "model": "fake-llm",
+    "tone": "감사",
+    "needsFollowup": false,
+    "status": "ready",
+    "articleIds": [
+      "제43조"
+    ],
+    "attempts": 1
+  },
+  "pickup_status": {
+    "reviewId": 11,
+    "reply": null,
+    "model": "fake-llm",
+    "tone": null,
+    "needsFollowup": true,
+    "status": "needs_review",
+    "articleIds": [],
+    "attempts": 0
+  },
+  "pickup_status_with_loanword": {
+    "reviewId": 12,
+    "reply": null,
+    "model": "fake-llm",
+    "tone": null,
+    "needsFollowup": true,
+    "status": "needs_review",
+    "articleIds": [],
+    "attempts": 0
+  },
+  "source_commit": "c7052de2e506831948cdb763ce24007b51e7ea88",
+  "articles": 155,
+  "source_sha256": "6c1375683ca14d09a529a201e2e9674285e94319cb9ce2d2c36d2ff163ff3ea5"
+}

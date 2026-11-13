@@ -8,6 +8,7 @@
 | 50페이지·155조 규정집 · 새 조문의 번호와 핵심 구절까지 저장 | 0/24 → 24/24 |
 | 155조 대리 수령 등 적용 범위 진단 · 번호와 핵심 구절까지 저장 | 5/11 → 11/11 |
 | 같은 진단의 실제 상태·대상 불명 문의 · 올바르게 보류 | 2/5 → 5/5 |
+| 별도 픽업·인계 완료 표현 · 올바르게 보류 | 0/3 → 3/3 |
 
 [35조 버전별 측정](benchmark/RESULTS.md) · [155조 버전별 측정과 응답 원본](benchmark/scale/VERSIONS.md) · [벤치마크 커밋 대조표](benchmark/SOURCES.md)
 
@@ -126,10 +127,11 @@ Invoke-RestMethod -Method Post -Uri "$reviewUrl/reply/revise" `
 
 ```powershell
 $book = '.local/benchmark/regulations-50p.md'
-$version = 'c6f0fb0'
+$version = 'c7052de'
 uv run --no-project --with reportlab python benchmark/scale/render_book.py --markdown $book --pdf .local/benchmark/regulations-50p.pdf
 uv run --locked python benchmark/scale/run.py --expanded-only --source-commit $version --markdown $book --output .local/benchmark/router-155.json
 uv run --locked python benchmark/scale/run.py --diagnostic-file benchmark/scale/policy-scope.json --source-commit $version --markdown $book --output .local/benchmark/router-155-scope.json
+uv run --locked python benchmark/scale/run.py --diagnostic-file benchmark/scale/pickup-state.json --source-commit $version --markdown $book --output .local/benchmark/router-155-pickup.json
 uv run --locked python benchmark/scale/smoke.py --expect-policy-scope --source-commit $version --markdown $book --output .local/benchmark/router-155-http.json
 ```
 
@@ -141,6 +143,6 @@ $env:LANGSMITH_TRACING = 'false'
 uv run --locked pytest -q
 ```
 
-`c6f0fb0`에서 테스트 89개가 통과했습니다. 155조는 실제 Chroma·BM25를 사용한 FastAPI `TestClient`와 로컬 Uvicorn으로 JSON·SSE·수정·재조회·보류를 검증했습니다. 측정의 OpenAI 요청은 0회입니다. 가짜 모델과 개발에 사용한 회귀 문항으로는 실제 모델의 문장 품질, 새로운 사용자 질문의 성능, 운영 지연을 판단할 수 없습니다. [HTTP 점검 원본](benchmark/scale/results/155-5993846-localhost.json)
+`c7052de`에서 테스트 92개가 통과했습니다. 155조는 실제 Chroma·BM25를 사용한 FastAPI `TestClient`와 로컬 Uvicorn으로 JSON·SSE·수정·재조회·보류를 검증했습니다. 측정의 OpenAI 요청은 0회입니다. 실제 모델의 문장 품질, 새로운 사용자 질문의 성능, 운영 지연은 별도 평가가 필요합니다. [HTTP 점검 원본](benchmark/scale/results/155-c7052de-localhost.json)
 
 가짜 모델 로컬 서버를 8000번 포트에 띄운 뒤 `uv run --locked python benchmark/benchmark.py`로 동기·비동기 경로의 지연과 처리량을 비교할 수 있습니다. 두 경로의 작업량은 다릅니다. [리팩토링 전 README와 실제 OpenAI 예시](https://github.com/kodonghui/ohgi-review-server/blob/d13fba9510a31f517b983f933e9348187b87741a/README.md)

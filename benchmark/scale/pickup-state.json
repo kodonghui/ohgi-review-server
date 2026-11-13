@@ -1,0 +1,6 @@
+[
+  {"id":"T01","group":"scope","question":"포장 음식을 가족이 이미 픽업했나요?","required":[],"spans":[],"expected":"needs_review"},
+  {"id":"T02","group":"scope","question":"제 친구가 테이크아웃한 거 픽업했는지 확인해 주세요.","required":[],"spans":[],"expected":"needs_review"},
+  {"id":"T03","group":"scope","question":"제가 주문한 음식은 벌써 대리인한테 인계가 완료됐나요?","required":[],"spans":[],"expected":"needs_review"},
+  {"id":"T04","group":"scope","question":"포장 음식은 제 동생이 픽업하러 가도 될까요?","required":["제69조"],"spans":["주문자가 주문번호를 전달하면 가능하다"],"expected":"ready"}
+]

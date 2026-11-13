@@ -133,13 +133,18 @@ def measure_policy_scope(http):
         assert passage in reply["reply"] and http.get(path).json()["reply"] == reply["reply"], reply
         result[name] = reply
 
-    path = review_path(http, "포장 주문을 친구가 이미 받아 갔는지 알려 주세요.")
-    response = http.post(path + "/reply")
-    response.raise_for_status()
-    held = response.json()
-    assert held["status"] == "needs_review" and held["attempts"] == 0, held
-    assert http.get(path).json()["reply"] is None
-    result["pickup_status"] = held
+    status_cases = (
+        ("pickup_status", "포장 주문을 친구가 이미 받아 갔는지 알려 주세요."),
+        ("pickup_status_with_loanword", "포장 음식을 가족이 이미 픽업했나요?"),
+    )
+    for name, question in status_cases:
+        path = review_path(http, question)
+        response = http.post(path + "/reply")
+        response.raise_for_status()
+        held = response.json()
+        assert held["status"] == "needs_review" and held["attempts"] == 0, held
+        assert http.get(path).json()["reply"] is None
+        result[name] = held
     return result
 
 

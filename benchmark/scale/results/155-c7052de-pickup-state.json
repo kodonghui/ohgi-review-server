@@ -1,0 +1,321 @@
+{
+  "expanded": {
+    "timestamp_utc": "2026-11-13T07:07:36+00:00",
+    "index": {
+      "version": 1,
+      "source_sha256": "6c1375683ca14d09a529a201e2e9674285e94319cb9ce2d2c36d2ff163ff3ea5",
+      "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+      "article_count": 155
+    },
+    "index_bytes": 1507492,
+    "build_seconds": 12.884,
+    "startup_seconds": 1.795,
+    "environment": {
+      "fastapi": "0.162.0",
+      "chromadb": "1.5.9",
+      "langgraph": "1.2.19",
+      "fastembed": "0.9.1"
+    },
+    "run": {
+      "repetitions": 3,
+      "warmups": 3,
+      "transport": "FastAPI TestClient",
+      "fake_delay_seconds": 0,
+      "openai_requests": 0,
+      "diagnostics_only": true,
+      "new_queries_sha256": "c4a4e6bfb814ff93d942b35fd18e8f4820ea9782801cc8e5def3312abac6fe2e",
+      "course_queries_sha256": "5a5aa961a57c136a1e668392ca38708f9e02a1fde1a7daa647e877872098c793",
+      "fixed_additions_sha256": "903534471c2eb9698eec48d3ad4ca0da3cd059b54685a12ae534edb127b86252",
+      "lock_sha256": "02e2093aa04056d1c4f783872bc751fb3b45cacd0ff1f6f352ee298665ef9580",
+      "runner_sha256": "c7fb9ca486e7937942cb7365f65ff5c98c3c816634c75f16965fa017340ed335"
+    },
+    "summary": {
+      "diagnostic": {
+        "requests": 4,
+        "with_reference": 1,
+        "full_top3_vector": 0,
+        "full_top3_bm25": 1,
+        "full_top3_rrf": 1,
+        "full_candidate_union": 1,
+        "reference_spans_in_union": 1,
+        "reference_spans_saved": 1,
+        "full_api_retrieval": 1,
+        "full_api_save": 1,
+        "full_save_with_spans": 1,
+        "requires_staff": 3,
+        "staff_correctly_held": 3,
+        "saved_missing_reference": 0,
+        "retries": 0,
+        "api_p50_ms": 10.503,
+        "api_p95_ms": 38.243,
+        "search_p50_ms": 0.028,
+        "search_p95_ms": 24.692
+      }
+    },
+    "cases": [
+      {
+        "id": "T01",
+        "group": "scope",
+        "question": "포장 음식을 가족이 이미 픽업했나요?",
+        "required": [],
+        "spans": [],
+        "expected": "needs_review",
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "ms": 0.016,
+        "api_ms": 7.194,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          7.194,
+          6.786,
+          8.538
+        ],
+        "search_samples_ms": [
+          0.016,
+          0.015,
+          0.017
+        ],
+        "vector_top3": [
+          "제10조",
+          "제105조",
+          "제12조"
+        ],
+        "bm25_top3": [
+          "제81조",
+          "제71조",
+          "제41조"
+        ],
+        "rrf_top3": [
+          "제81조",
+          "제80조",
+          "제77조"
+        ],
+        "candidate_union": [
+          "제81조",
+          "제80조",
+          "제77조",
+          "제10조",
+          "제105조",
+          "제71조",
+          "제12조",
+          "제41조",
+          "제108조",
+          "제59조",
+          "제114조",
+          "제42조",
+          "제69조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "staff_only",
+        "answer_spans_found": false
+      },
+      {
+        "id": "T02",
+        "group": "scope",
+        "question": "제 친구가 테이크아웃한 거 픽업했는지 확인해 주세요.",
+        "required": [],
+        "spans": [],
+        "expected": "needs_review",
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "ms": 0.02,
+        "api_ms": 8.396,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          8.396,
+          10.102,
+          11.153
+        ],
+        "search_samples_ms": [
+          0.02,
+          0.026,
+          0.03
+        ],
+        "vector_top3": [
+          "제76조",
+          "제131조",
+          "제66조"
+        ],
+        "bm25_top3": [
+          "제144조",
+          "제40조",
+          "제150조"
+        ],
+        "rrf_top3": [
+          "제131조",
+          "제123조",
+          "제144조"
+        ],
+        "candidate_union": [
+          "제131조",
+          "제123조",
+          "제144조",
+          "제76조",
+          "제40조",
+          "제150조",
+          "제66조",
+          "제77조",
+          "제134조",
+          "제1조",
+          "제96조",
+          "제42조",
+          "제70조",
+          "제81조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "staff_only",
+        "answer_spans_found": false
+      },
+      {
+        "id": "T03",
+        "group": "scope",
+        "question": "제가 주문한 음식은 벌써 대리인한테 인계가 완료됐나요?",
+        "required": [],
+        "spans": [],
+        "expected": "needs_review",
+        "articles": [],
+        "hold": true,
+        "reason": "staff_only",
+        "retried_questions": [],
+        "ms": 0.03,
+        "api_ms": 10.379,
+        "status": "needs_review",
+        "answer_articles": [],
+        "attempts": 0,
+        "saved": false,
+        "reply": null,
+        "api_samples_ms": [
+          10.379,
+          10.627,
+          13.219
+        ],
+        "search_samples_ms": [
+          0.03,
+          0.027,
+          0.03
+        ],
+        "vector_top3": [
+          "제151조",
+          "제69조",
+          "제60조"
+        ],
+        "bm25_top3": [
+          "제69조",
+          "제141조",
+          "제75조"
+        ],
+        "rrf_top3": [
+          "제69조",
+          "제151조",
+          "제141조"
+        ],
+        "candidate_union": [
+          "제69조",
+          "제151조",
+          "제141조",
+          "제60조",
+          "제75조",
+          "제64조",
+          "제80조",
+          "제105조",
+          "제154조",
+          "제110조",
+          "제12조",
+          "제71조",
+          "제81조",
+          "제43조",
+          "제77조"
+        ],
+        "source_spans_found": false,
+        "router_topics": [],
+        "router_reason": "staff_only",
+        "answer_spans_found": false
+      },
+      {
+        "id": "T04",
+        "group": "scope",
+        "question": "포장 음식은 제 동생이 픽업하러 가도 될까요?",
+        "required": [
+          "제69조"
+        ],
+        "spans": [
+          "주문자가 주문번호를 전달하면 가능하다"
+        ],
+        "expected": "ready",
+        "articles": [
+          "제69조"
+        ],
+        "hold": false,
+        "reason": "",
+        "retried_questions": [],
+        "ms": 29.161,
+        "api_ms": 44.934,
+        "status": "ready",
+        "answer_articles": [
+          "제69조"
+        ],
+        "attempts": 1,
+        "saved": true,
+        "reply": "실습 손님, 방문해 주셔서 감사합니다. 대리 수령은 주문자가 주문번호를 전달하면 가능하다. 매장에서 접수 내용과 주문을 확인하겠습니다.",
+        "api_samples_ms": [
+          44.934,
+          30.977,
+          32.769
+        ],
+        "search_samples_ms": [
+          29.161,
+          19.344,
+          21.035
+        ],
+        "vector_top3": [
+          "제12조",
+          "제77조",
+          "제149조"
+        ],
+        "bm25_top3": [
+          "제80조",
+          "제105조",
+          "제69조"
+        ],
+        "rrf_top3": [
+          "제105조",
+          "제77조",
+          "제69조"
+        ],
+        "candidate_union": [
+          "제105조",
+          "제77조",
+          "제69조",
+          "제81조",
+          "제42조",
+          "제12조",
+          "제80조",
+          "제149조",
+          "제103조",
+          "제71조",
+          "제10조"
+        ],
+        "source_spans_found": true,
+        "router_topics": [],
+        "router_reason": "unknown_question",
+        "answer_spans_found": true
+      }
+    ],
+    "label": "expanded",
+    "source_commit": "c7052de2e506831948cdb763ce24007b51e7ea88"
+  }
+}
