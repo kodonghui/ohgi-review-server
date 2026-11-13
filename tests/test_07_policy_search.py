@@ -2,6 +2,7 @@
 
 import asyncio
 
+import pytest
 from langchain_core.documents import Document
 
 from app.services.hybrid_retriever import SearchRankings
@@ -89,15 +90,27 @@ def test_only_the_missing_question_gets_one_focused_search():
     assert result.needs_manual_review is False
 
 
-def test_order_status_stops_even_if_general_damage_policy_is_known():
+@pytest.mark.parametrize("query", [
+    "배달 용기가 깨졌는데 제 주문 환불이 이미 승인됐는지 알려 주세요.",
+    "제 카드 결제 건 환불 들어왔나요?",
+    "포장 용기가 깨졌는데 제 환불금은 계좌에 들어왔나요?",
+])
+def test_order_status_stops_even_if_a_general_policy_is_known(query):
     index = TestIndex()
     hybrid = TestRetriever({})
-    query = "배달 용기가 깨졌는데 제 주문 환불이 이미 승인됐는지 알려 주세요."
     result = asyncio.run(PolicySearch(index, hybrid).retrieve(query))
     assert result.needs_manual_review is True
     assert result.reason == "staff_only"
     assert hybrid.queries == []
     assert index.lookups == []
+
+
+def test_denied_wrong_delivery_does_not_require_the_wrong_delivery_deadline():
+    index = TestIndex()
+    result = asyncio.run(PolicySearch(index).retrieve("오배송은 없었고 배달 용기만 깨졌어요."))
+    assert result.needs_manual_review is False
+    assert result.required_ids == ("제17조",)
+    assert result.required_hours == ("1",)
 
 
 def test_question_outside_the_policy_cannot_continue_as_regular_praise():

@@ -10,6 +10,10 @@ QUALITY_ARTICLE = "제12조"
 DELIVERY_ARTICLE = "제17조"
 QUALITY_ISSUE = r"이물질|오배송|다른\s*(?:메뉴|음식)|메뉴가\s*잘못|주문한\s*것과\s*다른"
 DELIVERY_DAMAGE = r"(?:용기|포장|배달)[^.!?\n]{0,16}(?:파손|깨졌|깨져|터[졌지])|쏟아[졌져]"
+INCIDENT_DENIAL = re.compile(
+    r"\s*(?:[은는이가도]|된\s*(?:건|게|것)(?:은|이)?)?\s*"
+    r"(?:없|아니|아닙|안\s*(?:왔|나왔)|(?:오|나|되)지\s*않)"
+)
 TASTE_COMPLAINT = r"(?:맛|입맛)[^.!?\n]{0,24}(?:안\s*맞|맞지\s*않|별로|없)"
 ALCOHOL = r"맥주|주류|술|와인|라거|소주|막걸리"
 DELIVERY = r"배달|배송|집으로|가져다"
@@ -23,6 +27,7 @@ STAFF_ONLY = re.compile(
     r"알레르기|칼로리|대여료|개인\s*전화번호|직원[^.!?]{0,20}(?:개인\s*연락처|성함)|"
     r"실제로\s*비어|(?:좌석|자리)[^.!?]{0,24}(?:비어\s*있|남아\s*있)|"
     r"(?:환불|주문)[^.!?]{0,26}(?:이미\s*승인|승인\s*됐|입금\s*됐|처리\s*완료\s*됐)|"
+    r"환불[^.!?\n]{0,35}(?:들어\s*왔|돌아\s*왔|(?:입금|승인|처리)[이가]?\s*(?:됐|되었|완료))|"
     r"쿠폰[^.!?]{0,18}(?:발급|보상|주세요|주실|줘|달라|준다고|드린다고|안\s*됐)"
 )
 
@@ -56,6 +61,13 @@ class PolicyRule:
     followup: bool = False
     deadline: bool = False
 
+    def matches(self, text: str) -> bool:
+        if not self.deadline:
+            return bool(self.question_pattern.search(text))
+        return any(
+            not INCIDENT_DENIAL.match(text, match.end()) for match in self.question_pattern.finditer(text)
+        )
+
     def evidence(self, article: Document) -> PolicyEvidence | None:
         lines = article.page_content.splitlines()
         if len(lines) > 1 and lines[0].startswith(self.article_id):
@@ -87,7 +99,7 @@ RULES = (
     rule("taste_refund", 12, "맛 불만 교환 환불", rf"(?=.*(?:{TASTE_COMPLAINT}))(?=.*환불)",
          r"맛이[^.]*환불을\s*하지\s*않", direct=True, followup=True),
     rule("alcohol_delivery", 18, "주류 배달 맥주 매장 판매", rf"(?=.*(?:{ALCOHOL}))(?=.*(?:{DELIVERY}))",
-         r"주류는\s*배달하지\s*않"),
+         r"^주류는\s*배달하지\s*않는다[.。]?$"),
     rule("delivery_hours", 15, "배달 주문 시간 마감 배달 예상 시간",
          rf"(?=.*(?:{DELIVERY}))(?=.*(?:마감|오래|몇\s*시|걸려|예상\s*시간|밤\s*\d))",
          r"배달 주문은|배달 예상 시간"),
@@ -162,7 +174,7 @@ def questions_in(text: str) -> tuple[tuple[tuple[PolicyRule, str], ...], str]:
         if not part:
             continue
         inquiry = POLICY_QUESTION.search(part)
-        found = [item for item in RULES if (inquiry or item.deadline) and item.question_pattern.search(part)]
+        found = [item for item in RULES if (inquiry or item.deadline) and item.matches(part)]
         if any(item.topic == "closed_days" for item in found) and not re.search(
             r"영업\s*시간|마지막|브레이크|몇\s*시", part
         ):
