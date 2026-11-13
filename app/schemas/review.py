@@ -3,11 +3,14 @@
 
 - ReviewCreateRequest : POST /api/reviews의 요청 본문. Field 조건에 맞지 않으면 FastAPI가 핸들러를 실행하지 않고 422로 응답한다.
 - ReviewResponse      : 리뷰 등록, 조회 API의 응답
-- ReplyResponse       : 답글 API의 응답
+- ReplyResponse       : 동기 비교용 답글 API의 응답
+- ReviewedReplyResponse : 검토·수정 API와 SSE 최종 이벤트의 응답
 
 엔티티(Review)를 그대로 응답하지 않고 응답 DTO로 바꿔서 응답한다.
 요청 DTO에는 review_id와 reply가 없다. 번호는 저장소가 붙이고, 답글은 답글 API가 만들기 때문이다.
 """
+
+from typing import Literal
 
 from pydantic import ConfigDict, Field
 
@@ -63,7 +66,7 @@ class ReviewResponse(CamelModel):
 
 
 class ReplyResponse(CamelModel):
-    """사장님 답글 초안 응답 DTO. 답글 API 두 개(async, sync)가 이 형태로 응답한다."""
+    """동기 비교 경로가 반환하는 기존 응답."""
 
     # 답글을 단 리뷰의 번호
     review_id: int
@@ -71,3 +74,24 @@ class ReplyResponse(CamelModel):
     reply: str
     # 답글을 만든 모델 이름. 가짜 LLM 클라이언트면 "fake-llm"이다. (가짜 서버인지 확인할 때 쓴다)
     model: str
+
+
+class ReviewedReplyResponse(CamelModel):
+    review_id: int
+    reply: str | None
+    model: str
+    tone: Literal["사과", "감사", "일반"] | None
+    needs_followup: bool
+    status: Literal["ready", "needs_review"]
+    article_ids: list[str]
+    attempts: int
+
+
+class ReviseReplyRequest(CamelModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+    instruction: str = Field(min_length=1, max_length=250)
+
+
+class ReplyPreferences(CamelModel):
+    style: Literal["정중", "따뜻"] = "정중"
+    max_sentences: int = Field(default=5, ge=1, le=5)

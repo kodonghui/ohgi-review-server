@@ -10,6 +10,15 @@ dependencies = [
     "pydantic-settings",
     # OpenAI 공식 라이브러리 (app/clients/llm_client.py)
     "openai",
+    "langchain==1.4.7",
+    "langchain-openai==1.7.3",
+    "langgraph==1.2.19",
+    "langchain-chroma==1.1.0",
+    "fastembed>=0.9.1",
+    "langgraph-checkpoint-sqlite>=3.1.3",
+    "langchain-text-splitters==1.1.3",
+    "httpx>=0.28.1",
+    "rank-bm25>=0.2.2",
 ]
 
 # uv run fastapi dev 명령이 실행할 앱의 위치. "app/main.py 파일의 app 객체"라는 뜻이다.

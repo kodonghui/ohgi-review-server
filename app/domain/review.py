@@ -20,3 +20,4 @@ class Review:
     content: str
     # 사장님 답글. 답글 API로 만들기 전에는 None이다.
     reply: str | None = None
+    reply_version: int = 0

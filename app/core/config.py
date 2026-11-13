@@ -47,6 +47,12 @@ class Settings(BaseSettings):
     # OpenAI의 응답을 기다리는 최대 시간(초)
     openai_timeout_seconds: float = Field(default=30.0, gt=0)
 
+    # 검색·작성·검토와 재작성을 포함한 비동기 요청 전체의 시간 제한이다.
+    reply_timeout_seconds: float = Field(default=60.0, gt=0)
+
+    # 임베딩 캐시, Chroma 인덱스, 매장 선호 SQLite가 들어가는 로컬 폴더다.
+    runtime_dir: Path = PROJECT_ROOT / ".local"
+
     # 가짜 LLM : true면 키가 있어도 OpenAI를 호출하지 않는다. 비용 없이 시험하거나 성능을 잴 때 사용한다.
     fake_llm: bool = False
 

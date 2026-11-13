@@ -1,27 +1,34 @@
-"""
-오지 레스토랑 리뷰 서버 (FastAPI 미니 프로젝트 : 리뷰와 사장님 답글 API)
+"""오지 레스토랑의 리뷰 CRUD와 LangGraph 답글 API."""
 
-손님 리뷰를 등록하고 조회하며, 저장된 리뷰를 LLM에 보내 사장님 답글 초안을 받는다.
-- POST /api/reviews                         : 리뷰 등록 (def, 성공 201, 잘못된 값 422)
-- GET  /api/reviews                         : 리뷰 전체 조회 (def)
-- GET  /api/reviews/{review_id}             : 리뷰 하나 조회 (def, 없으면 404)
-- POST /api/reviews/{review_id}/reply       : 사장님 답글 초안 생성 (async def + await, OpenAI 실패 502)
-- POST /api/reviews/{review_id}/reply/sync  : 답글 초안 생성 동기 버전 (def, 비교용)
-
-[실행 방법] 이 프로젝트 폴더에서
-  uv run fastapi dev   ->  http://127.0.0.1:8000/docs
-  OPENAI_API_KEY가 없거나 .env에 FAKE_LLM=true를 적으면 OpenAI 대신 가짜 LLM 클라이언트로 응답한다(비용 없음).
-"""
-
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack, asynccontextmanager
+import logging
 
 import anyio.to_thread
-from fastapi import FastAPI
+import httpx
+from chromadb.errors import ChromaError
+from fastapi import FastAPI, Request
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+from langgraph.store.sqlite.aio import AsyncSqliteStore
 
 from app.clients.llm_client import FakeLlmClient, OpenAiLlmClient
 from app.core.config import get_settings
 from app.core.exceptions import register_exception_handlers
+from app.repositories.review_repository import ReviewRepository
 from app.routers import review_router
+from app.schemas.reply_draft import GroundedReplyDraft
+from app.schemas.review import ReplyPreferences
+from app.services.hybrid_retriever import HybridRetriever
+from app.services.policy_index import load_articles, open_policy_index
+from app.services.policy_search import PolicySearch, PolicySearchResult
+from app.services.reply_workflow import build_reply_workflow
+
+
+logger = logging.getLogger(__name__)
+
+
+def open_model_http_clients(timeout: float) -> tuple[httpx.Client, httpx.AsyncClient]:
+    return httpx.Client(timeout=timeout), httpx.AsyncClient(timeout=timeout)
 
 
 # [lifespan] 서버가 시작할 때(yield 이전)와 종료될 때(yield 이후) 실행할 코드를 한 함수에 적는다.
@@ -31,27 +38,51 @@ from app.routers import review_router
 async def lifespan(app: FastAPI):
     settings = get_settings()
 
-    # 1. 서버 시작 : 모든 요청이 함께 사용할 LLM 클라이언트를 만들어 app.state에 저장한다.
-    # 1-1. FAKE_LLM=true거나 API 키가 없으면 OpenAI를 호출하지 않는 가짜 클라이언트를 만든다.
-    if settings.fake_llm or settings.openai_api_key is None:
-        print(f"[lifespan] 가짜 LLM 클라이언트를 사용한다 (FAKE_LLM={settings.fake_llm}, "
-              f"키 있음={settings.openai_api_key is not None}, 응답까지 {settings.fake_llm_delay_seconds}초)")
-        app.state.llm_client = FakeLlmClient(settings)
-    # 1-2. 키가 있으면 실제 OpenAI 클라이언트를 만든다.
-    else:
-        print(f"[lifespan] OpenAI 클라이언트를 사용한다 (model={settings.openai_model})")
-        app.state.llm_client = OpenAiLlmClient(settings)
+    async with AsyncExitStack() as resources:
+        if settings.fake_llm or settings.openai_api_key is None:
+            llm = FakeLlmClient(settings)
+        else:
+            timeout = settings.openai_timeout_seconds
+            sync_http, async_http = open_model_http_clients(timeout)
+            resources.enter_context(sync_http)
+            await resources.enter_async_context(async_http)
+            llm = OpenAiLlmClient(settings, sync_http, async_http)
+        app.state.llm_client = llm
+        app.state.review_repository = ReviewRepository()
 
-    # 2. 실험용 : THREAD_POOL_SIZE가 있으면 def 핸들러를 실행하는 스레드 풀의 크기를 바꾼다.
-    if settings.thread_pool_size is not None:
-        anyio.to_thread.current_default_thread_limiter().total_tokens = settings.thread_pool_size
-        print(f"[lifespan] 스레드 풀 크기 : {settings.thread_pool_size}개")
+        settings.runtime_dir.mkdir(parents=True, exist_ok=True)
+        store = await resources.enter_async_context(
+            AsyncSqliteStore.from_conn_string(str(settings.runtime_dir / "preferences.sqlite3"))
+        )
+        await store.setup()
+        app.state.reply_store = store
+        app.state.reply_timeout = settings.reply_timeout_seconds
 
-    # 3. 서버는 이 지점에서 멈춰 있는 동안 요청을 받는다.
-    yield
+        try:
+            index = await anyio.to_thread.run_sync(open_policy_index, settings.runtime_dir)
+            hybrid = HybridRetriever(index, load_articles()) if index is not None else None
+        except (OSError, ValueError, KeyError, RuntimeError, ChromaError) as error:
+            logger.warning("규정 인덱스 로드 실패 (%s). 인덱스를 다시 만드세요.", type(error).__name__)
+            index = hybrid = None
+        if index is None:
+            logger.info("규정 인덱스 없음. 규정이 필요한 요청은 매장 확인 상태로 처리합니다.")
+        search = PolicySearch(index, hybrid)
+        serializer = JsonPlusSerializer(allowed_msgpack_modules=[
+            (cls.__module__, cls.__name__)
+            for cls in (ReplyPreferences, GroundedReplyDraft, PolicySearchResult)
+        ])
+        app.state.reply_workflow = build_reply_workflow(
+            search.retrieve, checkpointer=InMemorySaver(serde=serializer),
+        )
 
-    # 4. 서버 종료 : OpenAI 서버와의 연결을 닫는다. close()가 async def라서 await가 필요하다.
-    await app.state.llm_client.close()
+        # 실험용 동기 핸들러의 스레드 풀 크기를 앱 수명 동안 적용한다.
+        if settings.thread_pool_size is not None:
+            limiter = anyio.to_thread.current_default_thread_limiter()
+            resources.callback(setattr, limiter, "total_tokens", limiter.total_tokens)
+            limiter.total_tokens = settings.thread_pool_size
+
+        print(f"[lifespan] 답글 모델 {llm.model}")
+        yield
 
 
 # FastAPI 앱 객체. uv run fastapi dev는 pyproject.toml의 entrypoint("app.main:app")를 보고 이 변수를 찾는다.
@@ -65,5 +96,13 @@ app = FastAPI(
 # 예외 처리기를 등록한다. (Spring 컨테이너가 @ControllerAdvice를 알아서 관리하던 일을 직접 한다)
 register_exception_handlers(app)
 
+
+@app.get("/health", include_in_schema=False)
+async def health(request: Request) -> dict[str, str]:
+    """부하 측정 도구가 모델 호출 없이 현재 모델을 확인할 수 있게 한다."""
+    return {"model": request.app.state.llm_client.model}
+
+
 # 라우터를 등록한다. 등록해야 라우터에 적어 둔 주소가 실제로 생긴다.
 app.include_router(review_router.router)
+app.include_router(review_router.preferences_router)

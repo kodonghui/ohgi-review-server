@@ -1,22 +1,27 @@
-"""
-리뷰 라우터 : 리뷰 API와 사장님 답글 API의 핸들러 (Spring의 ReviewController 역할)
+"""리뷰 CRUD와 JSON·SSE 답글 API."""
 
-핸들러는 요청을 서비스에 넘기고 결과를 반환하기만 한다.
-- def 핸들러       : 스레드 풀(기본 40개)의 스레드에서 실행된다. 터미널에 "AnyIO worker thread"로 찍힌다.
-- async def 핸들러 : 이벤트 루프가 도는 스레드에서 실행된다. 터미널에 "MainThread"로 찍힌다.
-                     await로 LLM을 기다리는 동안 이벤트 루프는 다른 요청을 처리한다.
-
-답글 API는 LLM의 응답을 몇 초씩 기다리는 일이라 async def + await로 만들었다(POST /{review_id}/reply).
-비교를 위해 def + 동기 메서드 버전도 하나 더 두었다(POST /{review_id}/reply/sync).
-"""
-
+import logging
 import threading
 import time
+from collections.abc import AsyncIterator
+from contextlib import aclosing
 
 from fastapi import APIRouter
+from fastapi.sse import EventSourceResponse, ServerSentEvent
 
-from app.dependencies import ReplyServiceDep, ReviewServiceDep
-from app.schemas.review import ReplyResponse, ReviewCreateRequest, ReviewResponse
+from app.core.exceptions import AiRequestError
+from app.dependencies import ReplyServiceDep, ReviewServiceDep, StreamReplyDep
+from app.schemas.review import (
+    ReplyPreferences,
+    ReplyResponse,
+    ReviewCreateRequest,
+    ReviewedReplyResponse,
+    ReviewResponse,
+    ReviseReplyRequest,
+)
+
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     # 이 라우터의 모든 주소 앞에 붙는 공통 주소 (Spring의 @RequestMapping("/api/reviews"))
@@ -24,6 +29,8 @@ router = APIRouter(
     # /docs 화면에서 API를 묶어 보여 줄 이름
     tags=["리뷰"],
 )
+
+preferences_router = APIRouter(prefix="/api/reply-preferences", tags=["답글 설정"])
 
 
 # 핸들러가 언제, 어느 스레드에서 실행되는지 터미널에 찍는다.
@@ -69,26 +76,71 @@ def find_review(review_id: int, service: ReviewServiceDep) -> ReviewResponse:
 
 # 4. 사장님 답글 초안 생성 (async def + await)
 # 저장된 리뷰로 프롬프트를 만들어 LLM에 보내고, 응답을 기다리는 동안 이벤트 루프는 다른 요청을 처리한다.
-@router.post("/{review_id}/reply", summary="사장님 답글 초안 생성 (async def)")
-async def create_reply(review_id: int, service: ReplyServiceDep) -> ReplyResponse:
+@router.post(
+    "/{review_id}/reply",
+    summary="규정 근거가 있는 답글 초안 생성",
+    responses={404: {"description": "리뷰 없음"}, 409: {"description": "동일 리뷰 처리 중"}, 502: {"description": "AI 응답 실패"}},
+)
+async def create_reply(review_id: int, service: ReplyServiceDep) -> ReviewedReplyResponse:
 
     log("reply", f"요청 받음 reviewId={review_id}")
     response = await service.create_reply_async(review_id)
-    log("reply", "응답 보냄")
+    log("reply", f"응답 보냄 status={response.status}, attempts={response.attempts}")
 
     return response
 
-# 요청 : POST /api/reviews/2/reply   (요청 본문 없음)
-# 응답 : 200 (가짜 LLM으로 실행한 서버. 실제 OpenAI면 reply에 답글 문장이 들어간다)
-# {"reviewId": 2, "reply": "(가짜 응답) 3.0초 기다렸습니다. 받은 프롬프트 : 손님 이름 : 박준호\n별점 : 2점 (5점 만점)\n리뷰 내용 :\n우럭스무디에서 ...", "model": "fake-llm"}
-#
-# 터미널
-#   10:15:02 [reply] 요청 받음 reviewId=2 (스레드: MainThread)
-#   10:15:05 [reply] 응답 보냄 (스레드: MainThread)
+
+@router.post(
+    "/{review_id}/reply/revise",
+    summary="직전 답글 수정",
+    responses={
+        404: {"description": "리뷰 없음"},
+        409: {"description": "이전 답글 없음 또는 동일 리뷰 처리 중"},
+        502: {"description": "AI 응답 실패"},
+    },
+)
+async def revise_reply(
+    review_id: int, payload: ReviseReplyRequest, service: ReplyServiceDep,
+) -> ReviewedReplyResponse:
+    return await service.create_reply_async(review_id, payload.instruction)
+
+
+@router.post(
+    "/{review_id}/reply/stream",
+    response_class=EventSourceResponse,
+    summary="답글 작성 과정 스트리밍",
+    responses={404: {"description": "리뷰 없음"}, 409: {"description": "동일 리뷰 처리 중"}},
+)
+async def stream_reply(
+    review: StreamReplyDep, service: ReplyServiceDep,
+) -> AsyncIterator[ServerSentEvent]:
+    try:
+        async with aclosing(service.stream_reply(review)) as updates:
+            async for event, payload in updates:
+                if isinstance(payload, ReviewedReplyResponse):
+                    payload = payload.model_dump(by_alias=True)
+                yield ServerSentEvent(event=event, data=payload)
+    except AiRequestError as error:
+        yield ServerSentEvent(event="error", data={"code": "ERROR_CODE_00011", "detail": str(error)})
+    except Exception as error:
+        logger.error("답글 스트림 실패 review_id=%s (%s)", review.review_id, type(error).__name__)
+        yield ServerSentEvent(
+            event="error", data={"code": "STREAM_FAILED", "detail": "답글 처리가 중단됐습니다."},
+        )
+
+
+@preferences_router.get("", summary="매장 답글 선호 조회")
+async def get_reply_preferences(service: ReplyServiceDep) -> ReplyPreferences:
+    return await service.get_preferences()
+
+
+@preferences_router.put("", summary="매장 답글 선호 저장")
+async def put_reply_preferences(payload: ReplyPreferences, service: ReplyServiceDep) -> ReplyPreferences:
+    return await service.put_preferences(payload)
 
 
 # 5. 사장님 답글 초안 생성 - 동기 버전 (def + 동기 메서드)
-# 4번과 같은 일을 하지만, 스레드 풀의 스레드 하나가 LLM의 응답이 올 때까지 멈춰서 기다린다.
+# 비교용 LCEL 체인은 스레드 풀의 스레드 하나에서 모델 응답을 기다린다.
 @router.post("/{review_id}/reply/sync", summary="사장님 답글 초안 생성 - 동기 버전 (def)")
 def create_reply_sync(review_id: int, service: ReplyServiceDep) -> ReplyResponse:
 
@@ -97,18 +149,3 @@ def create_reply_sync(review_id: int, service: ReplyServiceDep) -> ReplyResponse
     log("reply/sync", "응답 보냄")
 
     return response
-
-# 터미널
-#   10:16:10 [reply/sync] 요청 받음 reviewId=2 (스레드: AnyIO worker thread)
-#   10:16:13 [reply/sync] 응답 보냄 (스레드: AnyIO worker thread)
-
-
-# [Postman으로 두 버전 비교하기]
-# .env에 FAKE_LLM=true, FAKE_LLM_DELAY_SECONDS=5, THREAD_POOL_SIZE=1을 적고 서버를 다시 실행한다.
-# (스레드 풀에 스레드가 하나뿐인 서버. 기다리는 시간이 길어야 차이가 잘 보인다)
-# Postman에서 탭 두 개를 열고, 첫 번째 탭의 Send를 누른 직후 두 번째 탭의 Send를 누른다.
-#   탭 A, 탭 B : 둘 다 POST /api/reviews/1/reply/sync
-#   -> 탭 B는 10초 가까이 걸린다. 하나뿐인 스레드를 탭 A가 쓰고 있어서, 탭 A가 끝날 때까지 시작하지도 못했다.
-#   탭 A, 탭 B : 둘 다 POST /api/reviews/1/reply
-#   -> 둘 다 5초 만에 응답을 받는다. await로 기다리는 동안 이벤트 루프가 두 번째 요청도 받았다.
-# 확인했으면 THREAD_POOL_SIZE 줄을 다시 지워 두자.

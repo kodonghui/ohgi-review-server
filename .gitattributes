@@ -1,0 +1,3 @@
+# 강의 원본 두 파일의 바이트를 그대로 보관한다.
+/data/ohgi_regulations.md -text whitespace=cr-at-eol
+/data/golden_set.json -text whitespace=cr-at-eol

@@ -1,35 +1,19 @@
-"""
-의존성 함수 (Spring의 빈 등록 + 생성자 주입 역할)
+"""lifespan에서 만든 저장소·모델·그래프를 요청 서비스에 전달한다."""
 
-핸들러의 매개변수에 Depends(의존성 함수)를 적어 두면, 요청이 들어올 때마다 FastAPI가 의존성 함수를 호출해서 반환값을 넣어 준다.
-- ReviewRepository : 서버 전체에 하나만 있어야 하므로 이 모듈에서 한 번 만들어 두고 같은 객체를 반환한다.
-- LLM 클라이언트    : main.py의 lifespan이 서버가 시작할 때 만들어 app.state에 넣어 둔 객체를 꺼낸다.
-- 서비스            : 요청마다 새로 만든다. 저장소와 클라이언트만 들고 있는 가벼운 객체라서 괜찮다.
-
-[POST /api/reviews/1/reply 요청 하나가 들어왔을 때]
-create_reply(service: ReplyServiceDep)
-    -> get_reply_service(repository, llm_client)
-        -> get_review_repository()  : 서버에 하나뿐인 ReviewRepository 객체
-        -> get_llm_client(request)  : lifespan이 만든 LLM 클라이언트
-"""
-
+from collections.abc import AsyncIterator
 from typing import Annotated
 
 from fastapi import Depends, Request
 
 from app.clients.llm_client import LlmClient
+from app.domain.review import Review
 from app.repositories.review_repository import ReviewRepository
 from app.services.reply_service import ReplyService
 from app.services.review_service import ReviewService
 
-# 이 모듈이 처음 import 될 때 한 번만 실행된다. 파이썬은 한 번 import 한 모듈을 다시 실행하지 않으므로,
-# 모든 요청이 같은 ReviewRepository 객체(같은 딕셔너리)를 사용한다. (Spring의 싱글톤 빈)
-review_repository = ReviewRepository()
 
-
-# 이 함수 안에서 ReviewRepository()를 새로 만들면 요청마다 딕셔너리가 새로 생겨서 등록한 리뷰가 사라진다.
-def get_review_repository() -> ReviewRepository:
-    return review_repository
+def get_review_repository(request: Request) -> ReviewRepository:
+    return request.app.state.review_repository
 
 
 def get_review_service(repository: Annotated[ReviewRepository, Depends(get_review_repository)]) -> ReviewService:
@@ -48,10 +32,21 @@ def get_llm_client(request: Request) -> LlmClient:
 
 # 답글 서비스는 리뷰를 꺼낼 저장소와 답글을 만들 LLM 클라이언트가 둘 다 필요하다.
 def get_reply_service(
+    request: Request,
     repository: Annotated[ReviewRepository, Depends(get_review_repository)],
     llm_client: Annotated[LlmClient, Depends(get_llm_client)],
 ) -> ReplyService:
-    return ReplyService(repository, llm_client)
+    state = request.app.state
+    return ReplyService(repository, llm_client, state.reply_workflow, state.reply_store, state.reply_timeout)
 
 
 ReplyServiceDep = Annotated[ReplyService, Depends(get_reply_service)]
+
+
+async def reserve_stream_review(review_id: int, service: ReplyServiceDep) -> AsyncIterator[Review]:
+    # SSE 본문을 시작하기 전에 404·409를 판단하고 스트림이 닫힐 때 실행권을 반환한다.
+    with service.repository.reply_operation(review_id) as review:
+        yield review
+
+
+StreamReplyDep = Annotated[Review, Depends(reserve_stream_review)]

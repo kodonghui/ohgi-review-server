@@ -26,6 +26,12 @@ class AiRequestError(Exception):
     pass
 
 
+class ReplyConflictError(Exception):
+    def __init__(self, code: str, detail: str):
+        super().__init__(detail)
+        self.code = code
+
+
 # main.py에서 app을 넘겨 호출한다. 이 함수 안에 정의한 처리기들이 app에 등록된다.
 def register_exception_handlers(app: FastAPI) -> None:
 
@@ -53,6 +59,13 @@ def register_exception_handlers(app: FastAPI) -> None:
                 "description": "AI 응답 실패",
                 "detail": str(e),
             },
+        )
+
+    @app.exception_handler(ReplyConflictError)
+    def handle_reply_conflict(request: Request, e: ReplyConflictError):
+        return JSONResponse(
+            status_code=409,
+            content={"code": e.code, "description": "답글 요청 충돌", "detail": str(e)},
         )
 
 # 요청 : GET /api/reviews/99

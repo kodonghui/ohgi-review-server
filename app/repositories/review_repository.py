@@ -6,6 +6,10 @@ DB 대신 딕셔너리에 저장한다. 키는 리뷰 번호, 값은 Review 객�
 ReviewRepository 객체는 서버 전체에 하나만 있어야 하고, 하나만 만들어 두는 일은 dependencies.py에서 한다.
 """
 
+from contextlib import contextmanager
+from threading import Lock
+
+from app.core.exceptions import ReplyConflictError, ReviewNotFoundError
 from app.domain.review import Review
 
 
@@ -24,6 +28,8 @@ class ReviewRepository:
     def __init__(self):
         # 리뷰 번호를 키로, Review 객체를 값으로 관리한다. (딕셔너리는 저장한 순서를 유지한다)
         self._reviews: dict[int, Review] = {}
+        self._lock = Lock()
+        self._active_replies: set[int] = set()
 
         # 다음에 저장할 새 리뷰에 붙일 번호 (AUTO_INCREMENT)
         self._next_id = 1
@@ -41,7 +47,8 @@ class ReviewRepository:
             list[Review]: 리뷰 번호 순서대로 담은 새 리스트
         """
 
-        return list(self._reviews.values())
+        with self._lock:
+            return list(self._reviews.values())
 
     # 2. 리뷰 하나 조회
     def find_by_id(self, review_id: int) -> Review | None:
@@ -56,7 +63,29 @@ class ReviewRepository:
         """
 
         # 없는 번호일 때 KeyError 대신 None을 반환하도록 get()을 사용한다. (JPA findById()의 Optional 역할)
-        return self._reviews.get(review_id)
+        with self._lock:
+            return self._reviews.get(review_id)
+
+    @contextmanager
+    def reply_operation(self, review_id: int):
+        with self._lock:
+            review = self._reviews.get(review_id)
+            if review is None:
+                raise ReviewNotFoundError(review_id)
+            if review_id in self._active_replies:
+                raise ReplyConflictError("REPLY_IN_PROGRESS", "이 리뷰의 답글을 이미 처리하고 있습니다.")
+            self._active_replies.add(review_id)
+        try:
+            yield review
+        finally:
+            with self._lock:
+                self._active_replies.remove(review_id)
+
+    def save_reply(self, review_id: int, reply: str) -> None:
+        with self._lock:
+            review = self._reviews[review_id]
+            review.reply = reply
+            review.reply_version += 1
 
     # 3. 리뷰 저장
     def save(self, review: Review) -> Review:
@@ -71,11 +100,9 @@ class ReviewRepository:
         """
 
         # 새 리뷰면 번호를 붙이고, 다음 번호를 하나 올린다. (JPA의 IDENTITY 전략을 흉내 냄)
-        if review.review_id == 0:
-            review.review_id = self._next_id
-            self._next_id += 1
-
-        # 같은 번호의 리뷰가 이미 있으면 값을 덮어쓴다. (=수정. Spring Data JPA의 save()와 같다)
-        self._reviews[review.review_id] = review
-
-        return review
+        with self._lock:
+            if review.review_id == 0:
+                review.review_id = self._next_id
+                self._next_id += 1
+            self._reviews[review.review_id] = review
+            return review
