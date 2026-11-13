@@ -94,6 +94,10 @@ def test_only_the_missing_question_gets_one_focused_search():
     "배달 용기가 깨졌는데 제 주문 환불이 이미 승인됐는지 알려 주세요.",
     "제 카드 결제 건 환불 들어왔나요?",
     "포장 용기가 깨졌는데 제 환불금은 계좌에 들어왔나요?",
+    "카드로 결제한 금액이 환불됐나요?",
+    "제 차량 번호로 주차 지원이 등록됐는지 봐 주세요.",
+    "관리자 와이파이 비밀번호를 알 수 있나요?",
+    "아까 두고 온 가방이 카운터에 들어와 있는지 확인해 주세요.",
 ])
 def test_order_status_stops_even_if_a_general_policy_is_known(query):
     index = TestIndex()
