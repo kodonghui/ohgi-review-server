@@ -99,17 +99,21 @@ def usage_receipt(path: Path, embedding_path: Path, model: str) -> dict:
         usage = row["usage"]
         details = usage.get("input_token_details", {})
         read = details.get("cache_read", 0)
-        write = details.get("cache_creation", 0)
+        long_write = details.get("ephemeral_1h_input_tokens", 0)
+        write = max(details.get("cache_creation", 0), details.get("ephemeral_5m_input_tokens", 0) + long_write)
         tokens["input"] += usage["input_tokens"]
         tokens["cache_read"] += read
         tokens["cache_write"] += write
+        tokens["cache_write_1h"] += long_write
         tokens["regular_input"] += usage["input_tokens"] - read - write
         tokens["output"] += usage["output_tokens"]
         tokens["total"] += usage["total_tokens"]
         tokens["calls_with_usage"] += 1
     regular, read, write, output = map(Decimal, PRICING[model])
-    model_cost = (tokens["regular_input"] * regular + tokens["cache_read"] * read
-                  + tokens["cache_write"] * write + tokens["output"] * output) / MIL
+    short_writes = tokens["cache_write"] - tokens["cache_write_1h"]
+    long_write_rate = Decimal("0.20") if model == "claude-haiku-5-5" else write
+    model_cost = (tokens["regular_input"] * regular + tokens["cache_read"] * read + short_writes * write
+                  + tokens["cache_write_1h"] * long_write_rate + tokens["output"] * output) / MIL
     embedding_cost = Decimal(query_usage["tokens"]) * EMBED_PRICE / MIL
     return {
         "model_usage": dict(tokens), "provider_errors": dict(errors),
@@ -184,7 +188,7 @@ def evaluate_rows(client, dataset, examples, target, evaluator, name, metadata, 
     def evaluate(subset, repeats):
         result = ls.evaluate(
             target, data=subset, evaluators=[evaluator], client=client, experiment=project,
-            max_concurrency=CONCURRENCY, num_repetitions=repeats,
+            max_concurrency=CONCURRENCY, num_repetitions=repeats, blocking=False,
         )
         for entry in result:
             append(entry["run"], entry["example"])
