@@ -1,0 +1,296 @@
+{
+  "version": "ohgi-reply-v1",
+  "policy": "data/ohgi_regulations.md",
+  "cases": [
+    {
+      "id": "G03",
+      "source": "data/golden_set.json#3",
+      "group": "single_policy",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 3,
+        "content": "월요일이 공휴일이면 문을 열어?"
+      },
+      "expected": {
+        "status": "ready",
+        "article_ids": [
+          "제2조"
+        ],
+        "rationale": "정기 휴무일인 월요일이 공휴일이면 영업하고 다음 화요일에 쉽니다.",
+        "notices": [
+          {
+            "description": "월요일 공휴일에는 영업합니다.",
+            "pattern": "월요일[^.!?\\n]{0,50}(?:영업|문을\\s*엽|문을\\s*열)"
+          },
+          {
+            "description": "공휴일인 월요일의 다음 날인 화요일에 쉽니다.",
+            "pattern": "화요일[^.!?\\n]{0,35}(?:휴무|쉽|쉬|쉰)|(?:휴무일|쉬는 날)[^.!?\\n]{0,25}화요일"
+          }
+        ]
+      }
+    },
+    {
+      "id": "G08",
+      "source": "data/golden_set.json#8",
+      "group": "single_policy",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 3,
+        "content": "다회용기를 고르면 뭐가 좋아?"
+      },
+      "expected": {
+        "status": "ready",
+        "article_ids": [
+          "제10조"
+        ],
+        "rationale": "500원 할인과 7일 이내 반환, 미반환 시 3,000원 보증금을 안내합니다.",
+        "notices": [
+          {
+            "description": "500원 할인",
+            "pattern": "(?<![\\d,])500\\s*원[^.!?\\n]{0,20}할인"
+          },
+          {
+            "description": "7일 이내 반환",
+            "pattern": "(?:7\\s*일|일주일)[^.!?\\n]{0,35}(?:반납|반환|돌려)|(?:반납|반환)[^.!?\\n]{0,25}(?:7\\s*일|일주일)"
+          },
+          {
+            "description": "미반환 시 3,000원 보증금",
+            "pattern": "(?:보증금|미반납|미반환|돌려주지)[^.!?\\n]{0,45}3,?000\\s*원|3,?000\\s*원[^.!?\\n]{0,25}(?:보증금|청구)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "P09",
+      "source": "benchmark/policy_cases.json#P09",
+      "group": "single_policy",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 2,
+        "content": "세 가지 음식 중 하나만 문제인데 그 메뉴 값만 돌려받을 수 있을까요?"
+      },
+      "expected": {
+        "status": "ready",
+        "article_ids": [
+          "제14조"
+        ],
+        "rationale": "문제가 있는 메뉴의 금액만 환불하는 규정을 안내합니다.",
+        "notices": [
+          {
+            "description": "문제가 있는 메뉴에 한한 환불",
+            "pattern": "(?:해당|그|문제[^.!?\\n]{0,15})\\s*(?:메뉴|음식)[^.!?\\n]{0,25}(?:만|한해|한하여)[^.!?\\n]{0,22}(?:환불|돌려)|환불[^.!?\\n]{0,18}(?:해당|문제)[^.!?\\n]{0,22}(?:메뉴|음식)[^.!?\\n]{0,17}(?:만|한해|한정)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "M01",
+      "source": "benchmark/policy_cases.json#M01",
+      "group": "multi_policy",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 1,
+        "content": "다른 메뉴가 왔고 용기도 깨져서 쏟아졌어요. 각각 사진을 언제까지 보내나요?"
+      },
+      "expected": {
+        "status": "ready",
+        "article_ids": [
+          "제12조",
+          "제17조"
+        ],
+        "rationale": "오배송은 받은 뒤 24시간 안에, 용기 파손은 받은 뒤 1시간 안에 사진과 함께 접수합니다.",
+        "notices": [
+          {
+            "description": "오배송은 24시간 내 접수",
+            "pattern": "(?:오배송|다른\\s*메뉴)[^.!?\\n]{0,50}24\\s*시간|24\\s*시간[^.!?\\n]{0,30}(?:오배송|다른\\s*메뉴)"
+          },
+          {
+            "description": "용기 파손은 1시간 내 접수",
+            "pattern": "(?:파손|깨졌|쏟아|용기)[^.!?\\n]{0,55}(?<!\\d)1\\s*시간|(?<!\\d)1\\s*시간[^.!?\\n]{0,30}(?:파손|깨졌|쏟아|용기)"
+          },
+          {
+            "description": "접수에 사진 첨부",
+            "pattern": "사진"
+          }
+        ]
+      }
+    },
+    {
+      "id": "M05",
+      "source": "benchmark/policy_cases.json#M05",
+      "group": "multi_policy",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 3,
+        "content": "앱에서 카드로 주문했는데 조리 시작 전엔 취소할 수 있나요? 카드 환불까지 얼마나 걸려요?"
+      },
+      "expected": {
+        "status": "ready",
+        "article_ids": [
+          "제11조",
+          "제13조"
+        ],
+        "rationale": "조리 시작 전에 전액 취소할 수 있고 카드 결제 취소는 영업일 기준 3~5일이 걸립니다.",
+        "notices": [
+          {
+            "description": "조리 시작 전 취소",
+            "pattern": "조리[^.!?\\n]{0,22}전[^.!?\\n]{0,26}취소"
+          },
+          {
+            "description": "카드 취소의 영업일 기준",
+            "pattern": "영업일"
+          },
+          {
+            "description": "카드 취소 처리 기간 3~5일",
+            "pattern": "3\\s*(?:영업\\s*)?(?:일\\s*)?(?:[~～∼–—-]|에서|부터|내지)\\s*5\\s*(?:영업\\s*)?일"
+          }
+        ]
+      }
+    },
+    {
+      "id": "N01",
+      "source": "benchmark/policy_cases.json#N01",
+      "group": "no_policy_ready",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 5,
+        "content": "식사하는 동안 친절하게 안내해 주셔서 감사해요."
+      },
+      "expected": {
+        "status": "ready",
+        "article_ids": [],
+        "rationale": "정책 조문 인용 없이 고객에게 감사를 전합니다.",
+        "notices": [
+          {
+            "description": "고객에 대한 감사",
+            "pattern": "감사|고맙|고마"
+          }
+        ]
+      }
+    },
+    {
+      "id": "N03",
+      "source": "benchmark/policy_cases.json#N03",
+      "group": "staff_review",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 3,
+        "content": "다음 주 수요일 두 시에 창가 2인석이 실제로 비어 있나요?"
+      },
+      "expected": {
+        "status": "needs_review",
+        "article_ids": [],
+        "rationale": "규정 문서로는 특정 시간의 빈 좌석을 확인할 수 없습니다.",
+        "notices": []
+      }
+    },
+    {
+      "id": "N05",
+      "source": "benchmark/policy_cases.json#N05",
+      "group": "staff_review",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 2,
+        "content": "파손된 배달 주문인데 제 주문 환불이 이미 승인됐는지 알려줘요."
+      },
+      "expected": {
+        "status": "needs_review",
+        "article_ids": [],
+        "rationale": "제17조는 절차를 안내하며 개별 주문의 승인 사실은 매장이 확인합니다.",
+        "notices": []
+      }
+    },
+    {
+      "id": "S01",
+      "source": "synthetic",
+      "group": "multi_policy",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 3,
+        "content": "공휴일이 아닌 금요일 오후 4시에 매장에서 먹을 수 있나요? 그 시간에 전화로 포장 주문도 받을까요?"
+      },
+      "expected": {
+        "status": "ready",
+        "article_ids": [
+          "제1조",
+          "제6조"
+        ],
+        "rationale": "평일 브레이크타임에 매장 식사는 불가하고 포장은 앱이나 홈페이지로 주문합니다.",
+        "notices": [
+          {
+            "description": "금요일 16시는 브레이크타임이며 매장 식사 불가",
+            "pattern": "브레이크\\s*타임|(?:매장\\s*식사|매장\\s*주문)[^.!?\\n]{0,23}(?:불가|받지|어렵|안\\s*됩)"
+          },
+          {
+            "description": "앱 또는 홈페이지 포장 주문",
+            "pattern": "(?:포장[^.!?\\n]{0,45}(?:앱|홈페이지)|(?:앱|홈페이지)[^.!?\\n]{0,42}포장)"
+          },
+          {
+            "description": "전화로 주문할 수 없음",
+            "pattern": "전화[^.!?\\n]{0,35}(?:받지|불가|어렵|안\\s*됩|지원하지|할\\s*수\\s*없|불가능)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "S02",
+      "source": "synthetic",
+      "group": "multi_policy",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 3,
+        "content": "월요일이 공휴일인 주에 바로 다음 날 화요일에도 여나요? 방문해서 4만 원 결제하면 무료 주차는 몇 시간이에요?"
+      },
+      "expected": {
+        "status": "ready",
+        "article_ids": [
+          "제2조",
+          "제4조"
+        ],
+        "rationale": "해당 화요일은 휴무이고 3만 원 이상 결제 시 2시간 무료 주차를 지원합니다.",
+        "notices": [
+          {
+            "description": "공휴일인 월요일의 다음 날인 화요일에 쉽니다.",
+            "pattern": "화요일[^.!?\\n]{0,35}(?:휴무|쉽|쉬|쉰)|(?:휴무일|쉬는 날)[^.!?\\n]{0,25}화요일"
+          },
+          {
+            "description": "4만 원 결제 시 2시간 무료 주차",
+            "pattern": "2\\s*시간[^.!?\\n]{0,18}무료|무료[^.!?\\n]{0,24}2\\s*시간"
+          }
+        ]
+      }
+    },
+    {
+      "id": "S03",
+      "source": "synthetic",
+      "group": "staff_review",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 1,
+        "content": "심한 땅콩 알레르기가 있어요. 방금 준비된 제 음식에서 공용 조리 도구를 정말 안 썼는지 확인하고 안전하다고 보장해 주세요."
+      },
+      "expected": {
+        "status": "needs_review",
+        "article_ids": [],
+        "rationale": "제20조는 교차 오염 가능성을 알리며 개별 조리 과정과 안전 보장은 규정만으로 확인할 수 없습니다.",
+        "notices": []
+      }
+    },
+    {
+      "id": "S04",
+      "source": "synthetic",
+      "group": "staff_review",
+      "review": {
+        "customerName": "실습 고객",
+        "rating": 2,
+        "content": "어제 적립이 빠져서 제 회원 계정에 포인트를 넣어 준다고 했는데, 지금 실제로 처리가 끝나서 바로 쓸 수 있는지 확인해 주세요."
+      },
+      "expected": {
+        "status": "needs_review",
+        "article_ids": [],
+        "rationale": "제26조는 사용 조건을 규정하지만 특정 계정의 적립 완료 여부는 매장이 확인합니다.",
+        "notices": []
+      }
+    }
+  ]
+}

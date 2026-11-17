@@ -1,5 +1,6 @@
 """오지 레스토랑의 리뷰 CRUD와 LangGraph 답글 API."""
 
+from collections.abc import Callable
 from contextlib import AsyncExitStack, asynccontextmanager
 import logging
 
@@ -11,8 +12,8 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 from langgraph.store.sqlite.aio import AsyncSqliteStore
 
-from app.clients.llm_client import FakeLlmClient, OpenAiLlmClient
-from app.core.config import get_settings
+from app.clients.llm_client import FakeLlmClient, LlmClient, OpenAiLlmClient
+from app.core.config import Settings, get_settings
 from app.core.exceptions import register_exception_handlers
 from app.repositories.review_repository import ReviewRepository
 from app.routers import review_router
@@ -26,6 +27,7 @@ from app.services.reply_workflow import build_reply_workflow
 
 
 logger = logging.getLogger(__name__)
+LlmFactory = Callable[[Settings, httpx.Client, httpx.AsyncClient], LlmClient]
 
 
 def open_model_http_clients(timeout: float) -> tuple[httpx.Client, httpx.AsyncClient]:
@@ -37,17 +39,18 @@ def open_model_http_clients(timeout: float) -> tuple[httpx.Client, httpx.AsyncCl
 # 여기서 만든 LLM 클라이언트는 app.state에 두고 모든 요청이 함께 사용한다.
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    settings = get_settings()
+    settings = app.state.settings or get_settings()
+    factory = app.state.llm_factory
 
     async with AsyncExitStack() as resources:
-        if settings.fake_llm or settings.openai_api_key is None:
+        if settings.fake_llm or (factory is None and settings.openai_api_key is None):
             llm = FakeLlmClient(settings)
         else:
             timeout = settings.openai_timeout_seconds
             sync_http, async_http = open_model_http_clients(timeout)
             resources.enter_context(sync_http)
             await resources.enter_async_context(async_http)
-            llm = OpenAiLlmClient(settings, sync_http, async_http)
+            llm = (factory or OpenAiLlmClient)(settings, sync_http, async_http)
         app.state.llm_client = llm
         app.state.review_repository = ReviewRepository()
 
@@ -88,24 +91,21 @@ async def lifespan(app: FastAPI):
         yield
 
 
-# FastAPI 앱 객체. uv run fastapi dev는 pyproject.toml의 entrypoint("app.main:app")를 보고 이 변수를 찾는다.
-app = FastAPI(
-    # /docs 화면 맨 위에 나오는 서버 이름과 버전
-    title="오지 레스토랑 리뷰 서버",
-    version="1.0.0",
-    lifespan=lifespan,
-)
-
-# 예외 처리기를 등록한다. (Spring 컨테이너가 @ControllerAdvice를 알아서 관리하던 일을 직접 한다)
-register_exception_handlers(app)
-
-
-@app.get("/health", include_in_schema=False)
 async def health(request: Request) -> dict[str, str]:
     """부하 측정 도구가 모델 호출 없이 현재 모델을 확인할 수 있게 한다."""
     return {"model": request.app.state.llm_client.model}
 
 
-# 라우터를 등록한다. 등록해야 라우터에 적어 둔 주소가 실제로 생긴다.
-app.include_router(review_router.router)
-app.include_router(review_router.preferences_router)
+def create_app(settings: Settings | None = None, llm_factory: LlmFactory | None = None) -> FastAPI:
+    application = FastAPI(title="오지 레스토랑 리뷰 서버", version="1.0.0", lifespan=lifespan)
+    application.state.settings = settings
+    application.state.llm_factory = llm_factory
+    register_exception_handlers(application)
+    application.add_api_route("/health", health, methods=["GET"], include_in_schema=False)
+    application.include_router(review_router.router)
+    application.include_router(review_router.preferences_router)
+    return application
+
+
+# pyproject.toml의 FastAPI 진입점.
+app = create_app()

@@ -31,6 +31,13 @@ dev = [
     "pytest",
     "pytest-cov",
 ]
+evaluation = [
+    "anthropic",
+    "ipykernel",
+    "langchain-anthropic",
+    "langsmith",
+    "nbclient",
+]
 
 [tool.pytest.ini_options]
 # uv run pytest가 테스트를 찾을 폴더

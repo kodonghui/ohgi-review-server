@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 import re
 import time
 from typing import TYPE_CHECKING
@@ -10,11 +11,13 @@ from typing import TYPE_CHECKING
 import httpx
 import openai
 from langchain_core.exceptions import OutputParserException
+from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnableLambda
+from langchain_core.runnables import Runnable, RunnableLambda
 from langchain_openai import ChatOpenAI
 from langgraph.config import get_stream_writer
+from pydantic import BaseModel
 
 from app.clients.langchain_response import require_complete_message, require_reply_text
 from app.core.config import Settings
@@ -95,19 +98,86 @@ def draft_values(state: ReplyWorkflowState) -> dict:
     }
 
 
-class OpenAiLlmClient:
+class LangChainLlmClient:
+    def __init__(
+        self,
+        *,
+        model: str,
+        provider: str,
+        chat: BaseChatModel,
+        structured: Callable[[type[BaseModel], bool], Runnable],
+        api_error: type[Exception],
+        expect_completed: bool = False,
+    ):
+        self.model = model
+        self._provider = provider
+        self._api_error = api_error
+        self._expect_completed = expect_completed
+        self.text_chain = (
+            REPLY_PROMPT
+            | chat
+            | RunnableLambda(lambda message: require_complete_message(message, provider=provider))
+            | StrOutputParser()
+            | RunnableLambda(lambda text: require_reply_text(text, provider=provider))
+        )
+        self.draft_chain = DRAFT_PROMPT | structured(GroundedReplyDraft, False)
+        self.review_chain = REVIEW_PROMPT | structured(ReplyVerdict, True).with_config(tags=["nostream"])
+
+    def ask(self, instructions: str, prompt: str) -> str:
+        try:
+            return self.text_chain.invoke({"instructions": instructions, "prompt": prompt})
+        except self._api_error as error:
+            raise self._request_error(error) from None
+        except ValueError:
+            raise AiRequestError(f"{self._provider} 응답을 읽을 수 없습니다.") from None
+
+    async def draft(self, state: ReplyWorkflowState) -> GroundedReplyDraft:
+        draft = await self._structured(self.draft_chain, draft_values(state), GroundedReplyDraft)
+        return draft.model_copy(update={"reply": require_reply_text(draft.reply, provider=self._provider)})
+
+    async def review(self, state: ReplyWorkflowState) -> ReplyVerdict:
+        draft = state["draft"]
+        assert draft is not None
+        values = {**draft_values(state), "draft": draft.model_dump_json()}
+        return await self._structured(self.review_chain, values, ReplyVerdict)
+
+    async def _structured[T: BaseModel](self, chain: Runnable, values: dict, schema: type[T]) -> T:
+        try:
+            result = await chain.ainvoke(values)
+        except self._api_error as error:
+            raise self._request_error(error) from None
+        except (ValueError, OutputParserException):
+            raise AiRequestError(f"{self._provider}의 구조화 응답을 읽을 수 없습니다.") from None
+        require_complete_message(result["raw"], expect_completed=self._expect_completed, provider=self._provider)
+        parsed = result["parsed"]
+        if result.get("parsing_error") or not isinstance(parsed, schema):
+            raise AiRequestError(f"{self._provider}의 구조화 응답을 읽을 수 없습니다.")
+        return parsed
+
+    def _request_error(self, error: Exception) -> AiRequestError:
+        if isinstance(error, openai.APITimeoutError) or isinstance(error.__cause__, httpx.TimeoutException):
+            return AiRequestError(f"{self._provider} 모델 호출 제한 시간을 넘었습니다.")
+        status = getattr(error, "status_code", None)
+        detail = f" (HTTP {status})" if isinstance(status, int) else ""
+        return AiRequestError(f"{self._provider} 호출에 실패했습니다{detail}.")
+
+
+class OpenAiLlmClient(LangChainLlmClient):
     def __init__(
         self,
         settings: Settings,
         http_client: httpx.Client,
         http_async_client: httpx.AsyncClient,
+        *,
+        prompt_cache_key: str | None = None,
+        callbacks=None,
     ):
         if settings.openai_api_key is None:
             raise ValueError("OPENAI_API_KEY가 필요합니다.")
 
-        self.model = settings.openai_model
-        self._chat = ChatOpenAI(
-            model=self.model,
+        extra = {"prompt_cache_key": prompt_cache_key} if prompt_cache_key else {}
+        chat = ChatOpenAI(
+            model=settings.openai_model,
             api_key=settings.openai_api_key,
             timeout=settings.openai_timeout_seconds,
             max_retries=1,
@@ -117,51 +187,24 @@ class OpenAiLlmClient:
             store=False,
             http_client=http_client,
             http_async_client=http_async_client,
+            callbacks=callbacks,
+            model_kwargs=extra,
         )
-        self.text_chain = (
-            REPLY_PROMPT
-            | self._chat
-            | RunnableLambda(require_complete_message)
-            | StrOutputParser()
-            | RunnableLambda(require_reply_text)
+
+        def structured(schema: type[BaseModel], review: bool) -> Runnable:
+            options = {"stream": False} if review else {}
+            return chat.with_structured_output(
+                schema, method="json_schema", strict=True, include_raw=True, **options,
+            )
+
+        super().__init__(
+            model=settings.openai_model, provider="OpenAI", chat=chat, structured=structured,
+            api_error=openai.OpenAIError, expect_completed=True,
         )
-        self.draft_chain = DRAFT_PROMPT | self._chat.with_structured_output(
-            GroundedReplyDraft, method="json_schema", strict=True, include_raw=True,
-        )
-        self.review_chain = REVIEW_PROMPT | self._chat.with_structured_output(
-            ReplyVerdict, method="json_schema", strict=True, include_raw=True, stream=False,
-        ).with_config(tags=["nostream"])
 
-    def ask(self, instructions: str, prompt: str) -> str:
-        try:
-            return self.text_chain.invoke({"instructions": instructions, "prompt": prompt})
-        except openai.OpenAIError as error:
-            raise to_ai_request_error(error) from None
-        except ValueError:
-            raise AiRequestError("OpenAI 응답을 읽을 수 없습니다.") from None
+    def _request_error(self, error: openai.OpenAIError) -> AiRequestError:
+        return to_ai_request_error(error)
 
-    async def draft(self, state: ReplyWorkflowState) -> GroundedReplyDraft:
-        draft = await self._structured(self.draft_chain, draft_values(state), GroundedReplyDraft)
-        return draft.model_copy(update={"reply": require_reply_text(draft.reply)})
-
-    async def review(self, state: ReplyWorkflowState) -> ReplyVerdict:
-        draft = state["draft"]
-        assert draft is not None
-        values = {**draft_values(state), "draft": draft.model_dump_json()}
-        return await self._structured(self.review_chain, values, ReplyVerdict)
-
-    async def _structured[T](self, chain, values: dict, schema: type[T]) -> T:
-        try:
-            result = await chain.ainvoke(values)
-        except openai.OpenAIError as error:
-            raise to_ai_request_error(error) from None
-        except (ValueError, OutputParserException):
-            raise AiRequestError("OpenAI의 구조화 응답을 읽을 수 없습니다.") from None
-        require_complete_message(result["raw"], expect_completed=True)
-        parsed = result["parsed"]
-        if result.get("parsing_error") or not isinstance(parsed, schema):
-            raise AiRequestError("OpenAI의 구조화 응답을 읽을 수 없습니다.")
-        return parsed
 
 def to_ai_request_error(error: openai.OpenAIError) -> AiRequestError:
     if isinstance(error, openai.AuthenticationError):
@@ -253,4 +296,4 @@ class FakeLlmClient:
         assert draft is not None
         return ReplyVerdict(passed=True, reason="")
 
-LlmClient = OpenAiLlmClient | FakeLlmClient
+LlmClient = LangChainLlmClient | FakeLlmClient
