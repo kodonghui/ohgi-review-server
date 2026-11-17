@@ -24,9 +24,9 @@ $env:LANGSMITH_TRACING = 'false'
 uv run --locked fastapi run --host 127.0.0.1 --port 8000
 ```
 
-첫 인덱스 구축 때 다국어 MiniLM 임베딩 모델을 내려받습니다. 기본 앱은 [실습 규정집 35조](data/ohgi_regulations.md)와 `.local/`을 사용합니다. 앱 시작 전에 인덱스를 만들고 규정이 바뀌면 인덱스를 다시 만든 뒤 서버를 재시작합니다. 가짜 모델 모드로 OpenAI 키 없이 전체 흐름을 실행할 수 있습니다.
+기본 앱은 [실습 규정집 35조](data/ohgi_regulations.md)와 `.local/`을 사용합니다. 인덱스 구축과 검색에 OpenAI `text-embedding-3-large`와 `OPENAI_API_KEY`가 필요합니다. 앱 시작 전에 인덱스를 만들고 규정이 바뀌면 인덱스를 다시 만든 뒤 서버를 재시작합니다. `FAKE_LLM`은 답글 작성과 검토에 적용되며 규정 검색의 임베딩 호출은 그대로 사용합니다.
 
-[Swagger UI](http://127.0.0.1:8000/docs)에서 리뷰 등록·답글 생성·조회·수정을 실행할 수 있습니다. 155조와 제69조 대리 수령은 아래 확장판 재현 명령으로 실행합니다.
+[Swagger UI](http://127.0.0.1:8000/docs)에서 리뷰 등록·답글 생성·조회·수정을 실행할 수 있습니다. 155조와 제69조 대리 수령 측정은 [이전 확장판 결과](benchmark/scale/VERSIONS.md)에서 확인할 수 있습니다.
 
 ## 아키텍처
 
@@ -184,7 +184,7 @@ Hit@1은 첫 후보, Hit@3은 상위 세 후보에 정답 조문이 들어온 �
 uv run --locked python benchmark/policy_quality.py --output .local/benchmark/policy-35.json
 ```
 
-50페이지 PDF 생성기는 Windows 맑은 고딕을 사용합니다. 확장판 벤치와 HTTP 점검은 선택한 Git 커밋을 임시 경로에 풀어 해당 규정집을 인덱싱합니다.
+50페이지 PDF 생성기는 Windows 맑은 고딕을 사용합니다. 아래 확장판 벤치와 HTTP 점검 명령은 MiniLM으로 측정한 과거 실행 기록입니다. 현재 OpenAI 환경에서 새 평가는 [LangSmith 노트북](17_ohgi_review_langsmith.ipynb)으로 실행합니다.
 
 ```powershell
 $book = '.local/benchmark/regulations-50p.md'

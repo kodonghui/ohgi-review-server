@@ -9,18 +9,15 @@ from threading import Lock
 
 import httpx
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
 from openai import OpenAIError
 from pydantic import SecretStr
 
 from app.core.config import PROJECT_ROOT
-from app.services.policy_index import IndexEmbedding, REGULATIONS, build_policy_index, open_policy_index
+from app.services.policy_index import IndexEmbedding, REGULATIONS, build_policy_index, open_policy_index, openai_policy_embedding
 from benchmark.langsmith_providers import required_setting
 
 
 RESULTS_DIR = PROJECT_ROOT / ".local" / "langsmith-eval"
-EMBEDDING_MODEL = "text-embedding-3-large"
-EMBEDDING_DIMENSIONS = 3072
 
 
 class EmbeddingUsage:
@@ -61,16 +58,10 @@ def openai_evaluation_index() -> Iterator[EvaluationIndex]:
     usage = EmbeddingUsage()
     # Chroma's async search runs its synchronous embed_query in an executor.
     with httpx.Client(timeout=60, event_hooks={"response": [usage.record]}) as transport:
-        function = OpenAIEmbeddings(
-            model=EMBEDDING_MODEL,
-            dimensions=EMBEDDING_DIMENSIONS,
-            api_key=SecretStr(required_setting("OPENAI_API_KEY")),
-            base_url="https://api.openai.com/v1",
+        embedding = openai_policy_embedding(
+            SecretStr(required_setting("OPENAI_API_KEY")),
             http_client=transport,
-            request_timeout=60,
-            max_retries=1,
         )
-        embedding = IndexEmbedding(EMBEDDING_MODEL, function, EMBEDDING_DIMENSIONS)
         try:
             if open_policy_index(runtime_dir, embedding=embedding) is None:
                 build_policy_index(runtime_dir, embedding=embedding)

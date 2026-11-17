@@ -11,12 +11,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from uuid import uuid4
 
+import httpx
 from chromadb.config import Settings as ChromaSettings
-from fastembed import TextEmbedding
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import MarkdownHeaderTextSplitter
+from pydantic import SecretStr
 
 from app.core.config import PROJECT_ROOT, get_settings
 from app.services.hybrid_retriever import HybridRetriever
@@ -24,7 +26,8 @@ from app.services.hybrid_retriever import HybridRetriever
 
 REGULATIONS = PROJECT_ROOT / "data" / "ohgi_regulations.md"
 COLLECTION = "ohgi_regulations"
-EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+EMBEDDING_MODEL = "text-embedding-3-large"
+EMBEDDING_DIMENSIONS = 3072
 INDEX_VERSION = 1
 
 
@@ -35,20 +38,19 @@ class IndexEmbedding:
     dimensions: int
 
 
-class LocalPolicyEmbeddings(Embeddings):
-    def __init__(self, runtime_dir: Path, *, local_files_only: bool):
-        self._model = TextEmbedding(
-            model_name=EMBEDDING_MODEL,
-            cache_dir=str(runtime_dir / "embedding-models"),
-            threads=2,
-            local_files_only=local_files_only,
-        )
-
-    def embed_documents(self, texts: list[str]) -> list[list[float]]:
-        return [vector.tolist() for vector in self._model.embed(texts)]
-
-    def embed_query(self, text: str) -> list[float]:
-        return self.embed_documents([text])[0]
+def openai_policy_embedding(api_key: SecretStr | None, *, http_client: httpx.Client | None = None) -> IndexEmbedding:
+    if not api_key or not api_key.get_secret_value().strip():
+        raise ValueError("정책 임베딩에 OPENAI_API_KEY가 필요합니다.")
+    function = OpenAIEmbeddings(
+        model=EMBEDDING_MODEL,
+        dimensions=EMBEDDING_DIMENSIONS,
+        api_key=api_key,
+        base_url="https://api.openai.com/v1",
+        http_client=http_client,
+        request_timeout=60,
+        max_retries=1,
+    )
+    return IndexEmbedding(EMBEDDING_MODEL, function, EMBEDDING_DIMENSIONS)
 
 
 def load_articles(source: Path = REGULATIONS) -> list[Document]:
@@ -76,21 +78,22 @@ def open_policy_index(runtime_dir: Path, *, embedding: IndexEmbedding | None = N
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     model_name = embedding.model if embedding else EMBEDDING_MODEL
+    dimensions = embedding.dimensions if embedding else EMBEDDING_DIMENSIONS
     if (
         manifest["source_sha256"] != hashlib.sha256(REGULATIONS.read_bytes()).hexdigest()
         or manifest["embedding_model"] != model_name
-        or (embedding is not None and manifest.get("embedding_dimensions") != embedding.dimensions)
+        or manifest.get("embedding_dimensions") != dimensions
         or manifest["version"] != INDEX_VERSION
     ):
         raise ValueError("규정 또는 임베딩 설정이 바뀌었습니다. 정책 인덱스를 다시 만드세요.")
     directory = runtime_dir / "policy-indexes" / manifest["directory"]
     if not (directory / "chroma.sqlite3").is_file():
         raise FileNotFoundError("정책 인덱스 파일을 찾을 수 없습니다.")
+    if embedding is None:
+        embedding = openai_policy_embedding(get_settings().openai_api_key)
     index = Chroma(
         collection_name=COLLECTION,
-        embedding_function=embedding.function if embedding else LocalPolicyEmbeddings(
-            runtime_dir, local_files_only=True,
-        ),
+        embedding_function=embedding.function,
         persist_directory=str(directory),
         client_settings=ChromaSettings(anonymized_telemetry=False),
         create_collection_if_not_exists=False,
@@ -101,6 +104,8 @@ def open_policy_index(runtime_dir: Path, *, embedding: IndexEmbedding | None = N
 
 
 def build_policy_index(runtime_dir: Path, *, embedding: IndexEmbedding | None = None) -> dict:
+    if embedding is None:
+        embedding = openai_policy_embedding(get_settings().openai_api_key)
     source_hash = hashlib.sha256(REGULATIONS.read_bytes()).hexdigest()
     directory_name = uuid4().hex
     directory = runtime_dir / "policy-indexes" / directory_name
@@ -108,9 +113,7 @@ def build_policy_index(runtime_dir: Path, *, embedding: IndexEmbedding | None = 
     articles = load_articles()
     index = Chroma(
         collection_name=COLLECTION,
-        embedding_function=embedding.function if embedding else LocalPolicyEmbeddings(
-            runtime_dir, local_files_only=False,
-        ),
+        embedding_function=embedding.function,
         persist_directory=str(directory),
         client_settings=ChromaSettings(anonymized_telemetry=False),
         collection_configuration={"hnsw": {"space": "cosine"}},
@@ -124,11 +127,10 @@ def build_policy_index(runtime_dir: Path, *, embedding: IndexEmbedding | None = 
         "directory": directory_name,
         "version": INDEX_VERSION,
         "source_sha256": source_hash,
-        "embedding_model": embedding.model if embedding else EMBEDDING_MODEL,
+        "embedding_model": embedding.model,
+        "embedding_dimensions": embedding.dimensions,
         "article_count": len(ids),
     }
-    if embedding is not None:
-        manifest["embedding_dimensions"] = embedding.dimensions
     # 저장 중 프로세스가 끝나도 활성 manifest는 직전 완성 인덱스를 가리킨다.
     temporary = runtime_dir / f"policy-index-{directory_name}.json"
     temporary.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
