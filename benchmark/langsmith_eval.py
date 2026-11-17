@@ -20,6 +20,7 @@ from app.core.config import PROJECT_ROOT, Settings
 from app.main import create_app
 from app.schemas.review import ReviewCreateRequest
 from app.services.policy_index import REGULATIONS, build_policy_index, load_articles, open_policy_index
+from app.services.reply_workflow import MAX_DRAFT_ATTEMPTS
 from benchmark.langsmith_providers import Provider, model_factory, provider_config, required_setting, setting
 
 
@@ -205,6 +206,10 @@ def run_experiment(
 ) -> dict:
     config = provider_config(provider)
     usage = UsageMetadataCallbackHandler()
+    is_relay = provider == "deepseek"
+    model_timeout = 180 if is_relay else 60
+    # Reserve time for each draft and review, plus local work.
+    reply_timeout = 2 * MAX_DRAFT_ATTEMPTS * model_timeout + 30 if is_relay else 180
     settings = Settings(
         _env_file=None,
         fake_llm=False,
@@ -213,10 +218,24 @@ def run_experiment(
         openai_api_key=config.api_key if provider == "gpt" else None,
         openai_reasoning_effort="none",
         # The relay uses some of its output budget for reasoning before returning JSON.
-        openai_max_output_tokens=1800 if provider == "deepseek" else 500,
-        openai_timeout_seconds=60,
-        reply_timeout_seconds=180,
+        openai_max_output_tokens=1800 if is_relay else 500,
+        openai_timeout_seconds=model_timeout,
+        reply_timeout_seconds=reply_timeout,
     )
+    run_metadata = {
+        "provider": provider,
+        "model": config.model,
+        "policy_sha256": fingerprint(REGULATIONS),
+        "golden_sha256": fingerprint(GOLDEN),
+        "model_timeout_seconds": model_timeout,
+        "reply_timeout_seconds": reply_timeout,
+        "max_output_tokens": settings.openai_max_output_tokens,
+        "native_thinking": "relay default" if is_relay else "disabled",
+        "transport_max_retries": 0 if is_relay else 1,
+        "provider_prompt_cache": {"gpt": "prefix key", "claude": "ephemeral", "deepseek": "relay"}[provider],
+        "num_repetitions": repetitions,
+        "max_concurrency": concurrency,
+    }
     cache_key = f"ohgi-reply-{fingerprint(GOLDEN)[:12]}"
     application = create_app(settings, model_factory(config, usage, cache_key))
 
@@ -228,18 +247,17 @@ def run_experiment(
                 return await call_next(request)
         return await call_next(request)
 
-    # HTTP 호출로 먼저 구조화 작성·검토 응답과 실제 모델을 확인한다.
-    smoke = next(case for case in golden["cases"] if case["id"] == "G03")
     with TestClient(application, raise_server_exceptions=False) as http:
         with ls.tracing_context(enabled=False):
             if http.get("/health").json()["model"] != config.model:
                 raise RuntimeError(f"{provider} 모델 설정과 서버 모델이 다릅니다.")
-            probe = invoke_reply(http, {"case_id": smoke["id"], "review": smoke["review"]})
-        if probe["http_status"] != 200 or not probe.get("attempts"):
-            detail = probe.get("error_detail") or f"HTTP {probe['http_status']}"
-            if provider != "deepseek" or "HTTP 401" in detail or "HTTP 403" in detail:
-                raise RuntimeError(f"{provider}의 실제 모델 확인 실패. {detail}")
-            print(f"{provider} 사전 요청 확인. {detail} 본 실험에서 오류와 지연을 함께 측정합니다.", flush=True)
+            # A relay can spend its full timeout before the experiment is visible.
+            if not is_relay:
+                smoke = next(case for case in golden["cases"] if case["id"] == "G03")
+                probe = invoke_reply(http, {"case_id": smoke["id"], "review": smoke["review"]})
+                if probe["http_status"] != 200 or not probe.get("attempts"):
+                    detail = probe.get("error_detail") or f"HTTP {probe['http_status']}"
+                    raise RuntimeError(f"{provider}의 실제 모델 확인 실패. {detail}")
         smoke_usage = dict(usage.usage_metadata)
         usage.usage_metadata.clear()
         print(f"{provider} {config.model} LangSmith 반복 실험을 시작합니다.", flush=True)
@@ -249,20 +267,9 @@ def run_experiment(
 
         experiment = ls.evaluate(
             target, data=dataset.name, evaluators=[assess_reply], client=client,
-            experiment_prefix=f"{golden['version']}-{provider}",
+            experiment_prefix=f"{golden['version']}-{provider}" + ("-180s" if is_relay else ""),
             num_repetitions=repetitions, max_concurrency=concurrency,
-            metadata={
-                "provider": provider,
-                "model": config.model,
-                "policy_sha256": fingerprint(REGULATIONS),
-                "golden_sha256": fingerprint(GOLDEN),
-                "model_timeout_seconds": settings.openai_timeout_seconds,
-                "reply_timeout_seconds": settings.reply_timeout_seconds,
-                "max_output_tokens": settings.openai_max_output_tokens,
-                "native_thinking": "relay default" if provider == "deepseek" else "disabled",
-                "transport_max_retries": 0 if provider == "deepseek" else 1,
-                "provider_prompt_cache": {"gpt": "prefix key", "claude": "ephemeral", "deepseek": "relay"}[provider],
-            },
+            metadata=run_metadata,
         )
         rows = []
         for result in experiment:
@@ -283,6 +290,7 @@ def run_experiment(
         "experiment_name": experiment.experiment_name,
         "url": experiment.url,
         "dataset_url": dataset.url,
+        "configuration": run_metadata,
         "summary": summarize(rows, repetitions),
         "usage": usage.usage_metadata,
         "smoke_usage": smoke_usage,
