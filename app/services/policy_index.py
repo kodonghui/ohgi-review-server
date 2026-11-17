@@ -7,6 +7,7 @@ import argparse
 import asyncio
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from uuid import uuid4
 
@@ -25,6 +26,13 @@ REGULATIONS = PROJECT_ROOT / "data" / "ohgi_regulations.md"
 COLLECTION = "ohgi_regulations"
 EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 INDEX_VERSION = 1
+
+
+@dataclass(frozen=True)
+class IndexEmbedding:
+    model: str
+    function: Embeddings
+    dimensions: int
 
 
 class LocalPolicyEmbeddings(Embeddings):
@@ -61,15 +69,17 @@ def load_articles(source: Path = REGULATIONS) -> list[Document]:
     ]
 
 
-def open_policy_index(runtime_dir: Path) -> Chroma | None:
+def open_policy_index(runtime_dir: Path, *, embedding: IndexEmbedding | None = None) -> Chroma | None:
     manifest_path = runtime_dir / "policy-index.json"
     if not manifest_path.is_file():
         return None
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    model_name = embedding.model if embedding else EMBEDDING_MODEL
     if (
         manifest["source_sha256"] != hashlib.sha256(REGULATIONS.read_bytes()).hexdigest()
-        or manifest["embedding_model"] != EMBEDDING_MODEL
+        or manifest["embedding_model"] != model_name
+        or (embedding is not None and manifest.get("embedding_dimensions") != embedding.dimensions)
         or manifest["version"] != INDEX_VERSION
     ):
         raise ValueError("규정 또는 임베딩 설정이 바뀌었습니다. 정책 인덱스를 다시 만드세요.")
@@ -78,7 +88,9 @@ def open_policy_index(runtime_dir: Path) -> Chroma | None:
         raise FileNotFoundError("정책 인덱스 파일을 찾을 수 없습니다.")
     index = Chroma(
         collection_name=COLLECTION,
-        embedding_function=LocalPolicyEmbeddings(runtime_dir, local_files_only=True),
+        embedding_function=embedding.function if embedding else LocalPolicyEmbeddings(
+            runtime_dir, local_files_only=True,
+        ),
         persist_directory=str(directory),
         client_settings=ChromaSettings(anonymized_telemetry=False),
         create_collection_if_not_exists=False,
@@ -88,7 +100,7 @@ def open_policy_index(runtime_dir: Path) -> Chroma | None:
     return index
 
 
-def build_policy_index(runtime_dir: Path) -> dict:
+def build_policy_index(runtime_dir: Path, *, embedding: IndexEmbedding | None = None) -> dict:
     source_hash = hashlib.sha256(REGULATIONS.read_bytes()).hexdigest()
     directory_name = uuid4().hex
     directory = runtime_dir / "policy-indexes" / directory_name
@@ -96,7 +108,9 @@ def build_policy_index(runtime_dir: Path) -> dict:
     articles = load_articles()
     index = Chroma(
         collection_name=COLLECTION,
-        embedding_function=LocalPolicyEmbeddings(runtime_dir, local_files_only=False),
+        embedding_function=embedding.function if embedding else LocalPolicyEmbeddings(
+            runtime_dir, local_files_only=False,
+        ),
         persist_directory=str(directory),
         client_settings=ChromaSettings(anonymized_telemetry=False),
         collection_configuration={"hnsw": {"space": "cosine"}},
@@ -110,9 +124,11 @@ def build_policy_index(runtime_dir: Path) -> dict:
         "directory": directory_name,
         "version": INDEX_VERSION,
         "source_sha256": source_hash,
-        "embedding_model": EMBEDDING_MODEL,
+        "embedding_model": embedding.model if embedding else EMBEDDING_MODEL,
         "article_count": len(ids),
     }
+    if embedding is not None:
+        manifest["embedding_dimensions"] = embedding.dimensions
     # 저장 중 프로세스가 끝나도 활성 manifest는 직전 완성 인덱스를 가리킨다.
     temporary = runtime_dir / f"policy-index-{directory_name}.json"
     temporary.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")

@@ -3,11 +3,13 @@
 from collections.abc import Callable
 from contextlib import AsyncExitStack, asynccontextmanager
 import logging
+from pathlib import Path
 
 import anyio.to_thread
 import httpx
 from chromadb.errors import ChromaError
 from fastapi import FastAPI, Request
+from langchain_chroma import Chroma
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 from langgraph.store.sqlite.aio import AsyncSqliteStore
@@ -28,6 +30,7 @@ from app.services.reply_workflow import build_reply_workflow
 
 logger = logging.getLogger(__name__)
 LlmFactory = Callable[[Settings, httpx.Client, httpx.AsyncClient], LlmClient]
+PolicyIndexLoader = Callable[[Path], Chroma | None]
 
 
 def open_model_http_clients(timeout: float) -> tuple[httpx.Client, httpx.AsyncClient]:
@@ -63,7 +66,8 @@ async def lifespan(app: FastAPI):
         app.state.reply_timeout = settings.reply_timeout_seconds
 
         try:
-            index = await anyio.to_thread.run_sync(open_policy_index, settings.runtime_dir)
+            index_loader = app.state.policy_index_loader or open_policy_index
+            index = await anyio.to_thread.run_sync(index_loader, settings.runtime_dir)
             articles = load_articles() if index is not None else []
             hybrid = HybridRetriever(index, articles) if index is not None else None
         except (OSError, ValueError, KeyError, RuntimeError, ChromaError) as error:
@@ -96,10 +100,16 @@ async def health(request: Request) -> dict[str, str]:
     return {"model": request.app.state.llm_client.model}
 
 
-def create_app(settings: Settings | None = None, llm_factory: LlmFactory | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None,
+    llm_factory: LlmFactory | None = None,
+    *,
+    policy_index_loader: PolicyIndexLoader | None = None,
+) -> FastAPI:
     application = FastAPI(title="오지 레스토랑 리뷰 서버", version="1.0.0", lifespan=lifespan)
     application.state.settings = settings
     application.state.llm_factory = llm_factory
+    application.state.policy_index_loader = policy_index_loader
     register_exception_handlers(application)
     application.add_api_route("/health", health, methods=["GET"], include_in_schema=False)
     application.include_router(review_router.router)

@@ -2,9 +2,7 @@
 
 import hashlib
 import json
-import os
 import re
-import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
 from statistics import median
@@ -19,13 +17,13 @@ from langchain_core.callbacks import UsageMetadataCallbackHandler
 from app.core.config import PROJECT_ROOT, Settings
 from app.main import create_app
 from app.schemas.review import ReviewCreateRequest
-from app.services.policy_index import REGULATIONS, build_policy_index, load_articles, open_policy_index
+from app.services.policy_index import REGULATIONS, load_articles
 from app.services.reply_workflow import MAX_DRAFT_ATTEMPTS
+from benchmark.langsmith_embeddings import EvaluationIndex, RESULTS_DIR
 from benchmark.langsmith_providers import Provider, model_factory, provider_config, required_setting, setting
 
 
 GOLDEN = PROJECT_ROOT / "data" / "langsmith_reply_golden_v1.json"
-RESULTS_DIR = PROJECT_ROOT / ".local" / "langsmith-eval"
 
 
 def fingerprint(path: Path) -> str:
@@ -48,15 +46,6 @@ def load_golden() -> dict:
         for notice in expected["notices"]:
             re.compile(notice["pattern"])
     return golden
-
-
-def prepare_index() -> Path:
-    # Windows의 모델 캐시 경로 길이를 줄이고 일반 서버의 데이터와 격리한다.
-    host_cache = Path(os.environ.get("LOCALAPPDATA") or tempfile.gettempdir())
-    runtime_dir = host_cache / "ohgi-langsmith-eval" / fingerprint(REGULATIONS)[:12]
-    if open_policy_index(runtime_dir) is None:
-        build_policy_index(runtime_dir)
-    return runtime_dir
 
 
 def langsmith_client() -> ls.Client:
@@ -164,13 +153,15 @@ def assess_reply(outputs: dict, reference_outputs: dict) -> dict:
     return {"results": feedback}
 
 
-def fake_smoke(golden: dict, runtime_dir: Path) -> dict:
+def fake_smoke(golden: dict, index: EvaluationIndex) -> dict:
     settings = Settings(
         _env_file=None, openai_api_key=None, fake_llm=True,
-        fake_llm_delay_seconds=0, runtime_dir=runtime_dir,
+        fake_llm_delay_seconds=0, runtime_dir=index.runtime_dir,
     )
     case = next(item for item in golden["cases"] if item["id"] == "M01")
-    with ls.tracing_context(enabled=False), TestClient(create_app(settings)) as http:
+    with ls.tracing_context(enabled=False), TestClient(
+        create_app(settings, policy_index_loader=index.load),
+    ) as http:
         outputs = invoke_reply(http, {"case_id": case["id"], "review": case["review"]})
     if outputs.get("status") != "ready" or outputs.get("model") != "fake-llm" or not outputs.get("stored_matches"):
         raise RuntimeError("가짜 모델로 답글 API와 정책 인덱스를 확인하지 못했습니다.")
@@ -201,7 +192,7 @@ def summarize(rows: list[dict], repetitions: int) -> dict:
 
 
 def run_experiment(
-    client: ls.Client, dataset, golden: dict, runtime_dir: Path,
+    client: ls.Client, dataset, golden: dict, index: EvaluationIndex,
     provider: Provider, repetitions: int = 3, concurrency: int = 3,
 ) -> dict:
     config = provider_config(provider)
@@ -213,7 +204,7 @@ def run_experiment(
     settings = Settings(
         _env_file=None,
         fake_llm=False,
-        runtime_dir=runtime_dir,
+        runtime_dir=index.runtime_dir,
         openai_model=config.model,
         openai_api_key=config.api_key if provider == "gpt" else None,
         openai_reasoning_effort="none",
@@ -227,6 +218,8 @@ def run_experiment(
         "model": config.model,
         "policy_sha256": fingerprint(REGULATIONS),
         "golden_sha256": fingerprint(GOLDEN),
+        "embedding_model": index.embedding.model,
+        "embedding_dimensions": index.embedding.dimensions,
         "model_timeout_seconds": model_timeout,
         "reply_timeout_seconds": reply_timeout,
         "max_output_tokens": settings.openai_max_output_tokens,
@@ -237,7 +230,9 @@ def run_experiment(
         "max_concurrency": concurrency,
     }
     cache_key = f"ohgi-reply-{fingerprint(GOLDEN)[:12]}"
-    application = create_app(settings, model_factory(config, usage, cache_key))
+    application = create_app(
+        settings, model_factory(config, usage, cache_key), policy_index_loader=index.load,
+    )
 
     @application.middleware("http")
     async def link_trace(request: Request, call_next):
@@ -265,9 +260,11 @@ def run_experiment(
         def target(inputs: dict) -> dict:
             return invoke_reply(http, inputs)
 
+        embedding_before = index.usage.snapshot()
+        prefix = f"{golden['version']}-{provider}" + ("-180s" if is_relay else "") + "-oaiemb"
         experiment = ls.evaluate(
             target, data=dataset.name, evaluators=[assess_reply], client=client,
-            experiment_prefix=f"{golden['version']}-{provider}" + ("-180s" if is_relay else ""),
+            experiment_prefix=prefix,
             num_repetitions=repetitions, max_concurrency=concurrency,
             metadata=run_metadata,
         )
@@ -283,6 +280,7 @@ def run_experiment(
                 "trace_error": bool(run.error),
             })
         client.flush(timeout=30)
+        embedding_after = index.usage.snapshot()
 
     report = {
         "provider": provider,
@@ -291,6 +289,10 @@ def run_experiment(
         "url": experiment.url,
         "dataset_url": dataset.url,
         "configuration": run_metadata,
+        "embedding_usage": {
+            "index_build_in_session": index.build_usage,
+            "experiment_queries": {key: embedding_after[key] - value for key, value in embedding_before.items()},
+        },
         "summary": summarize(rows, repetitions),
         "usage": usage.usage_metadata,
         "smoke_usage": smoke_usage,

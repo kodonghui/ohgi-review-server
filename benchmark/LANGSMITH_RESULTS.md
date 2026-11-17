@@ -4,6 +4,8 @@
 
 이 기록의 기준 소스는 리뷰 서버 `82b96d0`과 평가 구현 `3ac6551`입니다. [35조 규정집](../data/ohgi_regulations.md), [골든셋 v1](../data/langsmith_reply_golden_v1.json), [평가 코드](langsmith_eval.py), [실습 노트북](../17_ohgi_review_langsmith.ipynb)을 사용했습니다. LangSmith 데이터셋 이름은 `ohgi-reply-v1-5d579a899f50`입니다.
 
+초기 벤치마크의 검색은 다국어 MiniLM 임베딩과 BM25를 합쳤습니다. 첫 인덱스 구축에서 Hugging Face의 Qdrant 저장소로부터 `%LOCALAPPDATA%/ohgi-langsmith-eval/db8b21b34388/embedding-models/`에 ONNX 파일을 다운로드했습니다. 확인한 본체는 224.16 MiB이고 관련 캐시 전체는 240.46 MiB입니다. 동희님이 요청한 새 실행부터는 교재와 같은 OpenAI `text-embedding-3-large`를 사용합니다. [초기 모델 저장소](https://huggingface.co/Qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q) · [인덱스 구현](../app/services/policy_index.py)
+
 ## 1. 점수와 이전 벤치마크
 
 골든셋은 요청 입력과 기대 결과를 미리 적어 둔 평가 데이터입니다. v1은 기존 문항 8건과 신규 합성 문항 4건으로 구성합니다. 기대 상태는 `ready` 또는 `needs_review`이며 필수 조문과 필수 안내를 함께 적습니다. 한 요청은 HTTP 응답, 기대 상태, 조문, 안내 문구 패턴, 저장 후 조회 결과가 모두 맞으면 통과합니다. 안내 문구는 정규식으로 확인하므로 표현의 의미까지 평가해야 할 때는 답글을 직접 확인합니다.
@@ -106,3 +108,11 @@
 4. **원인.** S01의 `articles_match`가 낮으면 `retrieve`의 확보 조문을 확인합니다. S04는 `status_match`와 `incorrect_auto_approval`을 본 뒤 `retrieve → draft → review` 순서로 직원 보류가 어디서 빠졌는지 확인합니다. 지연과 비용은 HTTP 상태와 함께 읽습니다. DeepSeek 60초 실험에서 약 60초는 모델 호출 제한 시간에 도달한 요청의 지연입니다.
 
 [실험 비교 화면 공식 안내](https://docs.langchain.com/langsmith/compare-experiment-results) · [피드백·트레이스·반복 실행 보기](https://docs.langchain.com/langsmith/analyze-an-experiment)
+
+## 8. DeepSeek 180초 요청과 임베딩 전환
+
+DeepSeek는 모델 호출당 180초를 주고, 최대 두 차례의 작성·검토와 검색을 포함한 전체 답글 요청 제한을 750초로 설정했습니다. 동시성 3과 출력 토큰 상한 1,800을 사용했습니다. 골든셋과 규정집의 SHA-256은 순서대로 `5d579a899f50c6bf9805c62c0b5f65b7ec676d06dad3c854beaf7a9704c723e3`과 `db8b21b34388c5e0f6fc4eea7c1a64c6cc1c0f88ec413f37cee0a5b35d9ee0fd`입니다.
+
+- MiniLM을 사용한 `ohgi-reply-v1-deepseek-180s-3ce647de`는 임베딩 전환 요청을 받고 중단했습니다. 계획 36건 중 26건을 시작했고 23건의 응답이 저장됐습니다. 응답 중 15건이 통과했고 6건이 HTTP 502였습니다. 릴레이 하위 상태는 HTTP 524가 4건, HTTP 429가 1건이었고 구조화 응답 실패가 1건이었습니다. 시작한 3건은 중단 시점의 결과 기록이 없습니다. LangSmith에 관측된 생성 모델 토큰 합계는 86,774였습니다. 스냅샷은 로컬 `deepseek-180s-minilm-stopped.json`입니다.
+- 학원 교재의 `09_langchain/starter/ohgi_data.py`와 `complete/ohgi_data.py`는 `OpenAIEmbeddings(model="text-embedding-3-large")`를 사용합니다. 오지 리뷰 서버에는 커밋 `f678b2c`부터 MiniLM 설정이 있었고, 확장판 기준 `c7052de`에도 같은 임베딩 모델이 기록돼 있습니다.
+- `ohgi-reply-v1-deepseek-180s-oaiemb-f8b58c55`는 OpenAI 3,072차원 벡터로 구축한 35조 인덱스를 사용합니다. 새 인덱스의 저장 위치는 실습 폴더의 `.local/langsmith-eval/index-openai-3-large/`입니다. 인덱스 구축과 평가 쿼리의 응답 토큰 사용량을 노트북 보고서에 기록합니다. 임베딩 단가는 100만 입력 토큰당 $0.13입니다. [OpenAI 임베딩 단가](https://developers.openai.com/api/docs/models/text-embedding-3-large)
