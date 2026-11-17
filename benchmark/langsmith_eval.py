@@ -56,12 +56,13 @@ def langsmith_client() -> ls.Client:
     )
 
 
-def sync_dataset(client: ls.Client, golden: dict):
-    name = f"{golden['version']}-{fingerprint(GOLDEN)[:12]}"
+def sync_dataset(client: ls.Client, golden: dict, golden_file: Path = GOLDEN):
+    name = f"{golden['version']}-{fingerprint(golden_file)[:12]}"
     if client.has_dataset(dataset_name=name):
         dataset = client.read_dataset(dataset_name=name)
     else:
-        dataset = client.create_dataset(name, description="오지 리뷰 답글 API 골든셋. 합성 및 강의 사례 12건.")
+        description = f"오지 리뷰 답글 API 골든셋. 조문 근거와 기대 답변이 있는 {len(golden['cases'])}건."
+        dataset = client.create_dataset(name, description=description)
     examples = {
         uuid5(dataset.id, case["id"]): {
             "inputs": {"case_id": case["id"], "review": case["review"]},

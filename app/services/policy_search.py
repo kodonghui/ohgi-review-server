@@ -4,10 +4,9 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from chromadb.errors import ChromaError
-from langchain_chroma import Chroma
 from langchain_core.documents import Document
 
-from app.services.hybrid_retriever import HybridRetriever, SearchRankings
+from app.services.hybrid_retriever import HybridRetriever, PolicyVectorIndex, SearchRankings
 from app.services.policy_passages import DOCUMENT_TOPIC, PolicyPassages, normalized, split_questions
 from app.services.policy_topics import PolicyEvidence, PolicyRule, route_questions
 
@@ -52,7 +51,7 @@ def find_evidence(rule: PolicyRule, candidates: list[Document]) -> tuple[Documen
 
 class PolicySearch:
     def __init__(
-        self, index: Chroma | None, hybrid: HybridRetriever | None = None, articles: Sequence[Document] = (),
+        self, index: PolicyVectorIndex | None, hybrid: HybridRetriever | None = None, articles: Sequence[Document] = (),
     ):
         self._index = index
         self._hybrid = hybrid

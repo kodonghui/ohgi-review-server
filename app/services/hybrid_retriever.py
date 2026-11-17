@@ -4,7 +4,7 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass
 
-from langchain_chroma import Chroma
+from typing import Protocol
 from langchain_core.documents import Document
 from rank_bm25 import BM25Okapi
 
@@ -46,8 +46,14 @@ class SearchRankings:
     hybrid: list[Document]
 
 
+class PolicyVectorIndex(Protocol):
+    async def asimilarity_search(self, query: str, k: int) -> list[Document]: ...
+
+    async def aget_by_ids(self, ids: list[str]) -> list[Document]: ...
+
+
 class HybridRetriever:
-    def __init__(self, index: Chroma, articles: list[Document]):
+    def __init__(self, index: PolicyVectorIndex, articles: list[Document]):
         self._index = index
         self._articles = articles
         self._bm25 = BM25Okapi([tokenize(article.page_content) for article in articles])

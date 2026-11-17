@@ -9,7 +9,6 @@ import anyio.to_thread
 import httpx
 from chromadb.errors import ChromaError
 from fastapi import FastAPI, Request
-from langchain_chroma import Chroma
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 from langgraph.store.sqlite.aio import AsyncSqliteStore
@@ -21,8 +20,8 @@ from app.repositories.review_repository import ReviewRepository
 from app.routers import review_router
 from app.schemas.reply_draft import GroundedReplyDraft
 from app.schemas.review import ReplyPreferences
-from app.services.hybrid_retriever import HybridRetriever
-from app.services.policy_index import load_articles, open_policy_index
+from app.services.hybrid_retriever import HybridRetriever, PolicyVectorIndex
+from app.services.policy_index import REGULATIONS, load_articles, open_policy_index
 from app.services.policy_search import PolicySearch, PolicySearchResult
 from app.services.policy_topics import PolicyEvidence
 from app.services.reply_workflow import build_reply_workflow
@@ -30,7 +29,7 @@ from app.services.reply_workflow import build_reply_workflow
 
 logger = logging.getLogger(__name__)
 LlmFactory = Callable[[Settings, httpx.Client, httpx.AsyncClient], LlmClient]
-PolicyIndexLoader = Callable[[Path], Chroma | None]
+PolicyIndexLoader = Callable[[Path], PolicyVectorIndex | None]
 
 
 def open_model_http_clients(timeout: float) -> tuple[httpx.Client, httpx.AsyncClient]:
@@ -68,7 +67,7 @@ async def lifespan(app: FastAPI):
         try:
             index_loader = app.state.policy_index_loader or open_policy_index
             index = await anyio.to_thread.run_sync(index_loader, settings.runtime_dir)
-            articles = load_articles() if index is not None else []
+            articles = load_articles(app.state.policy_source) if index is not None else []
             hybrid = HybridRetriever(index, articles) if index is not None else None
         except (OSError, ValueError, KeyError, RuntimeError, ChromaError) as error:
             logger.warning("규정 인덱스 로드 실패 (%s). 인덱스를 다시 만드세요.", type(error).__name__)
@@ -105,11 +104,13 @@ def create_app(
     llm_factory: LlmFactory | None = None,
     *,
     policy_index_loader: PolicyIndexLoader | None = None,
+    policy_source: Path = REGULATIONS,
 ) -> FastAPI:
     application = FastAPI(title="오지 레스토랑 리뷰 서버", version="1.0.0", lifespan=lifespan)
     application.state.settings = settings
     application.state.llm_factory = llm_factory
     application.state.policy_index_loader = policy_index_loader
+    application.state.policy_source = policy_source
     register_exception_handlers(application)
     application.add_api_route("/health", health, methods=["GET"], include_in_schema=False)
     application.include_router(review_router.router)

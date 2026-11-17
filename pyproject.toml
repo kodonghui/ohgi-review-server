@@ -36,6 +36,9 @@ evaluation = [
     "langchain-anthropic",
     "langsmith",
     "nbclient",
+    "psycopg[binary,pool]>=3.2,<4",
+    "pypdf>=6,<7",
+    "reportlab>=4,<5",
 ]
 
 [tool.pytest.ini_options]

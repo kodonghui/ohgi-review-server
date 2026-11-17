@@ -65,13 +65,14 @@ def pages_of(source):
     return pages
 
 
-def render(source, path, fonts):
+def render(source, path, fonts, *, page_count=50, last_article=155):
     pdfmetrics.registerFont(TTFont("Malgun", str(fonts / "malgun.ttf")))
     pdfmetrics.registerFont(TTFont("Malgun-Bold", str(fonts / "malgunbd.ttf")))
     pages = pages_of(source)
-    assert len(pages) == 50
+    if len(pages) != page_count:
+        raise ValueError(f"PDF 페이지 예상 {page_count}, 실제 {len(pages)}")
     pdf = Canvas(str(path), pagesize=A4, pageCompression=1, invariant=1)
-    pdf.setTitle("오지 레스토랑 운영 규정 · 50페이지 실험판")
+    pdf.setTitle(f"오지 레스토랑 운영 규정 · {page_count}페이지 실험판")
     pdf.setAuthor("오지 레스토랑 실습")
     text_width = WIDTH - MARGIN * 2
     for number, (chapter, page_in_chapter, articles, intro) in enumerate(pages, start=1):
@@ -119,7 +120,7 @@ def render(source, path, fonts):
         pdf.line(MARGIN, 57, WIDTH - MARGIN, 57)
         pdf.setFillColor(MUTED)
         pdf.setFont("Malgun", 9)
-        pdf.drawString(MARGIN, 39, "1–35조 교재 본문 · 36–155조 가상 추가 조문")
+        pdf.drawString(MARGIN, 39, f"1–35조 교재 본문 · 36–{last_article}조 가상 추가 조문")
         pdf.drawRightString(WIDTH - MARGIN, 39, f"{number} / {len(pages)}")
         pdf.showPage()
     pdf.save()
