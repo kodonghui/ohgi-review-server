@@ -10,6 +10,7 @@ from decimal import Decimal
 from pathlib import Path
 from threading import Lock
 from time import perf_counter
+from uuid import UUID
 
 import langsmith as ls
 import numpy as np
@@ -150,6 +151,11 @@ def experiment_info(client, dataset, name: str, metadata: dict):
     return project
 
 
+def experiment_name(golden: dict, backend: str, label: str, variant: str = "") -> str:
+    base = f"{golden['version']}-{backend}-{label}-{digest(GOLDEN)[:8]}"
+    return f"{base}-{variant}" if variant else base
+
+
 def assess_lesson(outputs: dict, reference_outputs: dict) -> dict:
     outputs = outputs or {}
     expected = reference_outputs["expected"]["article_ids"]
@@ -247,9 +253,9 @@ class JudgeResult(BaseModel):
     reason: str
 
 
-def run_lesson(client, dataset, examples, golden, bundle, store, backend, k, directory):
+def run_lesson(client, dataset, examples, golden, bundle, store, backend, k, directory, variant=""):
     config = provider_config("gpt")
-    name = f"{golden['version']}-{backend}-k{k}-{digest(GOLDEN)[:8]}"
+    name = experiment_name(golden, backend, f"k{k}", variant)
     report_path = directory / f"{name}.json"
     if report_path.is_file():
         return json.loads(report_path.read_text(encoding="utf-8"))
@@ -333,9 +339,9 @@ def common_metadata(bundle, backend, name, model, *, phase, repetitions, **extra
     }
 
 
-def run_api(client, dataset, examples, golden, bundle, store, backend, provider, directory):
+def run_api(client, dataset, examples, golden, bundle, store, backend, provider, directory, variant=""):
     config = provider_config(provider)
-    name = f"{golden['version']}-{backend}-{provider}-{digest(GOLDEN)[:8]}"
+    name = experiment_name(golden, backend, provider, variant)
     report_path = directory / f"{name}.json"
     if report_path.is_file():
         return json.loads(report_path.read_text(encoding="utf-8"))
@@ -404,7 +410,11 @@ def main() -> None:
     parser.add_argument("backend", choices=["chroma", "pgvector"])
     parser.add_argument("stage", choices=["dataset", "lesson", "api"])
     parser.add_argument("--provider", choices=PROVIDERS)
+    parser.add_argument("--variant", default="", help="Experiment suffix and separate result directory")
+    parser.add_argument("--dataset-id", type=UUID, help="Reuse an existing LangSmith dataset without editing it")
     args = parser.parse_args()
+    if args.variant and not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", args.variant):
+        parser.error("--variant accepts lowercase letters, digits and hyphens")
     for provider in PROVIDERS:
         model = provider_config(provider).model
         if model not in PRICING:
@@ -412,28 +422,31 @@ def main() -> None:
     bundle = build_bundle() if args.backend == "chroma" else load_bundle()
     golden = load_golden(bundle)
     client = langsmith_client()
-    dataset = sync_dataset(client, golden, GOLDEN)
+    dataset = (client.read_dataset(dataset_id=args.dataset_id) if args.dataset_id
+               else sync_dataset(client, golden, GOLDEN))
     examples = sorted(client.list_examples(dataset_id=dataset.id), key=lambda example: example.inputs["case_id"])
-    if len(examples) != len(golden["cases"]):
-        raise RuntimeError("LangSmith의 전체 골든셋 32건을 확인하지 못했습니다.")
+    expected = {case["id"]: (case["review"], {"expected": case["expected"]}) for case in golden["cases"]}
+    observed = {case.inputs["case_id"]: (case.inputs["review"], case.outputs) for case in examples}
+    if len(examples) != len(expected) or observed != expected:
+        raise RuntimeError("LangSmith의 골든셋이 로컬 입력 및 채점 기준과 다릅니다.")
     print(json.dumps({"dataset": dataset.name, "dataset_id": str(dataset.id), "dataset_url": dataset.url,
                       "examples": len(examples), "golden_sha256": digest(GOLDEN)}, ensure_ascii=False), flush=True)
     if args.stage == "dataset":
         return
 
-    directory = ARTIFACTS / args.backend
+    directory = ARTIFACTS / args.variant / args.backend
     directory.mkdir(parents=True, exist_ok=True)
     with open_store(args.backend, bundle) as store:
         if args.stage == "lesson":
             for k in (1, 3):
-                run_lesson(client, dataset, examples, golden, bundle, store, args.backend, k, directory)
+                run_lesson(client, dataset, examples, golden, bundle, store, args.backend, k, directory, args.variant)
         elif args.provider is not None:
-            run_api(client, dataset, examples, golden, bundle, store, args.backend, args.provider, directory)
+            run_api(client, dataset, examples, golden, bundle, store, args.backend, args.provider, directory, args.variant)
         else:
             with ThreadPoolExecutor(max_workers=len(PROVIDERS)) as executor:
                 jobs = [executor.submit(
                     run_api, langsmith_client(), dataset, examples, golden, bundle, store, args.backend, provider,
-                    directory,
+                    directory, args.variant,
                 ) for provider in PROVIDERS]
                 for job in jobs:
                     job.result(timeout=None)

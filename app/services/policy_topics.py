@@ -44,17 +44,62 @@ STAFF_ONLY = re.compile(
     r"쿠폰[^.!?]{0,18}(?:발급|보상|주세요|주실|줘|달라|준다고|드린다고|안\s*됐)"
 )
 FOLLOWUP_QUESTION = re.compile(r"(?:각각\s*)?(?:사진을?\s*언제까지\s*보내나요[?？]?|환불해\s*주세요[.!]?)")
+SENTENCE_BOUNDARY = re.compile(r"(?<=[?!。？])\s*|\.(?=\s|$)|\n+")
+QUESTION_JOIN = re.compile(
+    r"\s*[,，]\s*|\s+(?:그리고|또한)\s+|(?<=고)\s+(?=(?:카드|현금|간편결제|포인트|매장|전화|앱))"
+)
+QUESTION_FIELD = re.compile(
+    r"몇\s*[시분일점개명]|얼마|어느|어디|어떤|어떻게|뭐|무엇|언제|알려|궁금|가능|되나|돼요|있나|방법|기한"
+)
+LIVE_CONTEXT = re.compile(r"지난|방금|지금|현재|이미|벌써|아직|실제로|제\s*(?:계정|계좌|예약|주문|카드|결제)|내\s*(?:계정|예약|주문)")
+LIVE_STATUS = re.compile(
+    r"(?:적립|포인트)[^.!?\n]{0,26}(?:완료|반영|들어왔|됐는지|됐나요|처리됐)|"
+    r"(?:환불|취소|계좌)[^.!?\n]{0,28}(?:돌아왔|들어왔|입금됐|입금되었|반영됐)|"
+    r"(?:경사판|좌석|자리)[^.!?\n]{0,32}(?:설치|배정)[^.!?\n]{0,12}(?:끝났|완료|됐|되었)|"
+    r"(?:분실물|지갑|가방|우산|휴대폰)[^.!?\n]{0,32}(?:보관실|카운터|분실물함)[^.!?\n]{0,20}(?:있나요|있는지|있습니까)|"
+    r"(?:견과|교차\s*(?:오염|접촉)|알레르기\s*유발)[^.!?\n]{0,24}(?:접촉|섞였|없었|안전)"
+)
+NON_HOLIDAY = re.compile(r"공휴일(?:이|은|도)?\s*(?:아닌|아니고|아니면|아니라면|아닐\s*때)")
+STORE_VISIT_TIME = r"(?=.*(?:매장|식사|먹을|먹어|먹으러|방문))(?=.*(?:오전|오후|저녁|밤|낮)\s*\d+\s*시)"
+REFUND_METHOD = re.compile(r"카드|현금|간편결제|포인트(?:로)?\s*(?:결제|지불)")
+REFUND_PROCEDURE = re.compile(r"취소\s*(?:가능|조건|방법|되나요)|어떻게\s*취소|수수료|상품권|결제\s*수단")
+REVIEW_PAYMENT_SCOPE = re.compile(r"누락|빠졌|지워|지우|삭제|지운|증빙|문의|안\s*들어")
+POINTS_HISTORY_SCOPE = re.compile(r"내역|잔액|항목|만료\s*예정|혜택함|메뉴|화면|어디")
+HOLIDAY_FOLLOWUP = re.compile(r"^(?:그\s*주\s*|다음\s*날\s*)?화요일(?:은|도)?요[?？]$")
 
 
-def article_sentences(article: Document) -> tuple[str, ...]:
+def requires_staff_review(text: str) -> bool:
+    if STAFF_ONLY.search(text):
+        return True
+    requested = POLICY_QUESTION.search(text) or re.search(r"확인해\s*(?:주|줘)", text)
+    return bool(requested and LIVE_CONTEXT.search(text) and LIVE_STATUS.search(text))
+
+
+def question_clauses(text: str) -> tuple[str, ...]:
+    """Split coordinated questions only when each side asks for a field."""
+    clauses = []
+    for sentence in SENTENCE_BOUNDARY.split(text):
+        parts = tuple(part.strip() for part in QUESTION_JOIN.split(sentence) if part.strip())
+        if len(parts) > 1 and all(QUESTION_FIELD.search(part) for part in parts):
+            clauses.extend(parts)
+        elif sentence.strip():
+            clauses.append(sentence.strip())
+    return tuple(clauses)
+
+
+def article_paragraphs(article: Document) -> tuple[tuple[str, ...], ...]:
     lines = article.page_content.splitlines()
     if len(lines) > 1 and lines[0].startswith(str(article.id)):
         lines = lines[1:]
     return tuple(
-        sentence.strip().removeprefix("- ")
-        for sentence in re.split(r"(?<=[.!?。])\s+|\n+", "\n".join(lines))
-        if sentence.strip()
+        tuple(sentence.strip().removeprefix("- ")
+              for sentence in re.split(r"(?<=[.!?。])\s+", line) if sentence.strip())
+        for line in lines if line.strip()
     )
+
+
+def article_sentences(article: Document) -> tuple[str, ...]:
+    return tuple(sentence for paragraph in article_paragraphs(article) for sentence in paragraph)
 
 
 @dataclass(frozen=True)
@@ -64,6 +109,7 @@ class PolicyEvidence:
     excerpts: tuple[str, ...]
     hours: str | None
     followup: bool
+    question: str = ""
 
     def required_notice(self) -> str | None:
         if self.topic == "quality_incident":
@@ -127,7 +173,7 @@ RULES = (
          r"배달은.*주문|배달비"),
     rule("store_hours", 1, "영업시간 브레이크타임 마지막 매장 주문",
          r"영업\s*시간|개점|문을?\s*(?:열|닫)|브레이크\s*타임|마지막\s*(?:매장\s*)?주문|"
-         r"평일[^.?!]{0,25}(?:매장|식사)|매장\s*주문[^.?!]{0,20}마감",
+         r"평일[^.?!]{0,25}(?:매장|식사)|매장\s*주문[^.?!]{0,20}마감|" + STORE_VISIT_TIME,
          r"매장은.*영업|마지막 주문|브레이크타임|이 시간에는"),
     rule("closed_days", 2, "휴무 월요일 공휴일 다음 날 화요일",
          r"휴무|쉬는\s*날|월[요욜]|공휴일|빨간\s*날", r"정기 휴무일|월요일이 공휴일|설날과 추석"),
@@ -138,7 +184,8 @@ RULES = (
     rule("wifi", 5, "와이파이 비밀번호 영수증 콘센트",
          r"와이파이|wi-fi|콘센트", r"와이파이|비밀번호|콘센트"),
     rule("ordering", 6, "매장 태블릿 직원 주문 전화 주문 배달 포장",
-         r"(?:전화|태블릿|점원|직원|QR)[^.?!]{0,28}주문|포장\s*가능", r"태블릿|직원에게|포장과 배달|전화 주문"),
+         r"(?:전화|태블릿|점원|직원|QR)[^.?!]{0,28}주문|포장\s*가능|"
+         r"(?:포장|배달)[^.?!]{0,22}(?:전화로|앱으로|홈페이지로)", r"태블릿|직원에게|포장과 배달|전화 주문"),
     rule("restocking", 7, "품절 재료 재입고 날짜 주문 불가",
          r"재입고|품절|계절\s*메뉴|주문\s*불가", r"주문 불가|재입고"),
     rule("payments", 8, "결제 수단 상품권 모바일 상품권",
@@ -151,7 +198,7 @@ RULES = (
     rule("cancel_order", 11, "조리 시작 전 주문 취소 전액 취소",
          r"(?:조리|주문\s*상태)[^.?!]{0,38}취소|주문을?\s*취소", r"조리가|조리 중이라도", followup=True),
     rule("refund_timing", 13, "카드 결제 취소 환불 처리 기간 영업일",
-         r"(?:카드|간편결제|현금)[^.?!]{0,24}(?:취소|환불)(?:[^.?!]{0,24}(?:걸|돌아|며칠|언제))?",
+         r"(?:카드|간편결제|현금)[^.?!]{0,24}(?:취소|환불|반영)(?:[^.?!]{0,24}(?:걸|돌아|며칠|언제))?",
          r"카드 결제 취소|간편결제는|현금으로 결제|포인트로 결제", followup=True),
     rule("partial_refund", 14, "여러 메뉴 중 일부 문제 부분 환불",
          r"부분\s*환불|(?:하나|일부|한\s*개)만[^.?!]{0,36}(?:값|금액|환불|돌려)", r"일부에만|부분 환불",
@@ -164,7 +211,7 @@ RULES = (
     rule("membership_tier", 24, "멤버십 새싹 열매 나무 등급 기준 결제 금액",
          r"(?:등급|열매|새싹|나무)[^.?!]{0,28}(?:되려|써야|산정|기준|올라)", r"등급은 매월|최근 3개월 결제"),
     rule("points", 26, "포인트 사용 조건 유효기간",
-         r"(?:포인트|적립금)[^.?!]{0,32}(?:쓸|사용|유효|만료)|모은\s*지", r"포인트는|포인트로는|포인트의|기한이 지난"),
+         r"(?:포인트|적립금)[^.?!]{0,32}(?:쓸|쓰(?:고|나|면|려)|사용|유효|만료)|모은\s*지", r"포인트는|포인트로는|포인트의|기한이 지난"),
     rule("coupon_use", 27, "쿠폰 장수 중복 사용 포인트 함께",
          r"쿠폰[^.?!]{0,32}(?:두\s*장|두\s*개|동시|같이|함께|중복)", r"쿠폰은 한 번|여러 쿠폰|함께 사용할"),
     rule("group_booking", 30, "단체 예약 인원 10명 예약금 인당 5,000원",
@@ -183,28 +230,36 @@ RULES = (
 
 def route_questions(text: str) -> tuple[tuple[tuple[PolicyRule, str], ...], tuple[str, ...], str]:
     """Return registered rules and the questions that need document-based lookup."""
-    if STAFF_ONLY.search(text):
+    if requires_staff_review(text):
         return (), (), "staff_only"
 
     topics: dict[str, tuple[PolicyRule, str]] = {}
     unresolved = []
-    for part in re.split(r"(?<=[?!。？])\s*|\.(?=\s|$)|\n+", text):
-        part = part.strip()
-        if not part:
-            continue
-        inquiry = POLICY_QUESTION.search(part)
-        found = [item for item in RULES if (inquiry or item.deadline) and item.matches(part)]
+    clauses = question_clauses(text)
+    for part in clauses:
+        inquiry = POLICY_QUESTION.search(part) or (len(clauses) > 1 and QUESTION_FIELD.search(part))
+        found = [item for item in RULES if (inquiry or item.deadline) and item.matches(
+            NON_HOLIDAY.sub("", part) if item.topic == "closed_days" else part
+        )]
         if any(item.topic == "closed_days" for item in found) and not re.search(
-            r"영업\s*시간|마지막|브레이크|몇\s*시", part
+            r"영업\s*시간|마지막|브레이크|몇\s*시|" + STORE_VISIT_TIME, part
         ):
             found = [item for item in found if item.topic != "store_hours"]
         if any(item.topic == "group_cancellation" for item in found) and not re.search(r"인당|먼저\s*내", part):
             found = [item for item in found if item.topic != "group_booking"]
-        if any(item.topic == "refund_timing" for item in found) and not re.search(r"상품권|결제\s*수단", part):
-            found = [item for item in found if item.topic != "payments"]
+        refund_followup = ("refund_timing" in topics and inquiry and REFUND_METHOD.search(part)
+                           and bool(re.search(r"(?:했을\s*때도|결제라면|결제도|였으면)|며칠|걸리", part)))
+        if any(item.topic == "refund_timing" for item in found) or refund_followup:
+            if not REFUND_PROCEDURE.search(part):
+                found = [item for item in found if item.topic not in {"payments", "cancel_order"}]
+        if REVIEW_PAYMENT_SCOPE.search(part):
+            found = [item for item in found if item.topic != "review_points"]
+        if POINTS_HISTORY_SCOPE.search(part):
+            found = [item for item in found if item.topic != "points"]
         for item in found:
             topics.setdefault(item.topic, (item, part))
-        if inquiry:
+        closure_followup = "closed_days" in topics and HOLIDAY_FOLLOWUP.fullmatch(part)
+        if inquiry and not (refund_followup or closure_followup):
             unresolved.append(part)
 
     if any("환불" in part for part in unresolved):

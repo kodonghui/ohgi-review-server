@@ -1,20 +1,26 @@
 """질문별 규정 원문을 검색하고, 근거가 없는 답글을 보류한다."""
 
+import re
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from chromadb.errors import ChromaError
 from langchain_core.documents import Document
 
 from app.services.hybrid_retriever import HybridRetriever, PolicyVectorIndex, SearchRankings
-from app.services.policy_passages import DOCUMENT_TOPIC, PolicyPassages, normalized, split_questions
-from app.services.policy_topics import PolicyEvidence, PolicyRule, route_questions
+from app.services.policy_passages import (
+    ACTION_TERMS, CONTEXT_QUESTION, DOCUMENT_TOPIC, FOCUS_TERMS, PolicyPassages, normalized, split_questions, terms,
+)
+from app.services.policy_topics import (
+    POLICY_QUESTION, QUESTION_FIELD, PolicyEvidence, PolicyRule, article_sentences, question_clauses, route_questions,
+)
 
 
 FIRST_PASS_ARTICLES = 3
 MAX_CONTEXT_ARTICLES = 6
 MAX_DOCUMENT_QUESTIONS = 6
 SEARCH_ERRORS = (ChromaError, OSError, RuntimeError)
+ARTICLE_REFERENCE = re.compile(r"제\s*(\d+)\s*조")
 
 
 @dataclass(frozen=True)
@@ -85,6 +91,17 @@ class PolicySearch:
         retried = []
         open_questions = dict.fromkeys(unresolved)
         failed = False
+
+        async def search(query: str) -> SearchRankings:
+            assert self._hybrid is not None
+            if query not in rankings:
+                rankings[query] = await self._hybrid.search(query)
+            return rankings[query]
+
+        def accept(article: Document, item: PolicyEvidence, question: str) -> None:
+            articles[article.id] = article
+            evidence.append(replace(item, question=question))
+
         try:
             for rule, question in questions:
                 if rule.direct:
@@ -93,13 +110,11 @@ class PolicySearch:
                 else:
                     found = None
                     if self._hybrid is not None:
-                        if question not in rankings:
-                            rankings[question] = await self._hybrid.search(question)
-                        initial = rankings[question]
+                        initial = await search(question)
                         found = find_evidence(rule, initial.hybrid[:FIRST_PASS_ARTICLES])
                         if found is None:
                             retried.append(rule.topic)
-                            focused = await self._hybrid.search(rule.query)
+                            focused = await search(rule.query)
                             # RRF가 먼저 제외한 후보까지 복원한 뒤 해당 문의에 답하는 원문을 확인한다.
                             found = find_evidence(rule, focused.hybrid + initial.hybrid)
                 if found is None:
@@ -118,35 +133,53 @@ class PolicySearch:
                     open_questions.update(dict.fromkeys(missing_parts))
                     if len(missing_parts) == len(parts):
                         continue
-                articles[rule.article_id] = article
-                evidence.append(item)
+                accept(article, item, question)
             if open_questions and self._hybrid and self._passages:
-                parts = tuple(dict.fromkeys(part for text in open_questions for part in split_questions(text)))
+                contexts = question_contexts(review_text)
+                parts = {part: contexts.get(text, "") for text in open_questions for part in split_questions(text)}
                 if len(parts) > MAX_DOCUMENT_QUESTIONS:
                     return PolicySearchResult(tuple(articles), tuple(articles.values()), True, tuple(evidence),
                                               "context_limit", tuple(retried))
                 full_query = review_text.strip()
-                if full_query not in rankings:
-                    rankings[full_query] = await self._hybrid.search(full_query)
-                original = rankings[full_query].hybrid
-                for question in parts:
-                    candidates = original
-                    if question in rankings:
-                        candidates = candidate_union(candidates, rankings[question].hybrid)
-                    found = self._passages.select(question, candidates, context=full_query)
+                unanswered = {}
+                for question, context in parts.items():
+                    # Keep declarations for a single question, without mixing two different requests.
+                    query = full_query if len(contexts) == 1 else question
+                    candidates = (await search(query)).hybrid
+                    found = self._passages.select(question, candidates, context=context)
                     if found is None:
-                        search_query = " ".join(normalized(question).split())
-                        if search_query not in rankings:
+                        search_query = " ".join(normalized(f"{question} {context}").split())
+                        if search_query and search_query not in rankings:
                             retried.append(DOCUMENT_TOPIC)
-                            rankings[search_query] = await self._hybrid.search(search_query)
-                        candidates = candidate_union(candidates, rankings[search_query].hybrid)
-                        found = self._passages.select(question, candidates, context=full_query)
+                            await search(search_query)
+                        if search_query in rankings:
+                            candidates = candidate_union(rankings[search_query].hybrid, candidates)
+                        found = self._passages.select(question, candidates, context=context)
                     if found is None:
-                        failed = True
+                        unanswered[question] = (context, candidates)
                         continue
-                    article, item = found
-                    articles[article.id] = article
-                    evidence.append(item)
+                    accept(*found, question)
+
+                if unanswered:
+                    references = {}
+                    for question, (context, candidates) in unanswered.items():
+                        query = self._passages.query_terms(question, context)
+                        references[question] = reference_candidates(query, candidate_union(candidates, list(articles.values())))
+                    reference_ids = list(dict.fromkeys(
+                        article_id for ids in references.values() for article_id in ids
+                    ))[:MAX_CONTEXT_ARTICLES]
+                    if reference_ids:
+                        linked = {article.id: article for article in await self._index.aget_by_ids(reference_ids)
+                                  if valid_article(article)}
+                        if linked:
+                            retried.append("article_reference")
+                            for question, (context, _) in tuple(unanswered.items()):
+                                candidates = [linked[article_id] for article_id in references[question]
+                                              if article_id in linked]
+                                if found := self._passages.select(question, candidates, context=context):
+                                    accept(*found, question)
+                                    del unanswered[question]
+                failed |= bool(unanswered)
         except SEARCH_ERRORS:
             return PolicySearchResult(required_ids, tuple(articles.values()), True, tuple(evidence),
                                       "index_unavailable", tuple(retried))
@@ -158,6 +191,36 @@ class PolicySearch:
         required = tuple(dict.fromkeys((*required_ids, *resolved_ids))) if failed else resolved_ids
         return PolicySearchResult(required, tuple(articles.values()), failed, tuple(evidence),
                                   "evidence_missing" if failed else "", tuple(retried))
+
+
+def question_contexts(text: str) -> dict[str, str]:
+    """Keep declarations and the immediately preceding topic for an elliptical follow-up."""
+    declarations = []
+    contexts = {}
+    previous = ""
+    for part in question_clauses(text):
+        if POLICY_QUESTION.search(part) or QUESTION_FIELD.search(part):
+            nearby = [*declarations, previous] if CONTEXT_QUESTION.search(part) else declarations
+            contexts[part] = " ".join(fragment for fragment in nearby if fragment)
+            previous = part
+        else:
+            declarations.append(part)
+    return contexts
+
+
+def reference_candidates(query: frozenset[str], candidates: list[Document]) -> tuple[str, ...]:
+    """Expand one hop from sentences that point to a rule for this question's scope."""
+    focus = (query & FOCUS_TERMS) - ACTION_TERMS
+    references = []
+    for article in candidates:
+        for sentence in article_sentences(article):
+            numbers = ARTICLE_REFERENCE.findall(sentence)
+            if not numbers:
+                continue
+            matching_terms = query & terms(normalized(sentence))
+            if (focus and focus <= matching_terms) or (not focus and len(matching_terms) >= 2):
+                references.extend(f"제{number}조" for number in numbers if f"제{number}조" != article.id)
+    return tuple(dict.fromkeys(references))
 
 
 def candidate_union(*rankings: list[Document]) -> list[Document]:

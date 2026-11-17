@@ -15,6 +15,8 @@ def main():
     parser.add_argument("--host", required=True, help="SSH host for this experiment")
     parser.add_argument("--commit", required=True)
     parser.add_argument("--provider", choices=["gpt", "claude", "deepseek"])
+    parser.add_argument("--variant")
+    parser.add_argument("--dataset-id")
     args = parser.parse_args()
     if not re.fullmatch(r"/tmp/ohgi-eval-200p\.[a-zA-Z0-9]{8}", args.scratch):
         parser.error("이 실험의 임시 경로를 지정하세요.")
@@ -50,8 +52,9 @@ def main():
     command = [
         repo + "/.venv/bin/python", "-c", bootstrap, "-m", "benchmark.scale.eval_200", "pgvector", args.stage,
     ]
-    if args.provider:
-        command.extend(("--provider", args.provider))
+    for option in ("provider", "variant", "dataset_id"):
+        if value := getattr(args, option):
+            command.extend(("--" + option.replace("_", "-"), value))
     remote = "cd " + shlex.quote(repo) + " && exec " + shlex.join(command)
     result = subprocess.run(
         ["ssh", "-T", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ServerAliveInterval=30",

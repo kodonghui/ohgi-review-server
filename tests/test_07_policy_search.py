@@ -7,6 +7,7 @@ from langchain_core.documents import Document
 
 from app.services.hybrid_retriever import SearchRankings
 from app.services.policy_index import load_articles
+from app.services.policy_passages import normalized
 from app.services.policy_search import PolicySearch
 from app.services.policy_topics import RULES, route_questions
 from app.services.reply_workflow import policy_notice_problem
@@ -219,13 +220,14 @@ def test_unanswered_part_holds_the_whole_reply():
     combined = f"{query} 악기 대여는 몇 시간 할 수 있어요?"
     booths = new_article(904, "방음 부스", "매장에는 방음 부스 세 개가 있다.")
     hybrid = TestRetriever({
-        combined: ranked(booths),
+        query: ranked(booths),
         "악기 대여는 몇 시간 할 수 있어요?": ranked(booths),
     })
     result = asyncio.run(PolicySearch(index, hybrid, [booths]).retrieve(combined))
     assert result.needs_manual_review is True
     assert result.required_ids == ("제904조",)
     assert result.reason == "evidence_missing"
+    assert hybrid.queries == [query, "악기 대여는 몇 시간 할 수 있어요?"]
 
 
 def test_a_repeated_rule_hit_does_not_discard_the_other_question():
@@ -234,3 +236,30 @@ def test_a_repeated_rule_hit_does_not_discard_the_other_question():
     assert reason == ""
     assert [rule.article_id for rule, _ in known] == ["제30조"]
     assert unresolved == ("4명 예약도 같은가요?",)
+
+
+def test_a_negated_holiday_preserves_the_hour_and_order_channel_questions():
+    query = "공휴일이 아닌 수요일 오후 4시에 가서 밥 먹을 수 있나요? 배달 주문을 전화로 해도 되나요?"
+    known, unresolved, reason = route_questions(query)
+    assert [rule.topic for rule, _ in known] == ["store_hours", "ordering"]
+    assert unresolved == ()
+    assert reason == ""
+
+
+def test_in_scope_reference_finds_the_answer_in_a_different_article():
+    index = TestIndex()
+    context = "매장 안 카운터에서 포장 음식을 찾으려고 해요"
+    question = "동생이 대신 받으려면 뭘 알려줘야 하나요?"
+    text = f"{context}. {question}"
+    reference = new_article(910, "차량 픽업 대리 수령",
+                            "차량 픽업에는 차 번호를 입력한다. 매장 안 포장 수령은 제909조를 적용한다.")
+    answer = new_article(909, "매장 안 포장 전달", "매장 안 포장은 대리 수령할 때 주문번호를 보여 주면 가능하다.")
+    index.articles[answer.id] = answer
+    retry_query = " ".join(normalized(f"{question} {context}").split())
+    hybrid = TestRetriever({text: ranked(reference), retry_query: ranked(reference)})
+    result = asyncio.run(PolicySearch(index, hybrid, [reference, answer]).retrieve(text))
+
+    assert not result.needs_manual_review
+    assert result.required_ids == (answer.id,)
+    assert result.evidence[0].question == question
+    assert index.lookups == [(answer.id,)]

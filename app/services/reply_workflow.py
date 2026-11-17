@@ -15,10 +15,11 @@ from langgraph.runtime import Runtime
 from app.schemas.reply_draft import GroundedReplyDraft, ReplyVerdict
 from app.schemas.review import ReplyPreferences
 from app.services.policy_search import PolicySearchResult
+from app.services.policy_topics import requires_staff_review
 
 
 MAX_DRAFT_ATTEMPTS = 2
-GRAPH_RECURSION_LIMIT = 8
+GRAPH_RECURSION_LIMIT = 4 + 3 * MAX_DRAFT_ATTEMPTS
 FOLLOWUP_ISSUE = re.compile(r"직원\s*확인")
 COMPENSATION_PROMISE = re.compile(
     r"(?:환불|보상|쿠폰|재배달|재조리)(?:을|를|은)?\s*"
@@ -98,25 +99,32 @@ def build_reply_workflow(
 ) -> CompiledStateGraph:
     """작성과 검토는 외부에서 주입한다. 저장에는 통과한 결과만 넘긴다."""
 
-    async def retrieve_evidence(state: ReplyWorkflowInput) -> dict:
+    def screen_request(state: ReplyWorkflowInput) -> dict:
         get_stream_writer()({"event": "progress", "stage": "retrieve"})
+        initial = {"attempts": 0, "feedback": "", "draft": None, "status": None}
+        if requires_staff_review(state["review_text"]):
+            get_stream_writer()({"event": "progress", "stage": "evidence", "reason": "staff_only",
+                                 "retriedQuestions": []})
+            initial.update(evidence=PolicySearchResult((), (), True, reason="staff_only"),
+                           status="needs_review", feedback="매장에서 실제 상태를 확인해 주세요.")
+        return initial
+
+    def after_screen(state: ReplyWorkflowState) -> Literal["retrieve", "__end__"]:
+        return END if state["status"] else "retrieve"
+
+    async def retrieve_evidence(state: ReplyWorkflowState) -> dict:
         evidence = await retrieve(state["review_text"])
-        initial = {
-            "evidence": evidence,
-            "attempts": 0,
-            "feedback": "",
-            "draft": None,
-            "status": None,
-        }
+        update = {"evidence": evidence}
         if evidence.needs_manual_review:
-            initial.update(status="needs_review", feedback="적용할 규정을 매장에서 확인해 주세요.")
+            update.update(status="needs_review", feedback="적용할 규정을 매장에서 확인해 주세요.")
         if evidence.reason or evidence.retried_questions:
             get_stream_writer()({
-                "event": "progress", "stage": "evidence",
+                "event": "progress",
+                "stage": "evidence",
                 "reason": evidence.reason or "evidence_recovered",
                 "retriedQuestions": list(evidence.retried_questions),
             })
-        return initial
+        return update
 
     def after_retrieval(state: ReplyWorkflowState) -> Literal["draft", "__end__"]:
         return END if state["evidence"].needs_manual_review else "draft"
@@ -126,7 +134,13 @@ def build_reply_workflow(
         get_stream_writer()({"event": "progress", "stage": "draft", "attempt": attempt})
         return {"draft": await runtime.context.draft(state), "attempts": attempt}
 
-    async def review_reply(state: ReplyWorkflowState, runtime: Runtime[ReplyModelCalls]) -> dict:
+    def reject_draft(state: ReplyWorkflowState, feedback: str) -> dict:
+        get_stream_writer()({"event": "progress", "stage": "review_failed", "attempt": state["attempts"]})
+        if state["attempts"] >= MAX_DRAFT_ATTEMPTS:
+            return {"status": "needs_review", "draft": None, "feedback": feedback}
+        return {"feedback": feedback}
+
+    def validate_draft(state: ReplyWorkflowState) -> dict:
         get_stream_writer()({"event": "progress", "stage": "review", "attempt": state["attempts"]})
         draft = state["draft"]
         evidence = state["evidence"]
@@ -143,25 +157,27 @@ def build_reply_workflow(
             feedback = "안내를 뒷받침하는 조문을 확인하고 표시해 주세요."
         elif COMPENSATION_PROMISE.search(draft.reply):
             feedback = "확인하기 전에는 환불이나 보상을 약속할 수 없습니다."
-        elif issue := policy_notice_problem(draft.reply, evidence):
-            feedback = issue
         else:
-            verdict = await runtime.context.review(state)
-            if verdict.passed:
-                return {
-                    "status": "ready",
-                    "feedback": "",
-                    "last_accepted_reply": draft.reply,
-                    "last_accepted_version": state.get("next_reply_version", 1),
-                }
-            feedback = verdict.reason.strip() or "리뷰와 규정 적용 조건을 다시 확인해 주세요."
+            feedback = policy_notice_problem(draft.reply, evidence)
+        return reject_draft(state, feedback) if feedback else {"feedback": ""}
 
-        get_stream_writer()({
-            "event": "progress", "stage": "review_failed", "attempt": state["attempts"],
-        })
-        if state["attempts"] >= MAX_DRAFT_ATTEMPTS:
-            return {"status": "needs_review", "draft": None, "feedback": feedback}
-        return {"feedback": feedback}
+    def after_validation(state: ReplyWorkflowState) -> Literal["draft", "review", "__end__"]:
+        if state["status"]:
+            return END
+        return "draft" if state["feedback"] else "review"
+
+    async def review_reply(state: ReplyWorkflowState, runtime: Runtime[ReplyModelCalls]) -> dict:
+        draft = state["draft"]
+        assert draft is not None
+        verdict = await runtime.context.review(state)
+        if verdict.passed:
+            return {
+                "status": "ready",
+                "feedback": "",
+                "last_accepted_reply": draft.reply,
+                "last_accepted_version": state.get("next_reply_version", 1),
+            }
+        return reject_draft(state, verdict.reason.strip() or "리뷰와 규정 적용 조건을 다시 확인해 주세요.")
 
     def after_review(state: ReplyWorkflowState) -> Literal["draft", "__end__"]:
         return END if state["status"] else "draft"
@@ -172,11 +188,15 @@ def build_reply_workflow(
         output_schema=ReplyWorkflowOutput,
         context_schema=ReplyModelCalls,
     )
+    graph.add_node("screen_request", screen_request)
     graph.add_node("retrieve", retrieve_evidence)
     graph.add_node("draft", draft_reply)
+    graph.add_node("validate_draft", validate_draft)
     graph.add_node("review", review_reply)
-    graph.add_edge(START, "retrieve")
+    graph.add_edge(START, "screen_request")
+    graph.add_conditional_edges("screen_request", after_screen)
     graph.add_conditional_edges("retrieve", after_retrieval)
-    graph.add_edge("draft", "review")
+    graph.add_edge("draft", "validate_draft")
+    graph.add_conditional_edges("validate_draft", after_validation)
     graph.add_conditional_edges("review", after_review)
     return graph.compile(checkpointer=checkpointer).with_config({"recursion_limit": GRAPH_RECURSION_LIMIT})

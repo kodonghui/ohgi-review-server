@@ -67,6 +67,25 @@ def test_coupon_praise_can_receive_a_regular_draft(policy_search: PolicySearch):
     assert evidence.needs_manual_review is False
 
 
+@pytest.mark.parametrize("review_text", [
+    "지난 주 주문 건의 포인트가 내 계정에 반영됐는지 확인해 주세요.",
+    "지금 제 예약에 부탁한 경사판 설치가 완료됐나요? 요청 방법도 알려 주세요.",
+    "방금 받은 빵에 견과가 닿은 적이 없었는지 확인해 주세요.",
+])
+def test_live_state_review_stops_before_retrieval_and_model(review_text):
+    async def unexpected_call(value):
+        pytest.fail("실제 상태 확인이 필요한 리뷰가 검색이나 모델까지 진행됐습니다.")
+
+    graph = build_reply_workflow(unexpected_call)
+    result = asyncio.run(graph.ainvoke(
+        {**REVIEW, "review_text": review_text},
+        context=ReplyModelCalls(unexpected_call, unexpected_call),
+    ))
+    assert result["status"] == "needs_review"
+    assert result["draft"] is None
+    assert result["attempts"] == 0
+
+
 def test_missing_required_article_goes_to_staff(
     policy_search: PolicySearch, monkeypatch: pytest.MonkeyPatch
 ):
