@@ -374,14 +374,16 @@ def render():
     print(json.dumps({k: compact[k] for k in ("costs", "requests", "passed", "http_errors")}, ensure_ascii=False))
 
 
-def write_study_html(markdown: str, commit: str) -> None:
+def write_study_html(
+    markdown: str, commit: str, *, title=TIT, output: Path | None = None,
+    paths=("benchmark/scale/render_200.py", "benchmark/scale/index_200.py", "benchmark/scale/eval_200.py"),
+) -> None:
     renderer = MarkdownIt("commonmark", {"html": False}).enable("table")
     content = renderer.render(markdown)
     content = content.replace("<table>", '<div class="table-scroll"><table>').replace("</table>", "</table></div>")
-    title = html.escape(TIT)
+    title = html.escape(title)
     code = []
-    for name in ("render_200.py", "index_200.py", "eval_200.py"):
-        path = f"benchmark/scale/{name}"
+    for path in paths:
         raw = subprocess.check_output(["git", "show", f"{commit}:{path}"], cwd=PROJECT_ROOT).decode("utf-8")
         code.append(f"<details><summary>{path}</summary><pre><code>{html.escape(raw)}</code></pre></details>")
     document = f"""<!doctype html>
@@ -407,7 +409,7 @@ pre {{overflow:auto;padding:1em;background:var(--panel);font-size:.85em}}
 </style></head><body><main>{content}<section><h2>실행 코드</h2>
 <p>실험에 사용한 Git 버전의 파일입니다. 비용 표는 원시 토큰 기록을 다시 계산한 값입니다.</p>
 {''.join(code)}</section></main></body></html>"""
-    (ARTIFACTS / "study-200p.html").write_text(document, encoding="utf-8")
+    (output or ARTIFACTS / "study-200p.html").write_text(document, encoding="utf-8")
 
 
 if __name__ == "__main__":
