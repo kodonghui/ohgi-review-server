@@ -1,9 +1,12 @@
 """Verify and publish the 200-page benchmarks from the archived receipts."""
 import html
 import json
+import subprocess
 from collections import Counter
+from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from markdown_it import MarkdownIt
 
@@ -106,6 +109,7 @@ def render():
     bundle, golden, lesson, api = collect()
     dataset = dataset_url(next(iter(lesson.values())))
     corpus = read(ARTIFACTS / "corpus.json")
+    versions = read(ARTIFACTS / "versions.json")
     interrupted = interruption_cost()
     build = Decimal(bundle.manifest["build_embedding_usage"]["tokens"]) * EMBED_PRICE / MIL
     course_cost = sum(Decimal(run["cost"]["measured_usd"]) for run in lesson.values())
@@ -115,6 +119,17 @@ def render():
     all_api = sum(run["summary"]["requests"] for run in api.values())
     all_passed = sum(run["summary"]["passed"] for run in api.values())
     all_errors = sum(run["summary"]["http_errors"] for run in api.values())
+    checks = {"status_match": "상태 불일치", "articles_match": "조문 불일치",
+              "notices_match": "안내 문구 누락", "stored_matches": "저장 불일치"}
+    failure_counts = {}
+    for key, run in api.items():
+        incorrect = [row for row in run["rows"] if row["http_status"] == 200 and not row["passed"]]
+        failure_counts[key] = {"requests": len(incorrect), **{
+            check: sum(not row[check] for row in incorrect) for check in checks
+        }}
+    wrong_reply_count = sum(counts["requests"] for counts in failure_counts.values())
+    wrong_article_count = sum(counts["articles_match"] for counts in failure_counts.values())
+    assert all_api == all_passed + all_errors + wrong_reply_count
     sentences = [
         "# " + TIT,
         "",
@@ -128,8 +143,7 @@ def render():
         f"{lesson['pgvector', 'k3']['summary']['retrieval_hit']}/{lesson['pgvector', 'k3']['summary']['retrieval_eligible']}로 달라졌습니다.",
         "",
         f"③ **전체 답글 API.** [실행] {all_api}회에서 {all_passed}회 통과했고 HTTP 오류는 {all_errors}회였습니다. "
-        f"측정된 사용량에 단가를 적용한 합계는 **$\u007bollar\u007d**입니다.".replace(
-            "$\u007bollar\u007d", "$" + dollar(total)),
+        f"측정된 사용량에 단가를 적용한 합계는 **${dollar(total)}**입니다.",
         "",
         "## 질문과 출처",
         "",
@@ -179,7 +193,12 @@ def render():
         "",
         "[실행] Chroma는 Windows 노트북의 로컬 HNSW 코사인 검색, pgvector는 OVH Linux의 정확 코사인 검색입니다. "
         "두 환경에서 FastAPI TestClient로 실제 POST 답글 API를 호출하고, 다시 GET으로 저장된 텍스트를 읽었습니다. "
-        "이 단계에서는 교재의 k 대신 벡터와 BM25 후보를 각각 최대 8개 가져오는 기존 API 경로를 같은 설정으로 실행했습니다.",
+        "전체 API에서는 벡터와 BM25 후보를 각각 최대 8개 가져오는 기존 API 경로를 같은 설정으로 실행했습니다. "
+        "DeepSeek의 180초 제한은 모델 호출 한 번에 적용했고, 답글 API에는 작성과 검토를 최대 두 차례 수행할 시간을 부여했습니다.",
+        "",
+        f"[실행] 두 환경의 Python은 {versions['chroma']['python']}, FastAPI는 {versions['chroma']['fastapi']}, "
+        f"LangSmith SDK는 {versions['chroma']['langsmith']}입니다. 노트북 Chroma는 {versions['chroma']['chromadb']}이며 "
+        f"OVH의 PostgreSQL은 {versions['pgvector']['postgresql'].split()[0]}, pgvector는 {versions['pgvector']['pgvector']}입니다.",
         "",
         "| 통과 조건 | 상태 일치 · 필수 조문 포함 · 필수 안내 문구 포함 · 저장 결과 일치 |",
         "| --- | --- |",
@@ -200,8 +219,32 @@ def render():
             for (engine, model), run in api.items() for s in [run["summary"]]
         ]),
         "",
-        "검색 지연에는 검색 저장소 호출과 결과 조회가, 답글 지연에는 모델 요청과 API 처리가 포함됩니다. "
+        "검색 지연에는 클라이언트의 벡터 전달과 결과 조회가, 답글 지연에는 모델 요청과 API 처리가 포함됩니다. "
         "두 컴퓨터와 모델 네트워크가 달라 답글 지연 차이에는 이 환경 차이가 함께 들어갑니다.",
+        "",
+        f"노트북 DeepSeek의 답글 지연은 96회 전체를, 검색 지연은 프로세스 재개 뒤 측정한 "
+        f"벡터 검색 {api['chroma', 'deepseek']['summary']['vector_queries_timed']}회를 사용했습니다.",
+        "",
+        "### 채점에서 탈락한 조건",
+        "",
+        f"[실행] HTTP 200을 받은 {all_api - all_errors}회 중 {wrong_reply_count}회가 채점을 통과하지 못했습니다. "
+        f"그중 {wrong_article_count}회에서 조문이 기준과 달랐습니다. 필수 조문이 없는 문항의 불필요한 인용도 여기에 포함됩니다. "
+        "한 요청이 여러 조건을 위반할 수 있어 조건별 수치는 서로 겹칩니다.",
+        "",
+        table(["저장소·모델", "HTTP 200 중 탈락", *checks.values()], [
+            [f"{ENGINES[engine]} {PROVIDERS[model]}", counts["requests"],
+             *[counts[check] for check in checks]]
+            for (engine, model), counts in failure_counts.items()
+        ]),
+        "",
+        table(["DeepSeek 실험", "오류 내용", "건수"], [
+            [ENGINES[engine], reason.replace("|", " "), count]
+            for engine in ENGINES
+            for reason, count in Counter(
+                row.get("error_detail") or f"HTTP {row.get('http_status')}"
+                for row in api[engine, "deepseek"]["rows"] if row.get("http_status") != 200
+            ).items()
+        ]),
         "",
         "### 문항과 실제 결과",
         "",
@@ -213,6 +256,15 @@ def render():
         + ", ".join(next(row for row in lesson["chroma", "k3"]["rows"] if row["case_id"] == "M01").get("sources", []))
         + "입니다. 이 순서에서는 영업시간을 확인할 수 있고 전화 포장에 필요한 별도 조문은 빠졌습니다. "
         "전체 API의 조문 최종 선택과 저장 결과는 아래 요청별 트레이스에서 확인합니다.",
+        "",
+        "[실행] Chroma·Claude의 M01 사례에서 `route_questions()`는 `closed_days`를 잡았고, "
+        "`retrieve`는 제2조·제6조를 확정했습니다. 규칙이 ‘공휴일이 아닌’의 `공휴일`을 잡았고 금요일 오후 4시를 "
+        "`store_hours` 주제로 연결하지 못했습니다. 초안은 오후 4시 식사가 가능하다고 답했고, 같은 근거로 동작한 `review`는 이를 승인했습니다.",
+        "",
+        "[실행] H01 역시 문서 검색으로 넘어갔습니다. `retrieve`는 포인트 누락 접수 절차인 제110조를 찾으면서 "
+        "`followup=false`와 `needs_manual_review=false`를 반환했습니다. "
+        "초안은 해당 계정을 확인하겠다고 답했지만 `review`가 `ready`를 반환했습니다. 적립 여부를 확인하려면 포인트 원장이 필요합니다. "
+        "두 환경의 GPT·Claude는 이 문항을 모두 `ready`로 저장했습니다(12/12회).",
         "",
         table(["저장소·모델", "M01 실제 상태·인용", "H01 실제 상태"], [
             [f"{ENGINES[engine]} {PROVIDERS[model]}",
@@ -251,6 +303,9 @@ def render():
         "[임베딩 단가](https://developers.openai.com/api/docs/models/text-embedding-3-large) · "
         "[DeepSeek 릴레이 할당량](https://100milionseek.top/docs)",
         "",
+        "같은 캐시 설정과 계정으로 병렬 호출했으므로, 한 환경에서 만든 접두사 캐시가 다른 환경의 호출에 적중할 수 있습니다. "
+        "표는 각 환경의 응답이 보고한 캐시 읽기·쓰기 사용량을 집계했습니다.",
+        "",
         "[실행] Windows와 Git 추출본의 줄바꿈이 달라 최초 OVH 교재 실험 일부가 별도 데이터셋에 들어갔습니다. "
         "공통 골든셋 파일을 그대로 복사하고 해시를 확인한 뒤 같은 데이터셋으로 다시 실행했습니다. "
         "별도 실험은 위 점수 표와 분리했고, 기록된 사용량은 비용에 포함했습니다.",
@@ -262,7 +317,8 @@ def render():
         "실행과 채점은 `benchmark/scale/eval_200.py`에 있습니다. 답글 API 데이터는 `data/langsmith_reply_golden_200_v1.json`입니다.",
         "- 로컬 `.local/ohgi-200p/`에는 PDF·Markdown·문서 벡터와 두 환경에서 회수한 응답 JSON 및 토큰 사용량 JSONL이 있습니다.",
         "- 복합 문항의 정확도는 GPT 자기 계열 평가 결과이며, 32개 합성 문항에서 얻은 결과입니다. "
-        "실제 운영 규모와 장기 지연 분포는 별도 문제입니다.",
+        "앞선 12문항 실험과 이번 평가는 규정집·문항 구성·채점 조건이 달라 점수를 직접 비교하기 어렵습니다. "
+        "안내 문구는 정규식으로 확인하므로 의미가 같은 표현도 정규식과 일치하지 않으면 탈락할 수 있습니다.",
         "",
         "## 확인 질문",
         "",
@@ -270,21 +326,35 @@ def render():
         "",
     ]
     cleanup = ARTIFACTS / "ovh-cleanup.json"
+    verification = ARTIFACTS / "langsmith-verification.json"
+    if verification.is_file():
+        proof = read(verification)
+        paused = next(x for x in proof["experiments"] if x["engine"] == "chroma" and x["label"] == "deepseek")
+        unscored = len(paused.get("incomplete_before_pause", []))
+        restored = read(ARTIFACTS / "checkpoint-ovh-complete.json")["chroma_deepseek_paused"]["finished"]
+        sentences.extend([
+            "## 노트북 일시정지와 재개", "",
+            f"[실행] 일시정지 시점에 끝난 {restored}회의 결과를 같은 LangSmith 실험에서 복구하고 "
+            f"이후 {api['chroma', 'deepseek']['summary']['requests'] - restored}회를 이어서 실행했습니다. "
+            f"일시정지 이전에 시작돼 최종 API 응답이 없는 트레이스 {unscored}개는 원시 기록으로 보존했습니다.", "",
+        ])
     if cleanup.is_file():
         proof = read(cleanup)
         assert proof["directory_absent"] and proof["postgres_stopped"]
+        at = datetime.fromisoformat(proof["checked_at_utc"]).astimezone(ZoneInfo("Asia/Seoul"))
         sentences.extend(["## OVH 정리 검증", "",
-                          f"[실행] {proof['checked_at_utc']}에 결과 회수 해시를 확인한 후 실험 PostgreSQL을 종료했습니다. "
+                          f"[실행] {at:%Y-%m-%d %H:%M} KST에 결과 회수 해시를 확인한 후 실험 PostgreSQL을 종료했습니다. "
                           "실험 전용 DB·임시 실행 파일·로그가 있던 디렉터리의 부재를 SSH로 확인했습니다.", ""])
     markdown = "\n".join(sentences)
     REPORT.write_text(markdown, encoding="utf-8")
-    write_study_html(markdown)
+    write_study_html(markdown, api["chroma", "gpt"]["configuration"]["code_commit"])
     compact = {
         "lesson": [dict(engine=engine, variant=label, project_id=run["project_id"],
                         url=run["url"], summary=run["summary"], cost=run["cost"])
                    for (engine, label), run in lesson.items()],
         "api": [dict(engine=engine, provider=label, project_id=run["project_id"],
-                     url=run["url"], summary=run["summary"], cost=run["cost"])
+                     url=run["url"], summary=run["summary"], cost=run["cost"],
+                     criteria_failures=failure_counts[engine, label])
                 for (engine, label), run in api.items()],
         "costs": {"document": dollar(build), "lesson": dollar(course_cost), "api": dollar(api_cost),
                   "interruption": dollar(extra_cost), "total": dollar(total)},
@@ -295,11 +365,16 @@ def render():
     print(json.dumps({k: compact[k] for k in ("costs", "requests", "passed", "http_errors")}, ensure_ascii=False))
 
 
-def write_study_html(markdown: str) -> None:
+def write_study_html(markdown: str, commit: str) -> None:
     renderer = MarkdownIt("commonmark", {"html": False}).enable("table")
     content = renderer.render(markdown)
     content = content.replace("<table>", '<div class="table-scroll"><table>').replace("</table>", "</table></div>")
     title = html.escape(TIT)
+    code = []
+    for name in ("render_200.py", "index_200.py", "eval_200.py"):
+        path = f"benchmark/scale/{name}"
+        raw = subprocess.check_output(["git", "show", f"{commit}:{path}"], cwd=PROJECT_ROOT).decode("utf-8")
+        code.append(f"<details><summary>{path}</summary><pre><code>{html.escape(raw)}</code></pre></details>")
     document = f"""<!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title><style>
@@ -318,7 +393,11 @@ table {{width:100%;border-collapse:collapse;font-size:.9rem}}
 th,td {{text-align:left;padding:.6em .78em;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}}
 th {{background:var(--panel);min-width:4em}}
 td code {{word-break:break-all}}
-</style></head><body><main>{content}</main></body></html>"""
+details {{margin:1em 0}}
+pre {{overflow:auto;padding:1em;background:var(--panel);font-size:.85em}}
+</style></head><body><main>{content}<section><h2>실행 코드</h2>
+<p>실험에 사용한 Git 버전의 파일입니다. 비용 표는 원시 토큰 기록을 다시 계산한 값입니다.</p>
+{''.join(code)}</section></main></body></html>"""
     (ARTIFACTS / "study-200p.html").write_text(document, encoding="utf-8")
 
 
