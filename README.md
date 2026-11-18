@@ -2,7 +2,9 @@
 
 리뷰에 담긴 질문을 나누고 매장 규정의 근거를 찾은 뒤, 사장님 답글을 작성·검토하는 FastAPI 실습입니다. 통과한 답글은 리뷰에 저장하며 JSON, SSE, 한 문장 수정 경로에서 같은 LangGraph를 사용합니다.
 
-| 검증한 동작 | 초기 → 최종 |
+**200페이지 실험의 전체 답글 API는 274/576 → 493/576 통과했고, 오승인은 47 → 0회였습니다.** 같은 32문항을 Chroma와 pgvector에서 GPT·Claude·DeepSeek로 반복했습니다. [200페이지 실험과 재현](#200페이지-벤치마크)
+
+| 과거 35조·155조 실험 | 초기 → 최종 |
 | --- | ---: |
 | 35조 규정집 · 필요한 조문을 모두 포함해 저장 | 6/44 → 43/44 |
 | 50페이지·155조 규정집 · 새 조문의 번호와 핵심 구절까지 저장 | 0/24 → 24/24 |
@@ -10,7 +12,7 @@
 | 같은 진단의 실제 상태·대상 불명 문의 · 올바르게 보류 | 2/5 → 5/5 |
 | 별도 픽업·인계 완료 표현 · 올바르게 보류 | 0/3 → 3/3 |
 
-[본문의 버전별 벤치마크](#벤치마크) · [35조 실행 기록](benchmark/RESULTS.md) · [155조 실행 기록](benchmark/scale/VERSIONS.md) · [벤치마크 커밋 대조표](benchmark/SOURCES.md)
+[이전 벤치마크](#이전-벤치마크) · [35조 실행 기록](benchmark/RESULTS.md) · [155조 실행 기록](benchmark/scale/VERSIONS.md) · [벤치마크 커밋 대조표](benchmark/SOURCES.md)
 
 ## 로컬 실행
 
@@ -30,11 +32,25 @@ uv run --locked fastapi run --host 127.0.0.1 --port 8000
 
 ## 아키텍처
 
-![조문 검색과 답글 검토를 거쳐 답글을 저장하거나 직원 확인으로 보내는 흐름](docs/reply-workflow.png)
+```mermaid
+flowchart TD
+    start["리뷰 답글 요청"] --> screen["screen_request · 매장 확인 여부"]
+    screen -->|실제 상태 확인| hold["needs_review · 직원 확인"]
+    screen -->|규정으로 안내 가능| retrieve["retrieve · 질문별 원문 선택"]
+    retrieve -->|근거 부족| hold
+    retrieve -->|근거 확보| draft["draft · 근거로 초안 작성"]
+    draft --> validate["validate_draft · 인용과 필수 안내 검사"]
+    validate -->|통과| review["review · 조문 적용 조건 검토"]
+    review -->|통과| save["ready · 답글 저장"]
+    validate -->|재작성 가능| draft
+    review -->|재작성 가능| draft
+    validate -->|2회 모두 실패| hold
+    review -->|2회 모두 실패| hold
+```
 
 - **검색** · Chroma는 임베딩으로 의미가 가까운 조문을, BM25는 한국어 단어와 글자 쌍이 겹치는 조문을 찾습니다. 각각 최대 8개 후보를 RRF로 정렬하고, 상위 몇 개 밖에 있는 조문도 직접 근거를 찾을 때 사용합니다. [검색기](app/services/hybrid_retriever.py) · [질문별 검색](app/services/policy_search.py)
 - **근거 선택** · ‘포장 음식을 대신 받는다’와 ‘분실물을 대신 받는다’는 행동이 같아도 적용 대상이 다릅니다. 제목과 본문에서 대상을 확인하고, 그 행동의 조건을 설명하는 문장을 고릅니다. 제69조는 질문에 주문번호가 없어도 안내할 수 있습니다. 실제로 누군가 받아 갔는지는 매장 기록이 필요합니다. [문장 선택](app/services/policy_passages.py)
-- **작성과 검토** · 그래프는 필요한 조문이 확보됐을 때 초안을 작성합니다. 사건별 필수 안내와 모델의 구조화 판정을 통과하면 `ready`를 반환합니다. 최대 초안 2회, 그래프 단계 한도 8, 비동기 요청 시간 기본 60초입니다. [그래프](app/services/reply_workflow.py)
+- **작성과 검토** · 그래프는 개인의 실제 상태 문의를 먼저 분기합니다. 근거가 확보된 문의의 초안은 인용·필수 안내 코드 검사와 모델 검토를 거쳐 `ready`로 끝납니다. 최대 초안 2회, 그래프 단계 한도 10, 비동기 요청 시간 기본 60초입니다. [그래프](app/services/reply_workflow.py)
 - **상태** · `InMemorySaver`가 `review:{id}`별 체크포인트를 관리합니다. SQLite Store의 `("stores", "ohgi", "reply")` 네임스페이스에는 매장 말투와 문장 상한을 저장합니다. 설정은 재시작 후 다시 읽으며 리뷰·답글·체크포인트는 메모리에서 초기화됩니다. [앱 초기화](app/main.py) · [답글 서비스](app/services/reply_service.py)
 
 ### 실습 1–6단계
@@ -43,7 +59,7 @@ uv run --locked fastapi run --host 127.0.0.1 --port 8000
 | --- | --- |
 | 1 | [LCEL 체인](app/clients/llm_client.py)의 `ChatPromptTemplate → ChatOpenAI → StrOutputParser` |
 | 2 | [구조화 응답](app/schemas/reply_draft.py)의 Pydantic 초안·검토 스키마 |
-| 3 | [LangGraph](app/services/reply_workflow.py)의 `retrieve → draft → review`와 제한된 재작성 |
+| 3 | [LangGraph](app/services/reply_workflow.py)의 `screen_request → retrieve → draft → validate_draft → review`와 제한된 재작성 |
 | 4 | [SSE](app/routers/review_router.py)의 진행·초안 조각·최종 상태 |
 | 5 | [체크포인터와 Store](app/main.py)의 리뷰별 상태·매장 선호·답글 수정 |
 | 6 | [규정 RAG](app/services/policy_index.py)의 사전 인덱싱, 하이브리드 검색, 질문별 원문 검증 |
@@ -87,9 +103,91 @@ Invoke-RestMethod -Method Post -Uri "$reviewUrl/reply/revise" `
 
 `PUT /api/reply-preferences`에 `{"style":"따뜻","maxSentences":3}`을 보내 매장 선호를 바꿀 수 있습니다. 말투는 `정중` 또는 `따뜻`, 문장 상한은 1~5입니다.
 
-## 벤치마크
+## 200페이지 벤치마크
 
-API 실험은 Windows의 FastAPI `TestClient`에서 문항별로 3회씩 순차 실행했습니다. `POST /reply`가 반환한 답글과 `GET /api/reviews/{id}`에서 읽은 저장값을 대조했습니다. 기존 44문항은 필요한 조문 번호가 전부 있는지, 확장판의 새 24문항은 핵심 구절까지 답글에 포함했는지 확인했습니다. p50과 p95는 `POST /reply` 지연의 중앙값과 95번째 백분위입니다.
+실험은 2026년 11월 17~18일(KST)에 실행했습니다. 전체 답글 API는 **274/576 (47.57%) → 493/576 (85.59%), +38.02%p**였고, 담당자 확인 문항의 잘못된 자동 승인은 **47 → 0회**였습니다. 기준 실행과 재설계가 사용한 답글 구현은 공개 이력에서 각각 확인할 수 있습니다. [기준 코드](https://github.com/kodonghui/ohgi-review-server/commit/cd16495b4bfbef300c1bba86334f8db6ee8eda5b) · [재설계 코드](https://github.com/kodonghui/ohgi-review-server/commit/ae77bb75f00781b281758ae274299d422577c724)
+
+### 실험 조건과 채점 기준
+
+| 항목 | 설정 |
+| --- | --- |
+| 규정집 | 200페이지·605조. 제1~155조를 보존하고 실험용 가상 조문 450개 추가 |
+| 임베딩 | 조문 제목과 본문을 조문당 하나의 문서로 구성. OpenAI `text-embedding-3-large`, 3,072차원. 같은 문서 벡터를 두 환경에 사용 |
+| 검색 저장소 | Windows 노트북의 Chroma 1.5.9 코사인 HNSW와 OVH 싱가포르의 PostgreSQL 16.15·pgvector 0.6.0 코사인 전수 검색 |
+| 골든셋 | 가상 규정으로 작성한 리뷰와 예상 상태·필수 조문·안내 문구 32건. 조문이 필요한 24건과 담당자 확인·일반 후기 8건 |
+| 교재 검색 실험 | 저장소 2개 × k 2개 × 문항 32개 = **128회**. GPT가 답변하고 같은 GPT 설정으로 답변을 채점 |
+| 전체 API 반복 | 저장소 2개 × 모델 3개 × 문항 32개 × 반복 3회 = **576회**. 모델·저장소 조합마다 최대 동시 실행 2건 |
+| 모델과 캐시 | GPT `gpt-6-luna`는 `prompt_cache_key`, Claude `claude-haiku-5-5`는 시스템 프롬프트 캐시, 100mil DeepSeek `deepseek-v4.1-flash-free`는 모델 호출당 180초 |
+| 채점 | 같은 FastAPI 앱을 `TestClient`로 호출. 리뷰 등록 → 답글 요청 → 저장 결과 재조회. 기대 상태·필수 조문·안내 문구·저장값 대조를 모두 만족하면 통과 |
+
+골든셋의 한 문항은 리뷰 본문과 채점 기준을 함께 담습니다. 예를 들어 M01은 `ready`, 제1조와 제6조, 브레이크타임과 포장 주문 채널 안내가 모두 필요합니다. H01은 `needs_review`, 빈 인용과 저장 답글 대조가 통과 조건입니다. [골든셋 JSON](data/langsmith_reply_golden_200_v1.json) · [채점기와 API 호출](benchmark/langsmith_eval.py) · [LangSmith 평가 개념](https://docs.langchain.com/langsmith/evaluation-concepts)
+
+### 검색 개수 k의 영향
+
+`k`는 첫 벡터 검색에서 가져오는 조문 개수입니다. 검색 적중은 **필수 조문을 모두 찾은 문항 수**입니다. 답변 정확은 GPT 평가로 확인한 32개 답변의 결과입니다. 이 교재 경로는 아래의 하이브리드 API 검색과 별도 측정입니다.
+
+| 환경 | k | 필수 조문 적중 | 답변 정확 전 → 후 | 전후 검색 순서 일치 | 재실험 비용 |
+| --- | --- | --- | --- | --- | --- |
+| 노트북 Chroma | 1 | 13/24 | 20/32 → 21/32 | 32/32 | 0.00325977 USD |
+| 노트북 Chroma | 3 | 17/24 | 24/32 → 24/32 | 32/32 | 0.00403087 USD |
+| OVH pgvector | 1 | 13/24 | 21/32 → 21/32 | 32/32 | 0.00326607 USD |
+| OVH pgvector | 3 | 17/24 | 24/32 → 24/32 | 32/32 | 0.00399797 USD |
+
+같은 k에서 양쪽 저장소와 전후 버전의 조문 순서가 32문항 모두 일치했습니다. k=1에서는 두 조문이 필요한 문항의 두 번째 근거를 가져올 수 없습니다. k=3에서 적중이 13/24 → 17/24로 늘었습니다. 전체 API는 BM25와 벡터 검색의 순위를 RRF로 합치고, 질문별로 필요한 원문을 확인합니다. [교재 검색과 전체 API 실행 코드](benchmark/scale/eval_200.py) · [질문별 검색 코드](app/services/policy_search.py)
+
+### 전체 답글 API의 점수·시간·비용
+
+| 환경 | 모델 | 통과 전 → 후 | 3회 모두 통과 전 → 후 | 응답 p50 전 → 후 | 재실험 비용 |
+| --- | --- | --- | --- | --- | --- |
+| 노트북 Chroma | GPT | 49/96 → 85/96 | 16/32 → 26/32 | 3.47초 → 3.73초 | 0.01687674 USD |
+| 노트북 Chroma | Claude | 50/96 → 90/96 | 16/32 → 29/32 | 3.66초 → 3.18초 | 0.02380155 USD |
+| 노트북 Chroma | 100mil DeepSeek | 37/96 → 70/96 | 8/32 → 15/32 | 87.54초 → 72.84초 | 0.00048087 USD |
+| OVH pgvector | GPT | 50/96 → 86/96 | 16/32 → 26/32 | 3.37초 → 3.71초 | 0.01492863 USD |
+| OVH pgvector | Claude | 50/96 → 90/96 | 15/32 → 29/32 | 3.61초 → 3.17초 | 0.01735785 USD |
+| OVH pgvector | 100mil DeepSeek | 38/96 → 72/96 | 5/32 → 19/32 | 90.25초 → 76.54초 | 0.00048087 USD |
+
+**3회 모두 통과**는 32개 문항 중 세 번의 결과가 모두 채점 조건을 만족한 문항 수입니다. **p50**은 답글 POST 요청을 짧은 순서로 놓았을 때의 중앙값입니다. GPT·Claude 두 모델 합계는 **199/384 → 351/384**였습니다. 각 환경에서 Claude는 90/96과 29/32로 가장 높았습니다. [세부 결과와 p95](benchmark/scale/REDESIGN_RESULTS_200.md)
+
+재실험 사용량 환산액 **0.08866034 USD**은 전체 API 0.07392652 USD, 교재 검색·답변·평가 0.01455468 USD, 사전 검색 검증 0.00017914 USD의 합계입니다. 전체 API끼리는 0.09139846 USD → 0.07392652 USD로 19.1% 감소했습니다. 공통 문서 벡터를 재사용했고, 사용량에는 모델 입출력·캐시와 질의 임베딩을 반영했습니다. DeepSeek는 무료 할당량을 사용했으며 표의 실측 비용은 질의 임베딩입니다. 서버 이용료와 LangSmith 요금은 별도입니다. [비용 산정 코드](benchmark/scale/eval_200.py) · [단가와 기준 사용량 기록](benchmark/scale/RESULTS_200.md)
+
+### 점수를 높인 변경
+
+1. **실제 상태 확인을 작성 전에 분기했습니다.** `screen_request`가 특정 계정의 적립, 입금, 수령 완료를 확인해야 하면 `needs_review`로 종료합니다. GPT·Claude 트레이스에서 해당 요청을 모델 호출 전에 넘긴 비율은 **36/84 → 84/84**였습니다. [분기 코드](app/services/reply_workflow.py) · [상태 표현 분류](app/services/policy_topics.py)
+2. **복합 질문을 나눠 근거를 선택했습니다.** `retrieve`는 문장과 절의 요청을 나누고 적용 대상을 확인합니다. 후보가 충분하지 않으면 해당 질문만 다시 검색하고, 적용 범위가 맞는 조문 간 명시적 참조를 한 단계 확인합니다. 초안 전 필수 조문을 확보한 GPT·Claude 요청은 **168/288 → 288/288**이었습니다. [검색과 명시적 참조 추적](app/services/policy_search.py) · [본문 구절 선택](app/services/policy_passages.py)
+3. **코드 검사와 의미 검토를 순서대로 실행합니다.** `validate_draft`는 누락된 조문 ID, 확인하지 않은 인용, 필수 안내, 직원 후속 확인 표시와 보상 약속을 검사합니다. `review`는 해당 질문에 조문의 적용 조건을 맞게 설명했는지 평가합니다. 실패 사유는 다음 초안에 전달하며 최대 두 번 작성합니다. [그래프 노드](app/services/reply_workflow.py) · [작성·검토 프롬프트](app/clients/llm_client.py)
+
+| 문항 | 전 → 후 | 실행에서 확인한 내용 |
+| --- | ---: | --- |
+| M01 · 오후 4시 식사와 전화 포장 | 0/18 → 16/18 | 기준 검색은 제2조와 제6조를 전달했습니다. 식사와 포장을 나누자 제1조의 브레이크타임과 제6조의 앱·홈페이지 주문을 모두 반영했습니다. “전화가 아닌” 표현을 기존 정규식 채점이 인정하지 않은 답글도 있었습니다. |
+| H01 · 실제 포인트 적립 확인 | 2/18 → 18/18 | 계정에 반영됐는지는 매장 기록을 확인해야 하므로 검색과 초안 전에 담당자에게 넘겼습니다. |
+| M04 · 포인트 신청과 장애 예외 기한 | 0/18 → 18/18 | 일상 접수의 제110조와 장애 예외의 제381조를 별도 근거로 반영했습니다. |
+| O05 · 매장 안 포장 대리 수령 | 0/18 → 9/18 | 제201조가 가리키는 제69조의 주문번호 전달 조건을 확인했습니다. 답변 문장의 표현이 채점 정규식과 달라 점수를 잃은 사례가 있었습니다. |
+| O07 · 앱의 포인트 변경 내역 | 0/18 → 0/18 | 제112조를 인용하고도 날짜와 주문번호 문장만 발췌해 앱의 확인 경로 안내를 빠뜨린 사례가 남았습니다. |
+
+[해석] 교재 검색 결과의 순서가 유지되는 동안 작성 전에 전달한 근거와 담당자 분기의 결과가 달라졌습니다. 개선 폭은 라우팅·근거 선택·검토 프롬프트를 함께 바꾼 결과입니다. 32문항은 설계에도 활용한 회귀 평가이며, 문구의 뜻을 같은 것으로 봐야 하는 답변도 고정 정규식으로 비교했습니다. 과거 35조에서 기록한 43/44는 가짜 작성·검토 모델과 조문 포함 저장을 사용한 별도 실험입니다. [설계와 비교 범위](benchmark/scale/REDESIGN_200.md) · [35조 실행 기록](benchmark/RESULTS.md)
+
+### 재현
+
+[200페이지 평가 노트북](17_ohgi_review_langsmith_200p.ipynb)과 [가상 조문 생성기](benchmark/scale/render_200.py), [문서 임베딩·인덱스 코드](benchmark/scale/index_200.py)를 사용합니다. 다음 명령은 저장소 루트의 PowerShell에서 실행합니다. 먼저 자신의 `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `DEEPSEEK_RELAY_API_KEY`, `LANGSMITH_API_KEY`를 환경 변수에 설정합니다. 임베딩 구축과 모델 평가 명령에서는 API 사용량이 발생합니다.
+
+```powershell
+uv sync --locked --group evaluation
+uv run --locked --group evaluation python -m benchmark.scale.render_200
+uv run --locked --group evaluation python -m benchmark.scale.index_200 embed
+$env:OHGI_CODE_COMMIT = (git rev-parse HEAD).Trim()
+uv run --locked --group evaluation python -m benchmark.scale.eval_200 chroma dataset
+$dataset = '<위 명령이 표시한 dataset_id>'
+uv run --locked --group evaluation python -m benchmark.scale.eval_200 chroma lesson --variant graph-v2 --dataset-id $dataset
+uv run --locked --group evaluation python -m benchmark.scale.eval_200 chroma api --variant graph-v2 --dataset-id $dataset
+```
+
+pgvector 실험은 별도로 준비한 PostgreSQL 인스턴스의 `postgres` DB에 `vector` 확장을 활성화합니다. 위에서 생성한 규정 Markdown·`vectors.npy`·`vector-bundle.json`을 새 실행 환경의 `.local/ohgi-200p/`에 두고, 포트 46581과 `OHGI_PGHOST`의 소켓 위치를 설정합니다. 같은 `dataset_id`를 입력하고 벤치마크 명령에서 `chroma`를 `pgvector`로 바꿉니다. 양쪽 시점의 결과 JSON과 사용량 기록이 있으면 [비교 집계 코드](benchmark/scale/compare_200.py)로 표를 재계산할 수 있습니다.
+
+재설계는 회귀 테스트 100건을 통과했습니다. 재실험 704건(교재 128 + 전체 API 576)을 LangSmith의 10개 실험과 대조했습니다. OVH에서는 결과 파일을 회수한 뒤 실험용 데이터베이스와 임시 자료를 정리했습니다.
+
+## 이전 벤치마크
+
+아래 35조·155조 실험은 Windows의 FastAPI `TestClient`에서 문항별로 3회씩 순차 실행했습니다. `POST /reply`가 반환한 답글과 `GET /api/reviews/{id}`에서 읽은 저장값을 대조했습니다. 기존 44문항은 필요한 조문 번호가 전부 있는지, 확장판의 새 24문항은 핵심 구절까지 답글에 포함했는지 확인했습니다. p50과 p95는 `POST /reply` 지연의 중앙값과 95번째 백분위입니다.
 
 ### 검색기 비교 · 강의 골든셋 20문항
 
@@ -151,7 +249,7 @@ Hit@1은 첫 후보, Hit@3은 상위 세 후보에 정답 조문이 들어온 �
 | 조문의 적용 대상과 조건 확인 | [`c6f0fb0`](benchmark/scale/results/155-5993846.json) | 43/44 | 24/24 | 7/7 | 31.04 / 73.78 |
 | 픽업·인계 완료 상태 확인 | [`c7052de`](benchmark/scale/results/155-c7052de.json) | 43/44 | 24/24 | 7/7 | 53.51 / 120.97 |
 
-- **검색 후보에 근거 23/24, 초기의 새 조문·구절 저장 0/24.** 휠체어로 지하 주차장에서 올라가는 길을 물었을 때, 기존 라우터는 제36조를 후보에 두고도 ‘주차’라는 표현에 따라 제4조의 주차 요금을 저장했습니다. 질문에 직접 답하는 구절을 찾도록 바꾼 뒤에는 제36조의 A구역 승강기를 안내했습니다.
+- **검색 후보에 근거 23/24, 초기의 새 조문·구절 저장 0/24.** 지하 주차장에서 휠체어로 이동할 수 있는 경로를 물었을 때, 기존 라우터는 제36조를 후보에 두고도 ‘주차’라는 표현에 따라 제4조의 주차 요금을 저장했습니다. 질문에 직접 답하는 구절을 찾도록 바꾼 뒤에는 제36조의 A구역 승강기를 안내했습니다.
 - **새 조문 단독 18/18, 복합 문의 6/6.** 유아 의자·예약 지연·주류 배달·배달 마감을 함께 물은 S24에서 원질문 검색만으로는 네 조문이 다 나오지 않았습니다. 하위 질문별로 근거를 대조하고 빠진 근거를 보완해 제37·49·18·15조를 모두 반영했습니다. 조문이 빠진 채 저장한 새 문항은 3건에서 0건으로 줄었습니다.
 - **대조군 보류 3/7 → 7/7.** 실제 환불 입금 여부, 차량 주차 지원 등록, 분실물 습득 여부, 관리자 암호처럼 규정집으로 확인할 수 없는 요청을 보류했습니다. 일반 감사 후기는 여섯 버전에서 모두 답글을 저장했습니다.
 
